@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>ComponentDiscovery</id>
+    <version>1.0.0</version>
+    <title>Clearance based Component Discovery</title>
+    <authors>KornSW</authors>
+    <owners>KornSW</owners>
+    <!-- https://spdx.org/licenses/ -->
+    <license type="expression">GPL-3.0-only</license>
+    <projectUrl>https://github.com/KornSW/ComponentDiscovery</projectUrl>
+    <!--<iconUrl>https://github.com/KornSW/ComponentDiscovery/Master/kSystemExtensions.Logo.png</iconUrl>-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Clearance based Component Discovery</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright KornSW</copyright>
+    <tags>ComponentDiscovery Clearance based Component Discovery</tags>
+  </metadata>
+  <files>
+    <!-- https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
+    <file src="ComponentDiscovery\ComponentDiscovery\bin\Release\ComponentDiscovery.dll" target="lib/{tfm}" />
+    <file src="ComponentDiscovery\ComponentDiscovery\bin\Release\ComponentDiscovery.xml" target="lib/{tfm}" />
+    <file src="ComponentDiscovery\ComponentDiscovery\bin\Release\ComponentDiscovery.pdb" target="lib/{tfm}" />
+  </files>
+</package>
