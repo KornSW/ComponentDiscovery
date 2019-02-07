@@ -5,17 +5,17 @@ Public Class TypesClassificationAttribute
   Inherits Attribute
 
   Private _NamespaceAndTypenameMask As String
-  Private _DimensionName As String
+  Private _SemanticDimensionName As String
   Private _ClassificationExpression As String
 
   ''' <param name="namespaceAndTypenameMask">a include-mask for namespace and/or typename (can be used with wildcard '*')</param>
-  ''' <param name="dimensionName"></param>
+  ''' <param name="semanticDimensionName"></param>
   ''' <param name="classificationExpression"></param>
-  Public Sub New(namespaceAndTypenameMask As String, dimensionName As String, classificationExpression As String)
+  Public Sub New(namespaceAndTypenameMask As String, semanticDimensionName As String, classificationExpression As String)
     MyBase.New()
 
     _NamespaceAndTypenameMask = namespaceAndTypenameMask
-    _DimensionName = dimensionName
+    _SemanticDimensionName = semanticDimensionName
     _ClassificationExpression = classificationExpression
 
   End Sub
@@ -26,9 +26,9 @@ Public Class TypesClassificationAttribute
     End Get
   End Property
 
-  Public ReadOnly Property DimensionName As String
+  Public ReadOnly Property SemanticDimensionName As String
     Get
-      Return _DimensionName
+      Return _SemanticDimensionName
     End Get
   End Property
 

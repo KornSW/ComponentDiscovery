@@ -9,7 +9,7 @@ Public Class ClassificationBasedAssemblyIndexer
   Inherits AssemblyIndexer
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-  Private _ClassificationStrategiesByDimension As New Dictionary(Of String, IAssemblyClassificationStrategy)
+  Private _ClassificationStrategiesBySemanticDimension As New Dictionary(Of String, IAssemblyClassificationStrategy)
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _OverwrittenApplicationWorkDir As DirectoryInfo = Nothing
@@ -31,31 +31,31 @@ Public Class ClassificationBasedAssemblyIndexer
     End If
   End Function
 
-  Public Function GetClearances(dimensionName As String) As String()
-    Return _ClassificationStrategiesByDimension(dimensionName).Clearances
+  Public Function GetClearances(semanticDimensionName As String) As String()
+    Return _ClassificationStrategiesBySemanticDimension(semanticDimensionName).Clearances
   End Function
+
+  Protected Friend ReadOnly Property SemanticDimensionNames As String()
+    Get
+      Return _ClassificationStrategiesBySemanticDimension.Keys.ToArray()
+    End Get
+  End Property
 
   Protected Friend ReadOnly Property ClassificationStrategies As IAssemblyClassificationStrategy()
     Get
-      Return _ClassificationStrategiesByDimension.Values.ToArray()
+      Return _ClassificationStrategiesBySemanticDimension.Values.ToArray()
     End Get
   End Property
 
-  Protected Friend ReadOnly Property RelevantDimensionNames As String()
+  Protected Friend ReadOnly Property ClassificationStrategy(semanticDimensionName As String) As IAssemblyClassificationStrategy
     Get
-      Return _ClassificationStrategiesByDimension.Keys.ToArray()
-    End Get
-  End Property
-
-  Protected Friend ReadOnly Property ClassificationStrategy(dimensionName As String) As IAssemblyClassificationStrategy
-    Get
-      Dim lowerDimensionName = dimensionName.ToLower()
-      For Each dimensionName In _ClassificationStrategiesByDimension.Keys
-        If (dimensionName.ToLower() = lowerDimensionName) Then
-          Return _ClassificationStrategiesByDimension(dimensionName)
+      Dim lowerDimensionName = semanticDimensionName.ToLower()
+      For Each semanticDimensionName In _ClassificationStrategiesBySemanticDimension.Keys
+        If (semanticDimensionName.ToLower() = lowerDimensionName) Then
+          Return _ClassificationStrategiesBySemanticDimension(semanticDimensionName)
         End If
       Next
-      Throw New KeyNotFoundException(String.Format("There is no ClassificationStrategy registered under dimension '{0}'!", dimensionName))
+      Throw New KeyNotFoundException(String.Format("There is no ClassificationStrategy registered under dimension '{0}'!", semanticDimensionName))
     End Get
   End Property
 
@@ -63,8 +63,8 @@ Public Class ClassificationBasedAssemblyIndexer
   '''   Adds clearances to the internal clearance collection which will broaden the set of approvable assemblies.
   ''' </summary>
   ''' <remarks> Adding clearances could implicitely approve additional assemblies. </remarks>
-  Public Sub AddClearances(dimensionName As String, ParamArray clearanceExpressions() As String)
-    Me.ClassificationStrategy(dimensionName).AddClearances(clearanceExpressions)
+  Public Sub AddClearances(semanticDimensionName As String, ParamArray clearanceExpressions() As String)
+    Me.ClassificationStrategy(semanticDimensionName).AddClearances(clearanceExpressions)
     Me.ReapproveDismissedAssemblies()
   End Sub
 
@@ -74,8 +74,8 @@ Public Class ClassificationBasedAssemblyIndexer
   ''' </summary>
   ''' <param name="assemblyFullFilename"> The assembly to verify. </param>
   ''' <returns> True, if it's a match. </returns>
-  Public Function VerifyAssemblyWithinOneDimension(assemblyFullFilename As String, dimensionName As String) As Boolean
-    Return Me.ClassificationStrategy(dimensionName).VerifyAssembly(assemblyFullFilename)
+  Public Function VerifyAssemblyWithinOneDimension(assemblyFullFilename As String, semanticDimensionName As String) As Boolean
+    Return Me.ClassificationStrategy(semanticDimensionName).VerifyAssembly(assemblyFullFilename)
   End Function
 
 
@@ -88,7 +88,7 @@ Public Class ClassificationBasedAssemblyIndexer
   ''' </remarks>
   ''' <seealso cref="AddAssemblyAndImportClearances"/>
   Public Sub AddClearancesFromAssembly(assembly As Assembly)
-    System.Diagnostics.Trace.TraceInformation(String.Format("AssemblyIndexer: Importing scopevalues of '{0}' to whitelists...", assembly.GetName().Name))
+    Trace.TraceInformation(String.Format("AssemblyIndexer: Importing scopevalues of '{0}' to whitelists...", assembly.GetName().Name))
     Dim expanded As Boolean = False
     For Each strategy In Me.ClassificationStrategies
       expanded = expanded Or strategy.AddClearancesFromAssembly(assembly.Location)
@@ -98,16 +98,16 @@ Public Class ClassificationBasedAssemblyIndexer
     End If
   End Sub
 
-  Public Sub AddDimension(dimensionName As String, assemblyAnalyzerMethod As Action(Of String, List(Of String)))
+  Public Sub AddDimension(semanticDimensionName As String, assemblyAnalyzerMethod As Action(Of String, List(Of String)))
 
-    Dim lowerDimensionName = dimensionName.ToLower()
-    For Each registeredName In _ClassificationStrategiesByDimension.Keys
+    Dim lowerDimensionName = semanticDimensionName.ToLower()
+    For Each registeredName In _ClassificationStrategiesBySemanticDimension.Keys
       If (registeredName.ToLower() = lowerDimensionName) Then
         Throw New Exception("This dimensionName is already registered!")
       End If
     Next
 
-    Me.AddDimension(dimensionName, New DelegateBasedClassificationStrategy(assemblyAnalyzerMethod))
+    Me.AddDimension(semanticDimensionName, New DelegateBasedClassificationStrategy(assemblyAnalyzerMethod))
 
   End Sub
 
@@ -118,10 +118,10 @@ Public Class ClassificationBasedAssemblyIndexer
   '''   Only assemblies matching all clearances of dimensions will be approved.
   '''   So adding dimensions will tend to narrowing down the set of approvable assemblies.
   ''' </remarks>
-  Public Sub AddDimension(dimensionName As String, classificationStrategy As IAssemblyClassificationStrategy)
+  Public Sub AddDimension(semanticDimensionName As String, classificationStrategy As IAssemblyClassificationStrategy)
 
-    Dim lowerDimensionName = dimensionName.ToLower()
-    For Each existingDimensionName In _ClassificationStrategiesByDimension.Keys
+    Dim lowerDimensionName = semanticDimensionName.ToLower()
+    For Each existingDimensionName In _ClassificationStrategiesBySemanticDimension.Keys
       If (existingDimensionName.ToLower() = lowerDimensionName) Then
         Throw New Exception("This scopeName is already enabled!")
       End If
@@ -132,14 +132,14 @@ Public Class ClassificationBasedAssemblyIndexer
         Throw New Exception(
         String.Format(
           "Cannot enable the scope '{0}' because the already approved assembly '{1}' would retroactively turn illegal!",
-          dimensionName, alreadyApprovedAssembly.FullName
+          semanticDimensionName, alreadyApprovedAssembly.FullName
         )
       )
       End If
     Next
 
-    _ClassificationStrategiesByDimension.Add(dimensionName, classificationStrategy)
-    System.Diagnostics.Trace.TraceInformation(String.Format("AssemblyIndexer: composition scope '{0}' was enabled!", dimensionName))
+    _ClassificationStrategiesBySemanticDimension.Add(semanticDimensionName, classificationStrategy)
+    System.Diagnostics.Trace.TraceInformation(String.Format("AssemblyIndexer: composition scope '{0}' was enabled!", semanticDimensionName))
 
   End Sub
 
@@ -189,9 +189,9 @@ Public Class ClassificationBasedAssemblyIndexer
     End If
 
     Dim matchingResultsPerDimension As New Dictionary(Of String, Boolean)
-    For Each dimensionName In _ClassificationStrategiesByDimension.Keys
+    For Each dimensionName In _ClassificationStrategiesBySemanticDimension.Keys
 
-      If (_ClassificationStrategiesByDimension(dimensionName).VerifyAssembly(assemblyFullFilename)) Then
+      If (_ClassificationStrategiesBySemanticDimension(dimensionName).VerifyAssembly(assemblyFullFilename)) Then
         matchingResultsPerDimension.Add(dimensionName, True)
       Else
         matchingResultsPerDimension.Add(dimensionName, False)
@@ -214,6 +214,7 @@ Public Class ClassificationBasedAssemblyIndexer
 
 #Region " Blacklist (for components of external Frameworks) "
 
+  'HACK: needs to come from outside!
   Protected Overridable Function IsExternalFrameworkAssembly(assemblyFullFilename As String) As Boolean
     With (Path.GetFileNameWithoutExtension(assemblyFullFilename).ToLower())
 
@@ -381,7 +382,7 @@ Public Class ClassificationBasedAssemblyIndexer
 
   Public Function ExportClearances() As String()
     Dim result As New List(Of String)
-    For Each dimensionName In Me.RelevantDimensionNames
+    For Each dimensionName In Me.SemanticDimensionNames
       For Each clearanceExpression In Me.ClassificationStrategy(dimensionName).Clearances
         result.Add(String.Format("{0}:{1}", dimensionName, clearanceExpression))
       Next
@@ -401,7 +402,7 @@ Public Class ClassificationBasedAssemblyIndexer
         Dim dimensionName = expression.Substring(0, expression.IndexOf(":"))
         Dim clearanceExpression = expression.Substring(expression.IndexOf(":") + 1)
 
-        If (Me.RelevantDimensionNames.Contains(dimensionName)) Then
+        If (Me.SemanticDimensionNames.Contains(dimensionName)) Then
           Dim approvalStrategy = Me.ClassificationStrategy(dimensionName)
           approvalStrategy.AddClearances(clearanceExpression)
         End If
@@ -419,7 +420,7 @@ Public Class ClassificationBasedAssemblyIndexer
   Public Sub ImportClearances(clearancesSortedByDimension As Dictionary(Of String, String()))
     For Each dimensionName In clearancesSortedByDimension.Keys
       For Each clearanceExpression In clearancesSortedByDimension(dimensionName)
-        If (Me.RelevantDimensionNames.Contains(dimensionName)) Then
+        If (Me.SemanticDimensionNames.Contains(dimensionName)) Then
           Dim approvalStrategy = Me.ClassificationStrategy(dimensionName)
           approvalStrategy.AddClearances(clearanceExpression)
         End If

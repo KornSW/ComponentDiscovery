@@ -7,6 +7,7 @@ Imports System.Threading
 Imports System.Threading.Tasks
 
 ' HACK: Umbenennen: AttributeBasedClassificationStrategy
+'HACK: trennen in IAssemblyClassificationEvaluationStrategy und IAssemblyApprovalStrategy
 Public Class AttributeBasedApprovalStrategy
   Implements IAssemblyClassificationStrategy
 
@@ -175,7 +176,7 @@ Public Class AttributeBasedApprovalStrategy
 
         Dim expressions = (
           attribs.OfType(Of AssemblyClassificationAttribute).
-          Where(Function(a) a.DimensionName.ToLower() = dimensionName).
+          Where(Function(a) a.SemanticDimensionName.ToLower() = dimensionName).
           Select(Function(a) a.ClassificationExpression).
           ToArray()
         )

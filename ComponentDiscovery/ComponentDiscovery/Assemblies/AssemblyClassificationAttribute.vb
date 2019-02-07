@@ -4,20 +4,20 @@
 Public Class AssemblyClassificationAttribute
   Inherits Attribute
 
-  Private _DimensionName As String
+  Private _SemanticDimensionName As String
   Private _ClassificationExpression As String
 
-  Public Sub New(dimensionName As String, classificationExpression As String)
+  Public Sub New(semanticDimensionName As String, classificationExpression As String)
     MyBase.New()
 
-    _DimensionName = dimensionName
+    _SemanticDimensionName = semanticDimensionName
     _ClassificationExpression = classificationExpression
 
   End Sub
 
-  Public ReadOnly Property DimensionName As String
+  Public ReadOnly Property SemanticDimensionName As String
     Get
-      Return _DimensionName
+      Return _SemanticDimensionName
     End Get
   End Property
 
