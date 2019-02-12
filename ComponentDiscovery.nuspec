@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ComponentDiscovery</id>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <title>Clearance based Component Discovery</title>
     <authors>KornSW</authors>
     <owners>KornSW</owners>
