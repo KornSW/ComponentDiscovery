@@ -1,8 +1,9 @@
 ﻿Imports System
 Imports System.Reflection
 Imports System.Runtime.InteropServices
+Imports ComponentDiscovery
 
-<Assembly: AssemblyTitle("ComponentDiscovery")>
+<Assembly: AssemblyTitle("ComponentDiscovery - UnitTests")>
 <Assembly: AssemblyDescription("ComponentDiscovery")>
 <Assembly: AssemblyCompany("KornSW")>
 <Assembly: AssemblyProduct("ComponentDiscovery")>
@@ -10,6 +11,9 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyTrademark("KornSW")>
 <Assembly: ComVisible(False)>
 <Assembly: CLSCompliant(True)>
-<Assembly: Guid("5027f65d-44ad-44b7-805a-2de61c83390e")>
-<Assembly: AssemblyVersion("1.1.1.0")>
-<Assembly: AssemblyFileVersion("1.1.1.0")>
+<Assembly: Guid("3a47a3a2-430d-4863-ba40-75062cdf825f")>
+<Assembly: AssemblyVersion("1.0.0.0")>
+<Assembly: AssemblyFileVersion("1.0.0.0")>
+
+<Assembly: AssemblyClassification("BusinessConcern", "ConcernA")>
+<Assembly: AssemblyClassification("BusinessConcern", "ConcernB")>
