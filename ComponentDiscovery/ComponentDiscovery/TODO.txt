@@ -1,10 +1,15 @@
 ﻿
 
-ClassificationBasedTypeIndexer
+
+
+ClassificationBasedTypeIndexer < mit entspr clearances
+TYPE-CACHE!!!!
+
+
+
+
 
 generische basisklassen als suchziel neben basis,interf und attribut
-
-TYPE-CACHE!!!!
 
 AssembnlyLoadMethad asl hook (Indexer.Defaults indiziert Fusion-variante)
 
@@ -12,7 +17,8 @@ kein Bind mehr und kein parmeterloser konsruktur
 
 SemanticDimension, ClassficationTag, RequireRuntimeFact
 
-TYPEINDEXER weg von wireup hin zu getinstance + scopefx. GetInsctance(Of x as NEW) und ohne of MUSS(constructorargs as array, usePrivate!!!)
+TYPEINDEXER weg von wireup hin zu getinstance + scopefx. GetInsctance(Of x as NEW) und
+  ohne of MUSS(constructorargs as array, usePrivate!!!)
 
 Umzug der Wgitelist in ein FilteringDimension (die dann als uterobjekt die Filteringstragy enthält)
 
@@ -25,7 +31,5 @@ Cache eines komplett eigenen DOM (Typ,Basistyp,Interfaces) in einer Datei +
 TypeIndexer ITypeAnalysisStrategy mit/ohne Cahcing
 
 Subscribe Methoden so erweitern, dass auch ein Typ-Abmelde-Delegate registriert werden können
-
-ExtensionMethodIndexer bauen (auf basis des ExtensionmethodCache) der den AssemblyIndexer Verwendet
 
 umbau des typesubscription, dass auch ein abmeldedelegat angegeben werden muss!!!! assemblyindexer funktion "Suspend_Assembly"

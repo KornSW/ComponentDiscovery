@@ -167,7 +167,7 @@ Public Class AssemblyIndexer
 
     Catch ex As Exception
       Dim fileName As String = Path.GetFileNameWithoutExtension(assemblyFullFilename)
-      System.Diagnostics.Trace.TraceInformation(
+      Trace.TraceInformation(
       String.Format(
         "AssemblyIndexer: assembly '{0}' could not be added to index because because 'Assembly.LoadFile(""{1}"")' caused the following exception: {2}",
         fileName, assemblyFullFilename, ex.Message)
@@ -273,7 +273,7 @@ Public Class AssemblyIndexer
   End Function
 
   Public Sub ReapproveDismissedAssemblies()
-    System.Diagnostics.Trace.WriteLine($"'{NameOf(ReapproveDismissedAssemblies)}' was triggered...")
+    Trace.WriteLine($"'{NameOf(ReapproveDismissedAssemblies)}' was triggered...")
     For Each suppressedAssembly In _DismissedAssemblies.ToArray()
       Dim assemblyFileName As String = Path.GetFileNameWithoutExtension(suppressedAssembly)
 

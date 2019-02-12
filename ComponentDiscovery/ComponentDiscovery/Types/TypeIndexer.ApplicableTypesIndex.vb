@@ -3,6 +3,7 @@ Imports System.Collections
 Imports System.Collections.Generic
 Imports System.ComponentModel
 Imports System.Diagnostics
+Imports System.Linq
 Imports System.Reflection
 Imports System.Threading.Tasks
 
@@ -29,15 +30,19 @@ Partial Class TypeIndexer
     Private _ParameterlessInstantiableClassesOnlySubscribers As New List(Of Action(Of Type))
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+    Private _EnablePersistentCache As Boolean = False
+
+    <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _AssemblyIndexer As IAssemblyIndexer
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _ApprovingMethod As Func(Of Type, Boolean)
 
-    Public Sub New(selector As Type, assemblyIndexer As IAssemblyIndexer, approvingMethod As Func(Of Type, Boolean), enableAsyncIndexing As Boolean)
+    Public Sub New(selector As Type, assemblyIndexer As IAssemblyIndexer, enablePersistentCache As Boolean, approvingMethod As Func(Of Type, Boolean), enableAsyncIndexing As Boolean)
       _EnableAsyncIndexing = enableAsyncIndexing
       _Selector = selector
       _AssemblyIndexer = assemblyIndexer
+      _EnablePersistentCache = enablePersistentCache
       _ApprovingMethod = approvingMethod
       _AssemblyIndexer.SubscribeForAssemblyApproved(AddressOf Me.HandleAddedAssembly)
     End Sub
@@ -85,7 +90,8 @@ Partial Class TypeIndexer
     End Sub
 
     Private Sub CrawlAssembly(assemblyToCrawl As Assembly)
-      Dim assName As String = assemblyToCrawl.GetName().Name
+      Dim an = assemblyToCrawl.GetName()
+      Dim assName As String = an.Name
 
       'skip assemblies, which are not referencing the target-types assembly
       'If (Not Me.Selector.Assembly.IsDirectReferencedBy(assemblyToCrawl)) Then
@@ -94,22 +100,48 @@ Partial Class TypeIndexer
       'End If
       'GEHT NICHT DA ABLEITUNGEN VON IMPLEMENTIERENDEN KLASSEN KEINE REFERENZ AUF DIE URSPRUNGSASSEMBLY HABEN MÜSSEN!
 
-      System.Diagnostics.Trace.TraceInformation("TypeIndexer (for '{1}'): Scanning assembly '{0}' to inject types for '{1}'...", assName, _Selector.Name)
+      Dim foundTypes As List(Of Type)
+      Dim cacheUpdateRequired As Boolean = False
+      Dim persistentCacheTypeNames As String() = Nothing
+
+      If (_EnablePersistentCache AndAlso PersistentIndexCache.GetInstance().TryGetTypesFromCache(assemblyToCrawl.Location, _Selector.FullName, persistentCacheTypeNames)) Then
+        foundTypes = New List(Of Type)
+        'Trace.TraceInformation("TypeIndexer (for '{1}'): Loading applicable types for '{1}' from persistent cache (for assembly '{0}')...", assName, _Selector.Name)
+        For Each typeNameFromCache In persistentCacheTypeNames
+          If (Not String.IsNullOrWhiteSpace(typeNameFromCache)) Then
+            Try
+              foundTypes.Add(assemblyToCrawl.GetType(typeNameFromCache))
+            Catch ex As Exception
+              Trace.TraceError(ex.Message)
+            End Try
+          End If
+        Next
+      Else
+        'Trace.TraceInformation("TypeIndexer (for '{1}'): Scanning assembly '{0}' to find applicable type for '{1}'...", assName, _Selector.Name)
+        foundTypes = assemblyToCrawl.GetTypesAccessible().ToList()
+        cacheUpdateRequired = _EnablePersistentCache
+      End If
+
       Try
-        For Each foundType As Type In assemblyToCrawl.GetTypesAccessible()
-          If (foundType.IsPublic) Then
+        For Each foundType As Type In foundTypes
+          If (foundType IsNot Nothing AndAlso foundType.IsPublic) Then
             Me.TryRegisterCandidate(foundType, assName)
           End If
         Next
+
+        If (cacheUpdateRequired) Then
+          persistentCacheTypeNames = _ApplicableTypes.Where(Function(t) t.Assembly = assemblyToCrawl).Select(Function(t) t.FullName).ToArray()
+          PersistentIndexCache.GetInstance().WriteTypesToCache(assemblyToCrawl.Location, _Selector.FullName, persistentCacheTypeNames)
+        End If
+
       Catch ex As ReflectionTypeLoadException
-        System.Diagnostics.Trace.TraceError(ex.Message)
+        Trace.TraceError(ex.Message)
         For Each le In ex.LoaderExceptions
-          System.Diagnostics.Trace.TraceError(ex.Message)
+          Trace.TraceError(ex.Message)
         Next
       Catch ex As Exception
-        System.Diagnostics.Trace.TraceError(ex.Message)
+        Trace.TraceError(ex.Message)
       End Try
-
     End Sub
 
     Private Sub TryRegisterCandidate(candidate As Type, assemblyName As String)
@@ -137,7 +169,7 @@ Partial Class TypeIndexer
       If (_ApprovingMethod.Invoke(candidate)) Then
 
         If (match AndAlso Not _ApplicableTypes.Contains(candidate)) Then
-          System.Diagnostics.Trace.TraceInformation("TypeIndexer (for '{1}'): Indexing type '{0}' (for '{1}') from assembly '{2}'", candidate.Name, _Selector.Name, assemblyName)
+          'Trace.TraceInformation("TypeIndexer (for '{1}'): found applicable type '{0}' (for '{1}') from assembly '{2}'", candidate.Name, _Selector.Name, assemblyName)
           _ApplicableTypes.Add(candidate)
           For Each subscriber In _Subscribers
             If (_EnableAsyncIndexing) Then

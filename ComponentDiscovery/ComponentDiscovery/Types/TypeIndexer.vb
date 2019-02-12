@@ -19,27 +19,21 @@ Public Class TypeIndexer
   Private _ApplicablesPerSelector As New Dictionary(Of Type, ApplicableTypesIndex)
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+  Private _EnablePersistentCache As Boolean = False
+
+  <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _EnableAsyncIndexing As Boolean = False
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _ManuallyRegisteredCandidates As New List(Of Type)
 
-  Public Sub New(assemblyIndexer As IAssemblyIndexer, Optional enableAsyncIndexing As Boolean = False)
+  Public Sub New(assemblyIndexer As IAssemblyIndexer, Optional enablePersistentCache As Boolean = False, Optional customApprovingMethod As Func(Of Type, Boolean) = Nothing, Optional enableAsyncIndexing As Boolean = False)
     _AssemblyIndexer = assemblyIndexer
+    _EnablePersistentCache = enablePersistentCache
+    If (customApprovingMethod IsNot Nothing) Then
+      _ApprovingMethod = customApprovingMethod
+    End If
     _EnableAsyncIndexing = enableAsyncIndexing
-  End Sub
-
-  Private Sub New()
-  End Sub
-
-  Public Sub New(assemblyIndexer As IAssemblyIndexer, customApprovingMethod As Func(Of Type, Boolean), Optional enableAsyncIndexing As Boolean = False)
-    _AssemblyIndexer = assemblyIndexer
-    _ApprovingMethod = customApprovingMethod
-    _EnableAsyncIndexing = enableAsyncIndexing
-  End Sub
-
-  Public Sub WireUpAssemblyIndexer(assemblyIndexer As IAssemblyIndexer)
-    _AssemblyIndexer = assemblyIndexer
   End Sub
 
 #End Region
@@ -111,7 +105,7 @@ Public Class TypeIndexer
   Public Sub EnableIndexingOf(selector As Type)
     SyncLock _ApplicablesPerSelector
       If (Not _ApplicablesPerSelector.ContainsKey(selector)) Then
-        Dim newIndex As New ApplicableTypesIndex(selector, _AssemblyIndexer, _ApprovingMethod, _EnableAsyncIndexing)
+        Dim newIndex As New ApplicableTypesIndex(selector, _AssemblyIndexer, _EnablePersistentCache, _ApprovingMethod, _EnableAsyncIndexing)
         _ApplicablesPerSelector.Add(selector, newIndex)
         For Each manuallyRegisteredApplicableType In _ManuallyRegisteredCandidates
           newIndex.TryRegisterCandidate(manuallyRegisteredApplicableType)

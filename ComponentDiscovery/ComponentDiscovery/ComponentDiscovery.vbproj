@@ -55,7 +55,7 @@
     <Compile Include="%28internal%29\CrossAppdomainHelperExtensions.vb" />
     <Compile Include="%28internal%29\ExtensionMethods.vb" />
     <Compile Include="Assemblies\AssemblyClassificationAttribute.vb" />
-    <Compile Include="Assemblies\AssemblyClassificationCache.vb" />
+    <Compile Include="%28internal%29\PersistentIndexCache.vb" />
     <Compile Include="Assemblies\AssemblyIndexer.vb" />
     <Compile Include="Assemblies\AttributeBasedClassificationStrategy.vb" />
     <Compile Include="Assemblies\ClassificationBasedAssemblyIndexer.vb" />

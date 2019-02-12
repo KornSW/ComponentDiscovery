@@ -128,7 +128,7 @@ Public Class AttributeBasedApprovalStrategy
 
       If (
         _EnablePersistentCache AndAlso
-        AssemblyClassificationCache.GetInstance().TryGetClassificationExpressionsFromCache(assemblyFullFilename, _DimensionName, classificationExpressions)
+        PersistentIndexCache.GetInstance().TryGetClassificationExpressionsFromCache(assemblyFullFilename, _DimensionName, classificationExpressions)
       ) Then
         Return classificationExpressions
       End If
@@ -159,7 +159,7 @@ Public Class AttributeBasedApprovalStrategy
       _ClassificationExpressionsPerAssembly.Add(assemblyFullFilename, classificationExpressions)
 
       If (_EnablePersistentCache) Then
-        AssemblyClassificationCache.GetInstance().WriteScopeValuesToCache(assemblyFullFilename, _DimensionName, classificationExpressions)
+        PersistentIndexCache.GetInstance().WriteClassificationExpressionToCache(assemblyFullFilename, _DimensionName, classificationExpressions)
       End If
 
       Return classificationExpressions
