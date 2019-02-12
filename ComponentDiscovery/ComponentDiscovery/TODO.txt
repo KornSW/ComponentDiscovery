@@ -1,24 +1,12 @@
 ﻿
 
-
-
 ClassificationBasedTypeIndexer < mit entspr clearances
-TYPE-CACHE!!!!
-
-
-
-
 
 generische basisklassen als suchziel neben basis,interf und attribut
 
 AssembnlyLoadMethad asl hook (Indexer.Defaults indiziert Fusion-variante)
 
-kein Bind mehr und kein parmeterloser konsruktur
-
 SemanticDimension, ClassficationTag, RequireRuntimeFact
-
-TYPEINDEXER weg von wireup hin zu getinstance + scopefx. GetInsctance(Of x as NEW) und
-  ohne of MUSS(constructorargs as array, usePrivate!!!)
 
 Umzug der Wgitelist in ein FilteringDimension (die dann als uterobjekt die Filteringstragy enthält)
 
