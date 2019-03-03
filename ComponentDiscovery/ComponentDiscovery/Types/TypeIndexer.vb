@@ -1,4 +1,10 @@
-﻿Imports System
+﻿'  +------------------------------------------------------------------------+
+'  ¦ this file is part of an open-source solution which is originated here: ¦
+'  ¦ https://github.com/KornSW/ComponentDiscovery                           ¦
+'  ¦ the removal of this notice is prohibited by the author!                ¦
+'  +------------------------------------------------------------------------+
+
+Imports System
 Imports System.Collections.Generic
 Imports System.ComponentModel
 Imports System.Diagnostics
@@ -13,7 +19,7 @@ Public Class TypeIndexer
   Private _AssemblyIndexer As IAssemblyIndexer
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-  Private _ApprovingMethod As Func(Of Type, Boolean) = Function(t) (t.IsPublic AndAlso t.IsNested = False)
+  Private _ApprovingMethod As Func(Of Type, Boolean) = AddressOf Me.DefaultApprovingMethod
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _ApplicablesPerSelector As New Dictionary(Of Type, ApplicableTypesIndex)
@@ -23,6 +29,9 @@ Public Class TypeIndexer
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _EnableAsyncIndexing As Boolean = False
+
+  <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+  Private _EnableTracing As Boolean = False
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _ManuallyRegisteredCandidates As New List(Of Type)
@@ -35,6 +44,25 @@ Public Class TypeIndexer
     End If
     _EnableAsyncIndexing = enableAsyncIndexing
   End Sub
+
+  Protected Overridable Function DefaultApprovingMethod(t As Type) As Boolean
+    Return (t.IsPublic AndAlso t.IsNested = False)
+  End Function
+
+  <EditorBrowsable(EditorBrowsableState.Advanced)>
+  Public Property EnableTracing As Boolean
+    Get
+      Return _EnableTracing
+    End Get
+    Set(value As Boolean)
+      _EnableTracing = value
+      SyncLock _ApplicablesPerSelector
+        For Each item In _ApplicablesPerSelector.Values
+          item.EnableTracing = _EnableTracing
+        Next
+      End SyncLock
+    End Set
+  End Property
 
 #End Region
 
@@ -106,6 +134,7 @@ Public Class TypeIndexer
     SyncLock _ApplicablesPerSelector
       If (Not _ApplicablesPerSelector.ContainsKey(selector)) Then
         Dim newIndex As New ApplicableTypesIndex(selector, _AssemblyIndexer, _EnablePersistentCache, _ApprovingMethod, _EnableAsyncIndexing)
+        newIndex.EnableTracing = Me.EnableTracing
         _ApplicablesPerSelector.Add(selector, newIndex)
         For Each manuallyRegisteredApplicableType In _ManuallyRegisteredCandidates
           newIndex.TryRegisterCandidate(manuallyRegisteredApplicableType)

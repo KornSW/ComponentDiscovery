@@ -4,16 +4,12 @@
 '  ¦ the removal of this notice is prohibited by the author!                ¦
 '  +------------------------------------------------------------------------+
 
-Imports System
-Imports ComponentDiscoveryTests
+Namespace ClassificationDetection
 
-Public Class MyBusinessClass1
-  Implements MyBusinessInterfaceA
-  Public Sub New()
-  End Sub
+  Public Interface IAssemblyClassificationDetectionStrategy
 
-  Public Function GetDemoValue() As String Implements MyBusinessInterfaceA.GetDemoValue
-    Return "Demo-Value-1"
-  End Function
+    Function TryDetectClassificationsForAssembly(assemblyFullFilename As String, taxonomicDimensionName As String, ByRef classifications As String()) As Boolean
 
-End Class
+  End Interface
+
+End Namespace

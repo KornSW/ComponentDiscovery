@@ -54,14 +54,20 @@
   <ItemGroup>
     <Compile Include="%28internal%29\CrossAppdomainHelperExtensions.vb" />
     <Compile Include="%28internal%29\ExtensionMethods.vb" />
-    <Compile Include="Assemblies\AssemblyClassificationAttribute.vb" />
+    <Compile Include="ClassificationDetection\Attributes\AssemblyClassificationAttribute.vb" />
     <Compile Include="%28internal%29\PersistentIndexCache.vb" />
     <Compile Include="Assemblies\AssemblyIndexer.vb" />
-    <Compile Include="Assemblies\AttributeBasedClassificationStrategy.vb" />
+    <Compile Include="ClassificationDetection\AttributeBasedAssemblyClassificationDetectionStrategy.vb" />
+    <Compile Include="ClassificationDetection\DelegateBasedAssemblyClassificationDetectionStrategy.vb" />
+    <Compile Include="Assemblies\ClassificationBasedAssemblyIndexer.TaxonomicDimension.vb" />
     <Compile Include="Assemblies\ClassificationBasedAssemblyIndexer.vb" />
-    <Compile Include="Assemblies\IAssemblyClassificationStrategy.vb" />
+    <Compile Include="ClassificationApproval\ClassificationApprovalStrategyBase.vb" />
+    <Compile Include="ClassificationApproval\ExpressionCentricClassificationApprovalStrategy.vb" />
+    <Compile Include="ClassificationApproval\DemandCentricClassificationApprovalStrategy.vb" />
+    <Compile Include="ClassificationApproval\IClassificationApprovalStrategy.vb" />
+    <Compile Include="ClassificationDetection\IAssemblyClassificationDetectionStrategy.vb" />
     <Compile Include="Assemblies\IAssemblyIndexer.vb" />
-    <Compile Include="ExtensionMethods\ExtensionMethodCache.vb" />
+    <Compile Include="ExtensionMethods\ExtensionMethodIndexer.MethodIndex.vb" />
     <Compile Include="ExtensionMethods\ExtensionMethodIndexer.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -78,9 +84,14 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Types\ClassificationBasedTypeIndexer.SemanticDimension.vb" />
     <Compile Include="Types\ClassificationBasedTypeIndexer.vb" />
-    <Compile Include="Types\TypesClassificationAttribute.vb" />
-    <Compile Include="Types\TypeClassificationAttribute.vb" />
+    <Compile Include="ClassificationDetection\AttributeBasedTypeClassificationDetectionStrategy.vb" />
+    <Compile Include="ClassificationDetection\ITypeClassificationDetectionStrategy.vb" />
+    <Compile Include="ClassificationDetection\Attributes\NamespaceClassificationAttribute.vb" />
+    <Compile Include="ClassificationDetection\Attributes\IgnoreNamespaceClassificationsAttribute.vb" />
+    <Compile Include="ClassificationDetection\Attributes\TypeClassificationAttribute.vb" />
+    <Compile Include="Types\ExtensionsForITypeIndexer.vb" />
     <Compile Include="Types\ITypeIndexer.vb" />
     <Compile Include="Types\TypeIndexer.ApplicableTypesIndex.vb" />
     <Compile Include="Types\TypeIndexer.vb" />
@@ -104,9 +115,6 @@
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="TODO.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

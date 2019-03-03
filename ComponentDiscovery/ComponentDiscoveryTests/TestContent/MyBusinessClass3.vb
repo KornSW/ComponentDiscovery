@@ -5,15 +5,18 @@
 '  +------------------------------------------------------------------------+
 
 Imports System
+Imports ComponentDiscovery
 Imports ComponentDiscoveryTests
 
-Public Class MyBusinessClass1
+<TypeClassification("BusinessConcern", "ConcernC")>
+Public Class MyBusinessClass3
   Implements MyBusinessInterfaceA
-  Public Sub New()
+
+  Public Sub New(foo As Boolean)
   End Sub
 
   Public Function GetDemoValue() As String Implements MyBusinessInterfaceA.GetDemoValue
-    Return "Demo-Value-1"
+    Return "Demo-Value-3"
   End Function
 
 End Class

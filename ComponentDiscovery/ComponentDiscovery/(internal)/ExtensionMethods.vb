@@ -1,4 +1,10 @@
-﻿Imports System
+﻿'  +------------------------------------------------------------------------+
+'  ¦ this file is part of an open-source solution which is originated here: ¦
+'  ¦ https://github.com/KornSW/ComponentDiscovery                           ¦
+'  ¦ the removal of this notice is prohibited by the author!                ¦
+'  +------------------------------------------------------------------------+
+
+Imports System
 Imports System.Collections.Generic
 Imports System.ComponentModel
 Imports System.Diagnostics
@@ -7,6 +13,7 @@ Imports System.Reflection
 Imports System.Runtime.CompilerServices
 Imports System.Security.Cryptography
 Imports System.Text
+Imports System.Text.RegularExpressions
 
 Friend Module ExtensionMethods
 
@@ -38,7 +45,7 @@ Friend Module ExtensionMethods
       Return True
     End If
 
-    If (Not extendee.IsClass OrElse extendee.IsAbstract) Then
+    If (Not extendee.IsClass OrElse extendee.IsAbstract OrElse extendee.IsGenericTypeDefinition) Then
       Return False
     End If
 
@@ -96,6 +103,28 @@ Friend Module ExtensionMethods
   <Extension()>
   Public Function HasGenericConstraintNew(extendee As Type) As Boolean
     Return extendee.HasGenericConstraint(GenericParameterAttributes.DefaultConstructorConstraint)
+  End Function
+
+  <Extension(), EditorBrowsable(EditorBrowsableState.Advanced)>
+  Public Function IsGenericBaseTypeOf(extendee As Type, candidate As Type) As Boolean
+
+    If (candidate.IsGenericType AndAlso extendee.IsAssignableFrom(candidate.GetGenericTypeDefinition)) Then
+      Return True
+    End If
+
+    If (extendee.IsInterface) Then
+      For Each implementedInterface In candidate.GetInterfaces()
+        If (extendee.IsGenericBaseTypeOf(implementedInterface)) Then
+          Return True
+        End If
+      Next
+    End If
+
+    If (candidate.BaseType IsNot Nothing) Then
+      Return extendee.IsGenericBaseTypeOf(candidate.BaseType)
+    End If
+
+    Return False
   End Function
 
   <Extension(), EditorBrowsable(EditorBrowsableState.Advanced)>
@@ -163,6 +192,116 @@ Friend Module ExtensionMethods
       Return True
     End If
     Return sourceAssembly.GetReferencedAssemblies.Where(Function(a) a.FullName = targetAssembly.FullName).Any()
+  End Function
+
+  <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
+  Public Function MatchesWildcardMask(stringToEvaluate As String, pattern As String, Optional ignoreCasing As Boolean = True) As Boolean
+
+    Dim indexOfDoubleDot = pattern.IndexOf("..", StringComparison.Ordinal)
+    If (indexOfDoubleDot >= 0) Then
+      For i = indexOfDoubleDot To pattern.Length - 1
+        If (Not pattern(i) = "."c) Then
+          Return False
+        End If
+      Next
+    End If
+
+    Dim normalizedPatternString As String = Regex.Replace(pattern, "\.+$", "")
+    Dim endsWithDot As Boolean = (Not normalizedPatternString.Length = pattern.Length)
+    Dim endCharCount As Integer = 0
+
+    If (endsWithDot) Then
+      Dim lastNonWildcardPosition = normalizedPatternString.Length - 1
+
+      While lastNonWildcardPosition >= 0
+        Dim currentChar = normalizedPatternString(lastNonWildcardPosition)
+        If (currentChar = "*"c) Then
+          endCharCount += Short.MaxValue
+        ElseIf (currentChar = "?"c) Then
+          endCharCount += 1
+        Else
+          Exit While
+        End If
+        lastNonWildcardPosition -= 1
+      End While
+
+      If (endCharCount > 0) Then
+        normalizedPatternString = normalizedPatternString.Substring(0, lastNonWildcardPosition + 1)
+      End If
+
+    End If
+
+    Dim endsWithWildcardDot As Boolean = endCharCount > 0
+    Dim endsWithDotWildcardDot As Boolean = (endsWithWildcardDot AndAlso normalizedPatternString.EndsWith("."))
+
+    If (endsWithDotWildcardDot) Then
+      normalizedPatternString = normalizedPatternString.Substring(0, normalizedPatternString.Length - 1)
+    End If
+
+    normalizedPatternString = Regex.Replace(normalizedPatternString, "(?!^)(\.\*)+$", ".*")
+
+    Dim escapedPatternString = Regex.Escape(normalizedPatternString)
+    Dim prefix As String
+    Dim suffix As String
+
+    If (endsWithDotWildcardDot) Then
+      prefix = "^" & escapedPatternString
+      suffix = "(\.[^.]{0," & endCharCount & "})?$"
+    ElseIf (endsWithWildcardDot) Then
+      prefix = "^" & escapedPatternString
+      suffix = "[^.]{0," & endCharCount & "}$"
+    Else
+      prefix = "^" & escapedPatternString
+      suffix = "$"
+    End If
+
+    If (prefix.EndsWith("\.\*") AndAlso prefix.Length > 5) Then
+      prefix = prefix.Substring(0, prefix.Length - 4)
+      suffix = Convert.ToString("(\..*)?") & suffix
+    End If
+
+    Dim expressionString = prefix.Replace("\*", ".*").Replace("\?", "[^.]?") & suffix
+
+    If (ignoreCasing) Then
+      Return Regex.IsMatch(stringToEvaluate, expressionString, RegexOptions.IgnoreCase)
+    Else
+      Return Regex.IsMatch(stringToEvaluate, expressionString)
+    End If
+
+  End Function
+
+  <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
+  Public Function Contains(inputArray As String(), search As String, ignoreCasing As Boolean) As Boolean
+
+    If (Not ignoreCasing) Then
+      Return inputArray.Contains(search)
+    End If
+
+    For Each str In inputArray
+      If (String.Equals(str, search, StringComparison.CurrentCultureIgnoreCase)) Then
+        Return True
+      End If
+    Next
+
+    Return False
+  End Function
+
+  <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
+  Public Function IsSubPathOf(subPathString As String, parentPathString As String, pathSeparatorChar As Char) As Boolean
+    Dim childArray = subPathString.Split(pathSeparatorChar)
+    Dim parentArray = parentPathString.Split(pathSeparatorChar)
+
+    If (childArray.Length < parentArray.Length) Then
+      Return False
+    End If
+
+    For i As Integer = 0 To (parentArray.Length - 1)
+      If (Not String.Equals(parentArray(i), childArray(i), StringComparison.CurrentCultureIgnoreCase)) Then
+        Return False
+      End If
+    Next
+
+    Return True
   End Function
 
 End Module

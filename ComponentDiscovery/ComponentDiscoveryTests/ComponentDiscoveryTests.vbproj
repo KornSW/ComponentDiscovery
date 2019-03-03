@@ -68,9 +68,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ExpressionCentricClassificationApprovalStrategyTests.vb" />
+    <Compile Include="TestContent\MyBusinessClass3.vb" />
     <Compile Include="TestContent\MyBusinessInterfaceA.vb" />
     <Compile Include="TestContent\MyBusinessClass2.vb" />
     <Compile Include="TestContent\MyBusinessClass1.vb" />
+    <Compile Include="DemandCentricClassificationApprovalStrategyTests.vb" />
     <Compile Include="TypeIndexerTests.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">

@@ -2,8 +2,8 @@
 <package >
   <metadata>
     <id>ComponentDiscovery</id>
-    <version>1.1.2</version>
-    <title>Clearance based Component Discovery</title>
+    <version>3.0.0</version>
+    <title>Clearance and Classification based Component Discovery</title>
     <authors>KornSW</authors>
     <owners>KornSW</owners>
     <!-- https://spdx.org/licenses/ -->
@@ -11,10 +11,10 @@
     <projectUrl>https://github.com/KornSW/ComponentDiscovery</projectUrl>
     <!--<iconUrl>https://github.com/KornSW/ComponentDiscovery/Master/kSystemExtensions.Logo.png</iconUrl>-->
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Clearance based Component Discovery</description>
+    <description>a "Component Discovery" - Framework which supports the dynamically load of assemblies and types (like providers etc.) including a multi dimensional, classification- / clearance-based mandatory access control for components</description>
     <releaseNotes></releaseNotes>
-    <copyright>Copyright KornSW</copyright>
-    <tags>ComponentDiscovery Clearance based Component Discovery</tags>
+    <copyright>KornSW</copyright>
+    <tags>ComponentDiscovery Clearance Classification based Component Discovery AssemblyIndexer TypeIndexer MAC Assemblies</tags>
   </metadata>
   <files>
     <!-- https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->

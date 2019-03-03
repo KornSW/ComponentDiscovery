@@ -5,15 +5,13 @@
 '  +------------------------------------------------------------------------+
 
 Imports System
-Imports ComponentDiscoveryTests
 
-Public Class MyBusinessClass1
-  Implements MyBusinessInterfaceA
-  Public Sub New()
-  End Sub
+Namespace ClassificationDetection
 
-  Public Function GetDemoValue() As String Implements MyBusinessInterfaceA.GetDemoValue
-    Return "Demo-Value-1"
-  End Function
+  Public Interface ITypeClassificationDetectionStrategy
 
-End Class
+    Function TryDetectClassificationsForType(t As Type, taxonomicDimensionName As String, ByRef classifications As String()) As Boolean
+
+  End Interface
+
+End Namespace

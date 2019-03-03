@@ -1,7 +1,15 @@
-﻿Imports System
+﻿'  +------------------------------------------------------------------------+
+'  ¦ this file is part of an open-source solution which is originated here: ¦
+'  ¦ https://github.com/KornSW/ComponentDiscovery                           ¦
+'  ¦ the removal of this notice is prohibited by the author!                ¦
+'  +------------------------------------------------------------------------+
+
+Imports System
 Imports System.Collections.Generic
 Imports System.Reflection
 Imports ComponentDiscovery
+Imports ComponentDiscovery.ClassificationApproval
+Imports ComponentDiscovery.ClassificationDetection
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 
 <TestClass()>
@@ -18,8 +26,12 @@ Public Class TypeIndexerTests
     _ThisAssembly = Me.GetType().Assembly
 
     _AssemblyIndexer = New ClassificationBasedAssemblyIndexer()
-    Dim businessConcernStrategy As New AttributeBasedApprovalStrategy("BusinessConcern")
-    _AssemblyIndexer.AddDimension(businessConcernStrategy.DimensionName, businessConcernStrategy)
+
+    _AssemblyIndexer.AddTaxonomicDimension(
+      "BusinessConcern",
+      New AttributeBasedAssemblyClassificationDetectionStrategy(),
+      New DemandCentricClassificationApprovalStrategy()
+    )
 
     _TypeIndexer = New ClassificationBasedTypeIndexer(_AssemblyIndexer)
 
@@ -45,7 +57,7 @@ Public Class TypeIndexerTests
   '  <Assembly: AssemblyClassification("BusinessConcern", "ConcernB")>
 
   <TestMethod()>
-  Public Sub TestMethod1()
+  Public Sub TypeIndexerWithoutPicFilter()
 
     Dim foundTypes As New List(Of Type)
 
@@ -61,18 +73,28 @@ Public Class TypeIndexerTests
     )
 
     _AssemblyIndexer.TryApproveAssembly(_ThisAssembly)
+
+    Assert.IsTrue(_AssemblyIndexer.DismissedAssemblies.Length = 1)
+    Assert.IsTrue(_AssemblyIndexer.ApprovedAssemblies.Length = 0)
     Assert.IsTrue(foundTypes.Count = 0)
 
     _AssemblyIndexer.AddClearances("BusinessConcern", "ConcernA")
+    Assert.IsTrue(_AssemblyIndexer.DismissedAssemblies.Length = 1)
+    Assert.IsTrue(_AssemblyIndexer.ApprovedAssemblies.Length = 0)
     Assert.IsTrue(foundTypes.Count = 0)
 
     _AssemblyIndexer.AddClearances("BusinessConcern", "ConcernB")
+    Assert.IsTrue(_AssemblyIndexer.DismissedAssemblies.Length = 0)
+    Assert.IsTrue(_AssemblyIndexer.ApprovedAssemblies.Length = 1)
     Assert.IsTrue(foundTypes.Count = 3)
+
+    _AssemblyIndexer.AddClearances("BusinessConcern", "ConcernC")
+    Assert.IsTrue(foundTypes.Count = 4) 'TypeClassificationAttribute
 
   End Sub
 
   <TestMethod()>
-  Public Sub TestMethod2()
+  Public Sub TypeIndexerWithPicFilter()
 
     Dim foundTypes As New List(Of Type)
 

@@ -1,11 +1,17 @@
-﻿Imports System
+﻿'  +------------------------------------------------------------------------+
+'  ¦ this file is part of an open-source solution which is originated here: ¦
+'  ¦ https://github.com/KornSW/ComponentDiscovery                           ¦
+'  ¦ the removal of this notice is prohibited by the author!                ¦
+'  +------------------------------------------------------------------------+
+
+Imports System
 Imports System.Collections.Generic
 Imports System.Linq
 Imports System.Reflection
 
 Public Class ExtensionMethodIndexer
 
-  Private _CachesPerExtendeeType As New Dictionary(Of Type, ExtensionMethodCache)
+  Private _CachesPerExtendeeType As New Dictionary(Of Type, MethodIndex)
   Private _AssemblyIndexer As IAssemblyIndexer
 
   Public Sub New(assemblyIndexer As IAssemblyIndexer)
@@ -14,7 +20,7 @@ Public Class ExtensionMethodIndexer
   End Sub
 
   Public Sub AddAssembly(assembly As Assembly)
-    Dim allCaches As ExtensionMethodCache()
+    Dim allCaches As MethodIndex()
     SyncLock _CachesPerExtendeeType
       allCaches = _CachesPerExtendeeType.Values.ToArray()
     End SyncLock
@@ -31,7 +37,7 @@ Public Class ExtensionMethodIndexer
     Return Me.GetCache(extendeeType)
   End Function
 
-  Private Function GetCache(extendeeType As Type) As ExtensionMethodCache
+  Private Function GetCache(extendeeType As Type) As MethodIndex
 
     SyncLock _CachesPerExtendeeType
       If (_CachesPerExtendeeType.ContainsKey(extendeeType)) Then
@@ -40,7 +46,7 @@ Public Class ExtensionMethodIndexer
     End SyncLock
 
     'ACHTUNG: darf nicht innerhalb des SyncLock sein, da der recursive aufruf von GetCache sonst blockiert wäre
-    Dim cache As New ExtensionMethodCache(extendeeType, AddressOf Me.GetCache)
+    Dim cache As New MethodIndex(extendeeType, AddressOf Me.GetCache)
 
     SyncLock _CachesPerExtendeeType
       _CachesPerExtendeeType.Add(extendeeType, cache)
