@@ -9,7 +9,7 @@
     <!-- https://spdx.org/licenses/ -->
     <license type="expression">GPL-3.0-only</license>
     <projectUrl>https://github.com/KornSW/ComponentDiscovery</projectUrl>
-    <!--<iconUrl>https://github.com/KornSW/ComponentDiscovery/Master/kSystemExtensions.Logo.png</iconUrl>-->
+    <iconUrl>https://github.com/KornSW/ComponentDiscovery/blob/master/PackageIcon.png?raw=true</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>a "Component Discovery" - Framework which supports the dynamically load of assemblies and types (like providers etc.) including a multi dimensional, classification- / clearance-based mandatory access control for components</description>
     <releaseNotes></releaseNotes>
