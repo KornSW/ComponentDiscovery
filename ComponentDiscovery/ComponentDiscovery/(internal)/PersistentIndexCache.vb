@@ -59,21 +59,21 @@ Friend Class PersistentIndexCache
 
   Private Sub AnalyzeAssemblyFingerprintData(
     assemblyFileFullName As String,
-    ByRef fileSize As Long, ByRef fileVersion As Version, ByRef modifiedDate As DateTime
+    ByRef fileSize As Long, ByRef fileVersion As String, ByRef modifiedDate As DateTime
   )
     Dim fi As New FileInfo(assemblyFileFullName)
     fileSize = fi.Length
     modifiedDate = fi.LastWriteTime
     Try
-      fileVersion = Version.Parse(FileVersionInfo.GetVersionInfo(assemblyFileFullName).FileVersion)
+      fileVersion = FileVersionInfo.GetVersionInfo(assemblyFileFullName).FileVersion
     Catch
-      fileVersion = New Version()
+      fileVersion = "?.?.?.?"
     End Try
   End Sub
 
   Private Function BuildTimestampBlock(assemblyFileFullName As String) As String
     Dim currentAssemblyFileSize As Long
-    Dim currentAssemblyFileVersion As Version = Nothing
+    Dim currentAssemblyFileVersion As String = Nothing
     Dim currentAssemblyModifiedDate As DateTime
     AnalyzeAssemblyFingerprintData(assemblyFileFullName, currentAssemblyFileSize, currentAssemblyFileVersion, currentAssemblyModifiedDate)
 
@@ -141,12 +141,12 @@ Friend Class PersistentIndexCache
     End If
 
     Dim cachedAssemblyFileSize As Long
-    Dim cachedAssemblyFileVersion As Version
+    Dim cachedAssemblyFileVersion As String
     Dim cachedAssemblyModifiedDate As DateTime
     Dim classificationExpressionsFromCache As String() = {}
 
     Dim currentAssemblyFileSize As Long
-    Dim currentAssemblyFileVersion As Version = Nothing
+    Dim currentAssemblyFileVersion As String = Nothing
     Dim currentAssemblyModifiedDate As DateTime
     Me.AnalyzeAssemblyFingerprintData(assemblyFullFilename, currentAssemblyFileSize, currentAssemblyFileVersion, currentAssemblyModifiedDate)
 
@@ -162,7 +162,7 @@ Friend Class PersistentIndexCache
           End If
           Dim fileds = content.Split("|"c)
           cachedAssemblyFileSize = Long.Parse(fileds(0))
-          cachedAssemblyFileVersion = Version.Parse(fileds(1))
+          cachedAssemblyFileVersion = fileds(1)
           cachedAssemblyModifiedDate = DateTime.Parse(fileds(2))
 
           If (currentAssemblyFileSize = cachedAssemblyFileSize AndAlso currentAssemblyFileVersion = cachedAssemblyFileVersion) Then

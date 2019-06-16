@@ -321,17 +321,21 @@ Public Class ClassificationBasedAssemblyIndexer
 
       Select Case (True)
 
+        Case .StartsWith("anonymously")
+        Case .StartsWith("vshost")
+
         Case .StartsWith("system.")
-        Case .StartsWith("microsoft*")
-        Case .StartsWith("mscorlib*")
-        Case .StartsWith("vshost*")
-        Case .StartsWith("entityframework*")
-        Case .StartsWith("anonymously*")
-        Case .StartsWith("webgrease*")
-        Case .StartsWith("aspnet*")
-        Case .StartsWith("antlr3*")
-        Case .StartsWith("owin*")
-        Case .StartsWith("newtonsoft*")
+        Case .StartsWith("microsoft.")
+        Case .StartsWith("mscorlib")
+
+        Case .StartsWith("entityframework")
+        Case .StartsWith("newtonsoft")
+
+        Case .StartsWith("webgrease")
+        Case .StartsWith("aspnet")
+        Case .StartsWith("antlr3")
+        Case .StartsWith("owin")
+
         Case .StartsWith("msvcr90")
         Case .StartsWith("sqlceca40")
         Case .StartsWith("sqlcecompact40")

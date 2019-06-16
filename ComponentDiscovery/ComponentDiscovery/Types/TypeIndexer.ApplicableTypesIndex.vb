@@ -47,7 +47,7 @@ Partial Class TypeIndexer
     Private _EnablePersistentCache As Boolean = False
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private _AssemblyIndexer As IAssemblyIndexer
+    Private _AssemblyIndexer As IAssemblyIndexer = Nothing
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _ApprovingMethod As Func(Of Type, Boolean)
@@ -61,6 +61,18 @@ Partial Class TypeIndexer
       _EnablePersistentCache = enablePersistentCache
       _ApprovingMethod = approvingMethod
       _AssemblyIndexer.SubscribeForAssemblyApproved(AddressOf Me.HandleAddedAssembly)
+    End Sub
+
+    Public Sub New(selector As Type, assembliesToCrawl As Assembly(), enablePersistentCache As Boolean, approvingMethod As Func(Of Type, Boolean), enableAsyncIndexing As Boolean)
+      _EnableAsyncIndexing = enableAsyncIndexing
+      _Selector = selector
+      _SelectorIsAttribute = _Selector.IsSubclassOf(GetType(Attribute))
+      _SelectorIsGenericTypeDefinition = _Selector.IsGenericTypeDefinition
+      _EnablePersistentCache = enablePersistentCache
+      _ApprovingMethod = approvingMethod
+      For Each assemblyToCrawl In assembliesToCrawl
+        Me.HandleAddedAssembly(assemblyToCrawl)
+      Next
     End Sub
 
 #End Region

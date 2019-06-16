@@ -9,6 +9,7 @@ Imports System.Collections.Generic
 Imports System.ComponentModel
 Imports System.Diagnostics
 Imports System.Linq
+Imports System.Reflection
 
 Public Class TypeIndexer
   Implements ITypeIndexer
@@ -16,7 +17,10 @@ Public Class TypeIndexer
 #Region " Fields & Constructor "
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-  Private _AssemblyIndexer As IAssemblyIndexer
+  Private _AssemblyIndexer As IAssemblyIndexer = Nothing 'requires _StaticAssemblyList must be Nothing
+
+  <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+  Private _StaticAssemblyList As Assembly() = Nothing 'requires _AssemblyIndexer must be Nothing
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _ApprovingMethod As Func(Of Type, Boolean) = AddressOf Me.DefaultApprovingMethod
@@ -38,6 +42,15 @@ Public Class TypeIndexer
 
   Public Sub New(assemblyIndexer As IAssemblyIndexer, Optional enablePersistentCache As Boolean = False, Optional customApprovingMethod As Func(Of Type, Boolean) = Nothing, Optional enableAsyncIndexing As Boolean = False)
     _AssemblyIndexer = assemblyIndexer
+    _EnablePersistentCache = enablePersistentCache
+    If (customApprovingMethod IsNot Nothing) Then
+      _ApprovingMethod = customApprovingMethod
+    End If
+    _EnableAsyncIndexing = enableAsyncIndexing
+  End Sub
+
+  Public Sub New(assemblies As Assembly(), Optional enablePersistentCache As Boolean = False, Optional customApprovingMethod As Func(Of Type, Boolean) = Nothing, Optional enableAsyncIndexing As Boolean = False)
+    _StaticAssemblyList = assemblies
     _EnablePersistentCache = enablePersistentCache
     If (customApprovingMethod IsNot Nothing) Then
       _ApprovingMethod = customApprovingMethod
@@ -69,9 +82,31 @@ Public Class TypeIndexer
 #Region " Obervation (which types are needed to be indexed) "
 
   <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Public ReadOnly Property AssemblyIndexer As IAssemblyIndexer
+  Protected ReadOnly Property AssemblyIndexer As IAssemblyIndexer
     Get
       Return _AssemblyIndexer
+    End Get
+  End Property
+
+  <EditorBrowsable(EditorBrowsableState.Advanced)>
+  Public ReadOnly Property MonitoredAssemblies As Assembly()
+    Get
+      If (_AssemblyIndexer IsNot Nothing) Then
+        Return _AssemblyIndexer.ApprovedAssemblies.ToArray()
+      ElseIf (_StaticAssemblyList IsNot Nothing) Then
+        Return _StaticAssemblyList
+      Else
+        Return {}
+      End If
+    End Get
+  End Property
+
+  <EditorBrowsable(EditorBrowsableState.Advanced)>
+  Public ReadOnly Property MonitoredSelectors As Type()
+    Get
+      SyncLock _ApplicablesPerSelector
+        Return _ApplicablesPerSelector.Keys.ToArray()
+      End SyncLock
     End Get
   End Property
 
@@ -111,11 +146,6 @@ Public Class TypeIndexer
   End Sub
 
   Public Function GetApplicableTypes(selector As Type, parameterlessInstantiableClassesOnly As Boolean) As Type() Implements ITypeIndexer.GetApplicableTypes
-
-    If (_AssemblyIndexer Is Nothing) Then
-      Throw New Exception("TypeIndexer not wired up!")
-    End If
-
     If (parameterlessInstantiableClassesOnly) Then
       Return Me.GetApplicableTypes(selector).ApplicableTypes.Where(Function(t) t.IsClass AndAlso t.IsParameterlessInstantiable).ToArray()
     End If
@@ -133,31 +163,26 @@ Public Class TypeIndexer
   Public Sub EnableIndexingOf(selector As Type)
     SyncLock _ApplicablesPerSelector
       If (Not _ApplicablesPerSelector.ContainsKey(selector)) Then
-        Dim newIndex As New ApplicableTypesIndex(selector, _AssemblyIndexer, _EnablePersistentCache, _ApprovingMethod, _EnableAsyncIndexing)
-        newIndex.EnableTracing = Me.EnableTracing
+
+        Dim newIndex As ApplicableTypesIndex
+
+        If (_AssemblyIndexer IsNot Nothing) Then
+          newIndex = New ApplicableTypesIndex(selector, _AssemblyIndexer, _EnablePersistentCache, _ApprovingMethod, _EnableAsyncIndexing)
+        ElseIf (_StaticAssemblyList IsNot Nothing) Then
+          newIndex = New ApplicableTypesIndex(selector, _StaticAssemblyList, _EnablePersistentCache, _ApprovingMethod, _EnableAsyncIndexing)
+        Else
+          Throw New Exception("TypeIndexer not wired up!")
+        End If
+
         _ApplicablesPerSelector.Add(selector, newIndex)
+
         For Each manuallyRegisteredApplicableType In _ManuallyRegisteredCandidates
           newIndex.TryRegisterCandidate(manuallyRegisteredApplicableType)
         Next
+
       End If
     End SyncLock
   End Sub
-
-  'TODO: WTF????
-  Public ReadOnly Property IsUsable As Boolean
-    Get
-      Return (_AssemblyIndexer IsNot Nothing)
-    End Get
-  End Property
-
-  <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Public ReadOnly Property MonitoredSelectors As Type()
-    Get
-      SyncLock _ApplicablesPerSelector
-        Return _ApplicablesPerSelector.Keys.ToArray()
-      End SyncLock
-    End Get
-  End Property
 
 #End Region
 
@@ -185,7 +210,7 @@ Public Class TypeIndexer
     Next
 
     If (foundType Is Nothing) Then
-      For Each ass In _AssemblyIndexer.ApprovedAssemblies.ToArray()
+      For Each ass In Me.MonitoredAssemblies
         For Each accessableType In ass.GetTypesAccessible()
           If (String.Equals(accessableType.FullName, typeFullName, StringComparison.CurrentCultureIgnoreCase)) Then
             foundType = accessableType
