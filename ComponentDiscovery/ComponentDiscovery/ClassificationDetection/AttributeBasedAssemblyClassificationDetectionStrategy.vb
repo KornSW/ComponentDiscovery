@@ -128,6 +128,15 @@ Namespace ClassificationDetection
 
     Private Shared _SheduledAppdomainShutdownTask As Task = Nothing
 
+    Shared Sub New()
+      AddHandler AppDomain.CurrentDomain.DomainUnload,
+        Sub(s, e)
+          If (_SandboxDomain IsNot Nothing) Then
+            AppDomain.Unload(_SandboxDomain)
+          End If
+        End Sub
+    End Sub
+
     Private Shared Sub EnsureSandboxDomainIsInitialized()
       SyncLock _AppdomainAccessSemaphore
         _KeepSandboxDomainRunningUntil = DateTime.Now.AddSeconds(10)
