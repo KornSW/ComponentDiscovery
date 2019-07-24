@@ -128,11 +128,15 @@ Namespace ClassificationDetection
 
     Private Shared _SheduledAppdomainShutdownTask As Task = Nothing
 
+    Private Shared _OuterAppDomainShutDown As Boolean = False
+
     Shared Sub New()
       AddHandler AppDomain.CurrentDomain.DomainUnload,
         Sub(s, e)
+          _OuterAppDomainShutDown = True
           If (_SandboxDomain IsNot Nothing) Then
             AppDomain.Unload(_SandboxDomain)
+            _SandboxDomain = Nothing
           End If
         End Sub
     End Sub
@@ -161,8 +165,14 @@ Namespace ClassificationDetection
     Private Shared Sub SheduledAppdomainShutdown()
 
       Do
-        Thread.Sleep(1000)
+
+        Try
+          Thread.Sleep(300)
+        Catch
+        End Try
+
         SyncLock _AppdomainAccessSemaphore
+
           If (_KeepSandboxDomainRunningUntil < DateTime.Now AndAlso _SandboxDomain IsNot Nothing) Then
             Dim domainToUnload = _SandboxDomain
             _SandboxDomain = Nothing
@@ -172,8 +182,11 @@ Namespace ClassificationDetection
             End Try
             Exit Do
           End If
+
         End SyncLock
-      Loop
+
+      Loop Until _OuterAppDomainShutDown
+
     End Sub
 
 #End Region

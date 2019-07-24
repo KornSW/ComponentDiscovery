@@ -23,6 +23,9 @@ Public Class AssemblyIndexer
   Private _AppDomainBindingIsEnabled As Boolean = False
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+  Private _AutoImportFromResolvePathsEnabled As Boolean = False
+
+  <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _RecursiveReferencesIncluded As Boolean = False
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
@@ -38,11 +41,26 @@ Public Class AssemblyIndexer
   Private _OnAssemblyApprovedMethods As New List(Of Action(Of Assembly))
 
   Public Sub New()
-    MyClass.New(True)
+    MyClass.New(True, True, True)
   End Sub
 
-  Public Sub New(preferAssemblyLoadingViaFusion As Boolean)
+  Public Sub New(
+    preferAssemblyLoadingViaFusion As Boolean,
+    autoImportAllAssembliesFromResolvePaths As Boolean,
+    enableAppDomainBinding As Boolean
+  )
+
     _PreferAssemblyLoadingViaFusion = preferAssemblyLoadingViaFusion
+
+    'this triggers the registration of the appdomain resolve handlers!!!
+    AssemblyResolving.Initialize()
+
+    'this triggers assembly-add
+    Me.AppDomainBindingEnabled = enableAppDomainBinding
+
+    'this triggers assembly-add
+    Me.AutoImportFromResolvePathsEnabled = autoImportAllAssembliesFromResolvePaths
+
   End Sub
 
   <EditorBrowsable(EditorBrowsableState.Advanced)>
@@ -209,7 +227,7 @@ Public Class AssemblyIndexer
 
 #Region " Adding of Assemblies (automatic via appdomain event) "
 
-  Public Property AppDomainBindingIsEnabled() As Boolean
+  Public Property AppDomainBindingEnabled() As Boolean
     Get
       Return _AppDomainBindingIsEnabled
     End Get
@@ -240,7 +258,7 @@ Public Class AssemblyIndexer
   End Property
 
   Private Sub AppDomain_AssemblyLoad(sender As Object, args As AssemblyLoadEventArgs)
-    If (Me.AppDomainBindingIsEnabled) Then
+    If (Me.AppDomainBindingEnabled) Then
       If (Not args.LoadedAssembly.IsDynamic) Then
         If (Me.EnableTracing) Then
           Trace.TraceInformation(String.Format("AssemblyIndexer: assembly '{0}' received over appdomain subscription", args.LoadedAssembly.GetName().Name))
@@ -248,6 +266,33 @@ Public Class AssemblyIndexer
         Me.TryApproveAssembly(args.LoadedAssembly)
       End If
     End If
+  End Sub
+
+#End Region
+
+#Region " Adding of Assemblies (automatic on new resolve path) "
+
+  Public Property AutoImportFromResolvePathsEnabled() As Boolean
+    Get
+      Return _AutoImportFromResolvePathsEnabled
+    End Get
+    Set(value As Boolean)
+
+      If (_AutoImportFromResolvePathsEnabled = True AndAlso value = False) Then
+        AssemblyResolving.UnsubscribeFromNewResolvePathAdded(AddressOf OnNewResolvePathAdded)
+
+      ElseIf (_AutoImportFromResolvePathsEnabled = False AndAlso value = True) Then
+        AssemblyResolving.SubscribeForNewResolvePathAdded(AddressOf OnNewResolvePathAdded)
+
+      End If
+
+      _AutoImportFromResolvePathsEnabled = value
+
+    End Set
+  End Property
+
+  Private Sub OnNewResolvePathAdded(newResolvePath As String)
+    Me.TryApproveAssemblyFilesFrom(New DirectoryInfo(newResolvePath), False, "*.dll")
   End Sub
 
 #End Region
@@ -410,7 +455,8 @@ Public Class AssemblyIndexer
   Protected Overridable Sub Dispose(disposing As Boolean)
     If (Not _AlreadyDisposed) Then
       If (disposing) Then
-        Me.AppDomainBindingIsEnabled = False
+        Me.AppDomainBindingEnabled = False
+        Me.AutoImportFromResolvePathsEnabled = False
       End If
       _AlreadyDisposed = True
     End If

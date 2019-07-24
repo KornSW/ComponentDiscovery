@@ -28,6 +28,20 @@ Public Class ClassificationBasedAssemblyIndexer
     MyBase.New()
   End Sub
 
+  Public Sub New(
+    preferAssemblyLoadingViaFusion As Boolean,
+    autoImportAllAssembliesFromResolvePaths As Boolean,
+    enableAppDomainBinding As Boolean
+  )
+
+    MyBase.New(
+      preferAssemblyLoadingViaFusion,
+      autoImportAllAssembliesFromResolvePaths,
+      enableAppDomainBinding
+    )
+
+  End Sub
+
   Public Sub New(applicationWorkDir As String)
     MyBase.New()
     _OverwrittenApplicationWorkDir = New DirectoryInfo(applicationWorkDir)
