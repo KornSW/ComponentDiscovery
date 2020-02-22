@@ -6,7 +6,10 @@
 
 Imports System
 
-<AttributeUsage(AttributeTargets.Class Or AttributeTargets.Interface Or AttributeTargets.Module Or AttributeTargets.Struct Or AttributeTargets.Enum, AllowMultiple:=True, Inherited:=True)>
+<AttributeUsage(
+  AttributeTargets.Class Or AttributeTargets.Interface Or AttributeTargets.Module Or AttributeTargets.Struct Or AttributeTargets.Enum,
+  AllowMultiple:=True, Inherited:=True
+)>
 Public Class IgnoreNamespaceClassificationsAttribute
   Inherits Attribute
 

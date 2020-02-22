@@ -1,2 +1,2 @@
-nuget pack ./ComponentDiscovery.nuspec -Build -Symbols -OutputDirectory "..\(NuGetRepo)" -InstallPackageToOutputPath
+nuget pack ./ComponentDiscovery.nuspec -Build -Symbols -OutputDirectory ".\(Stage)\Packages" -InstallPackageToOutputPath
 PAUSE

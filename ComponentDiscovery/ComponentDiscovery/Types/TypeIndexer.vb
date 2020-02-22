@@ -34,13 +34,19 @@ Public Class TypeIndexer
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _EnableAsyncIndexing As Boolean = False
 
-  <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-  Private _EnableTracing As Boolean = False
+  '<DebuggerBrowsable(DebuggerBrowsableState.Never)>
+  'Private _EnableTracing As Boolean = False
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _ManuallyRegisteredCandidates As New List(Of Type)
 
-  Public Sub New(assemblyIndexer As IAssemblyIndexer, Optional enablePersistentCache As Boolean = False, Optional customApprovingMethod As Func(Of Type, Boolean) = Nothing, Optional enableAsyncIndexing As Boolean = False)
+  Public Sub New(
+    assemblyIndexer As IAssemblyIndexer,
+    Optional enablePersistentCache As Boolean = False,
+    Optional customApprovingMethod As Func(Of Type, Boolean) = Nothing,
+    Optional enableAsyncIndexing As Boolean = False
+  )
+
     _AssemblyIndexer = assemblyIndexer
     _EnablePersistentCache = enablePersistentCache
     If (customApprovingMethod IsNot Nothing) Then
@@ -49,7 +55,13 @@ Public Class TypeIndexer
     _EnableAsyncIndexing = enableAsyncIndexing
   End Sub
 
-  Public Sub New(assemblies As Assembly(), Optional enablePersistentCache As Boolean = False, Optional customApprovingMethod As Func(Of Type, Boolean) = Nothing, Optional enableAsyncIndexing As Boolean = False)
+  Public Sub New(
+    assemblies As Assembly(),
+    Optional enablePersistentCache As Boolean = False,
+    Optional customApprovingMethod As Func(Of Type, Boolean) = Nothing,
+    Optional enableAsyncIndexing As Boolean = False
+  )
+
     _StaticAssemblyList = assemblies
     _EnablePersistentCache = enablePersistentCache
     If (customApprovingMethod IsNot Nothing) Then
@@ -57,25 +69,6 @@ Public Class TypeIndexer
     End If
     _EnableAsyncIndexing = enableAsyncIndexing
   End Sub
-
-  Protected Overridable Function DefaultApprovingMethod(t As Type) As Boolean
-    Return (t.IsPublic AndAlso t.IsNested = False)
-  End Function
-
-  <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Public Property EnableTracing As Boolean
-    Get
-      Return _EnableTracing
-    End Get
-    Set(value As Boolean)
-      _EnableTracing = value
-      SyncLock _ApplicablesPerSelector
-        For Each item In _ApplicablesPerSelector.Values
-          item.EnableTracing = _EnableTracing
-        Next
-      End SyncLock
-    End Set
-  End Property
 
 #End Region
 
@@ -171,7 +164,7 @@ Public Class TypeIndexer
         ElseIf (_StaticAssemblyList IsNot Nothing) Then
           newIndex = New ApplicableTypesIndex(selector, _StaticAssemblyList, _EnablePersistentCache, _ApprovingMethod, _EnableAsyncIndexing)
         Else
-          Throw New Exception("TypeIndexer not wired up!")
+          Throw New Exception("TypeIndexer has an invalid state!")
         End If
 
         _ApplicablesPerSelector.Add(selector, newIndex)
@@ -183,6 +176,26 @@ Public Class TypeIndexer
       End If
     End SyncLock
   End Sub
+
+  Protected Overridable Function DefaultApprovingMethod(t As Type) As Boolean
+    Return (t.IsPublic AndAlso t.IsNested = False)
+  End Function
+
+
+  '<EditorBrowsable(EditorBrowsableState.Advanced)>
+  'Public Property EnableTracing As Boolean
+  '  Get
+  '    Return _EnableTracing
+  '  End Get
+  '  Set(value As Boolean)
+  '    _EnableTracing = value
+  '    SyncLock _ApplicablesPerSelector
+  '      For Each item In _ApplicablesPerSelector.Values
+  '        item.EnableTracing = _EnableTracing
+  '      Next
+  '    End SyncLock
+  '  End Set
+  'End Property
 
 #End Region
 
@@ -240,16 +253,22 @@ Public Class TypeIndexer
 
 #Region " Subscription "
 
-  Public Sub SubscribeForApplicableTypeFound(selector As Type, parameterlessInstantiableClassesOnly As Boolean, onApplicableTypeFoundMethod As Action(Of Type)) _
-  Implements ITypeIndexer.SubscribeForApplicableTypeFound
+  Public Sub SubscribeForApplicableTypeFound(
+    selector As Type,
+    parameterlessInstantiableClassesOnly As Boolean,
+    onApplicableTypeFoundMethod As Action(Of Type)
+  ) Implements ITypeIndexer.SubscribeForApplicableTypeFound
 
     Me.GetApplicableTypes(selector).AddSubscriber(onApplicableTypeFoundMethod, parameterlessInstantiableClassesOnly)
 
   End Sub
 
   <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Public Sub UnsubscribeFromApplicableTypeFound(selector As Type, parameterlessInstantiableClassesOnly As Boolean, onTypeIndexedMethod As Action(Of Type)) _
-  Implements ITypeIndexer.UnsubscribeFromApplicableTypeFound
+  Public Sub UnsubscribeFromApplicableTypeFound(
+    selector As Type,
+    parameterlessInstantiableClassesOnly As Boolean,
+    onTypeIndexedMethod As Action(Of Type)
+  ) Implements ITypeIndexer.UnsubscribeFromApplicableTypeFound
 
     Me.GetApplicableTypes(selector).RemoveSubscriber(onTypeIndexedMethod, parameterlessInstantiableClassesOnly)
 

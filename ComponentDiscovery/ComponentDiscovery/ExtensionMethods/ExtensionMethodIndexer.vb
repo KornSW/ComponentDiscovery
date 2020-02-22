@@ -12,6 +12,7 @@ Imports System.Reflection
 Public Class ExtensionMethodIndexer
 
   Private _CachesPerExtendeeType As New Dictionary(Of Type, MethodIndex)
+
   Private _AssemblyIndexer As IAssemblyIndexer
 
   Public Sub New(assemblyIndexer As IAssemblyIndexer)

@@ -40,15 +40,14 @@ Public Class AssemblyIndexer
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Private _OnAssemblyApprovedMethods As New List(Of Action(Of Assembly))
 
+  <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+  Private _FullyImportedDirectories As New List(Of String)
+
   Public Sub New()
     MyClass.New(True, True, True)
   End Sub
 
-  Public Sub New(
-    preferAssemblyLoadingViaFusion As Boolean,
-    autoImportAllAssembliesFromResolvePaths As Boolean,
-    enableAppDomainBinding As Boolean
-  )
+  Public Sub New(enableResolvePathsBinding As Boolean, enableAppDomainBinding As Boolean, Optional preferAssemblyLoadingViaFusion As Boolean = True)
 
     _PreferAssemblyLoadingViaFusion = preferAssemblyLoadingViaFusion
 
@@ -59,30 +58,45 @@ Public Class AssemblyIndexer
     Me.AppDomainBindingEnabled = enableAppDomainBinding
 
     'this triggers assembly-add
-    Me.AutoImportFromResolvePathsEnabled = autoImportAllAssembliesFromResolvePaths
+    Me.ResolvePathsBindingEnabled = enableResolvePathsBinding
 
   End Sub
-
-  <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Public Property EnableTracing As Boolean = False
 
 #End Region
 
 #Region " Adding of Assemblies (manual)  "
 
-  Protected Overridable Function GetApplicationWorkDir() As DirectoryInfo
-    Return New DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().FullFileName))
+  Protected Overridable Function GetPrimaryApplicationAssemblyDirectory() As DirectoryInfo
+    Return New DirectoryInfo(AssemblyResolving.PrimaryApplicationAssemblyDirectory)
   End Function
 
-  Public Sub TryApproveAssembliesFromWorkdir(recursive As Boolean, Optional pattern As String = "*.dll|*.exe", Optional forceReapprove As Boolean = False)
-    Me.TryApproveAssemblyFilesFrom(Me.GetApplicationWorkDir, recursive, pattern, forceReapprove)
+  Public Sub TryApproveAssemblyFilesFromApplicationAssemblyDirectory(
+    recursive As Boolean,
+    Optional pattern As String = "*.dll|*.exe",
+    Optional forceReapprove As Boolean = False
+  )
+
+    Me.TryApproveAssemblyFilesFrom(Me.GetPrimaryApplicationAssemblyDirectory, recursive, pattern, forceReapprove)
   End Sub
 
-  Public Sub TryApproveAssemblyFilesFrom(directoryInfo As DirectoryInfo, recursive As Boolean, Optional searchPattern As String = "*.dll|*.exe", Optional forceReapprove As Boolean = False)
+  Public Sub TryApproveAssemblyFilesFrom(
+    directoryInfo As DirectoryInfo,
+    recursive As Boolean,
+    Optional searchPattern As String = "*.dll|*.exe",
+    Optional forceReapprove As Boolean = False
+  )
+
     searchPattern = searchPattern.ToLower()
-    If (Me.EnableTracing) Then
-      Trace.TraceInformation(String.Format("AssemblyIndexer: adding assembly files '{0}\{1}' ...", directoryInfo.FullName.ToLower(), searchPattern))
+
+    If (directoryInfo.Exists) Then
+      SyncLock _FullyImportedDirectories
+        _FullyImportedDirectories.Add(directoryInfo.FullName)
+      End SyncLock
+    Else
+      Exit Sub
     End If
+
+    Diag.Verbose(Function() String.Format("AssemblyIndexer: adding assembly files '{0}\{1}' ...", directoryInfo.FullName.ToLower(), searchPattern))
 
     If (String.IsNullOrWhiteSpace(searchPattern)) Then
       searchPattern = "*.dll|*.exe"
@@ -105,6 +119,14 @@ Public Class AssemblyIndexer
 
   End Sub
 
+  Protected ReadOnly Property FullyImportedDirectories As String()
+    Get
+      SyncLock _FullyImportedDirectories
+        Return _FullyImportedDirectories.ToArray()
+      End SyncLock
+    End Get
+  End Property
+
   Public Function TryApproveAssemblyFile(fileInfo As FileInfo, Optional forceReapprove As Boolean = False) As Boolean Implements IAssemblyIndexer.TryApproveAssemblyFile
     Try
       Return Me.TryApproveAssembly(fileInfo.FullName, forceReapprove)
@@ -113,17 +135,17 @@ Public Class AssemblyIndexer
     Return False
   End Function
 
-  Public Sub TryApproveAssemblyFile(assemblyFullFilename As String) Implements IAssemblyIndexer.TryApproveAssemblyFile
-    Me.TryApproveAssembly(assemblyFullFilename, False)
-  End Sub
+  Public Function TryApproveAssemblyFile(assemblyFullFilename As String) As Boolean Implements IAssemblyIndexer.TryApproveAssemblyFile
+    Return Me.TryApproveAssembly(assemblyFullFilename, False)
+  End Function
 
-  Public Sub TryApproveCurrentAssembly() Implements IAssemblyIndexer.TryApproveCurrentAssembly
-    Me.TryApproveAssembly(Assembly.GetCallingAssembly())
-  End Sub
+  Public Function TryApproveCurrentAssembly() As Boolean Implements IAssemblyIndexer.TryApproveCurrentAssembly
+    Return Me.TryApproveAssembly(Assembly.GetCallingAssembly())
+  End Function
 
-  Public Overridable Sub TryApproveAssembly(assembly As Assembly) Implements IAssemblyIndexer.TryApproveAssembly
-    Me.TryApproveAssembly(assembly.Location, False)
-  End Sub
+  Public Overridable Function TryApproveAssembly(assembly As Assembly) As Boolean Implements IAssemblyIndexer.TryApproveAssembly
+    Return Me.TryApproveAssembly(assembly.Location, False)
+  End Function
 
   Protected Function TryApproveAssembly(assemblyFileFullName As String, forceReapprove As Boolean) As Boolean
     assemblyFileFullName = assemblyFileFullName.ToLower()
@@ -148,20 +170,17 @@ Public Class AssemblyIndexer
     ' We need to do this because this method needs to be absolutely thread-safe
     _CurrentlyApprovingAssemblies.Add(assemblyFileFullName)
     Try
-      If (Me.EnableTracing) Then
-        Trace.TraceInformation(String.Format("AssemblyIndexer: approving incomming assembly '{0}'...", fileName))
-      End If
+
+      Diag.Verbose(Function() $"AssemblyIndexer: approving incomming assembly '{fileName}'...")
 
       If (Me.VerifyAssembly(assemblyFileFullName, False)) Then
-        If (Me.EnableTracing) Then
-          Trace.TraceInformation(String.Format("AssemblyIndexer: incomming assembly '{0}' was APPROVED and will be added to index!", fileName))
-        End If
+        Diag.Verbose(Function() $"AssemblyIndexer: incomming assembly '{fileName}' was APPROVED and will be added to index!")
         Return Me.LoadAndAdd(assemblyFileFullName)
+
       Else
-        If (Me.EnableTracing) Then
-          Trace.TraceInformation(String.Format("AssemblyIndexer: incomming assembly '{0}' was REPRESSED and will not be added to index!", fileName))
-        End If
+        Diag.Verbose(Function() $"AssemblyIndexer: incomming assembly '{fileName}' was REPRESSED and will not be added to index!")
         _DismissedAssemblies.Add(assemblyFileFullName)
+
       End If
 
     Finally
@@ -208,11 +227,14 @@ Public Class AssemblyIndexer
 
     Catch ex As Exception
       Dim fileName As String = Path.GetFileNameWithoutExtension(assemblyFullFilename)
-      Trace.TraceWarning(
-      String.Format(
-        "AssemblyIndexer: assembly '{0}' could not be added to index because because 'Assembly.LoadFile(""{1}"")' caused the following exception: {2}",
-        fileName, assemblyFullFilename, ex.Message)
+
+      Diag.Warning(
+        String.Format(
+          "AssemblyIndexer: assembly '{0}' could not be added to index because because 'Assembly.LoadFile(""{1}"")' caused the following exception: {2}",
+          fileName, assemblyFullFilename, ex.Message
+        )
       )
+
       Return False
     End Try
 
@@ -235,23 +257,23 @@ Public Class AssemblyIndexer
       If (Not _AppDomainBindingIsEnabled = value) Then
         _AppDomainBindingIsEnabled = value
         If (_AppDomainBindingIsEnabled) Then
+
           AddHandler AppDomain.CurrentDomain.AssemblyLoad, AddressOf Me.AppDomain_AssemblyLoad
-          If (Me.EnableTracing) Then
-            Trace.TraceInformation("AssemblyIndexer: Appdomain subscription ENABLED")
-          End If
+          Diag.Info("AssemblyIndexer: Appdomain subscription ENABLED")
+
           For Each assembly In AppDomain.CurrentDomain.GetAssemblies()
             If (Not assembly.IsDynamic) Then
-              If (Me.EnableTracing) Then
-                Trace.TraceInformation(String.Format("AssemblyIndexer: assembly '{0}' received over appdomain subscription", assembly.GetName().Name))
-              End If
+
+              Diag.Verbose(Function() $"AssemblyIndexer: assembly '{assembly.GetName().Name}' received over appdomain subscription")
               Me.TryApproveAssembly(assembly)
+
             End If
           Next
+
         Else
           RemoveHandler AppDomain.CurrentDomain.AssemblyLoad, AddressOf Me.AppDomain_AssemblyLoad
-          If (Me.EnableTracing) Then
-            Trace.TraceInformation("AssemblyIndexer: appdomain subscription DISABLED")
-          End If
+          Diag.Info("AssemblyIndexer: appdomain subscription DISABLED")
+
         End If
       End If
     End Set
@@ -260,10 +282,10 @@ Public Class AssemblyIndexer
   Private Sub AppDomain_AssemblyLoad(sender As Object, args As AssemblyLoadEventArgs)
     If (Me.AppDomainBindingEnabled) Then
       If (Not args.LoadedAssembly.IsDynamic) Then
-        If (Me.EnableTracing) Then
-          Trace.TraceInformation(String.Format("AssemblyIndexer: assembly '{0}' received over appdomain subscription", args.LoadedAssembly.GetName().Name))
-        End If
+
+        Diag.Verbose(Function() $"AssemblyIndexer: assembly '{args.LoadedAssembly.GetName().Name}' received over appdomain subscription")
         Me.TryApproveAssembly(args.LoadedAssembly)
+
       End If
     End If
   End Sub
@@ -272,7 +294,7 @@ Public Class AssemblyIndexer
 
 #Region " Adding of Assemblies (automatic on new resolve path) "
 
-  Public Property AutoImportFromResolvePathsEnabled() As Boolean
+  Public Property ResolvePathsBindingEnabled() As Boolean
     Get
       Return _AutoImportFromResolvePathsEnabled
     End Get
@@ -303,9 +325,7 @@ Public Class AssemblyIndexer
     If (Not _RecursiveReferencesIncluded) Then
       _RecursiveReferencesIncluded = True
       For Each alreadyApprovedAssembly In Me.ApprovedAssemblies
-        If (Me.EnableTracing) Then
-          Trace.TraceInformation(String.Format("AssemblyIndexer: adding references of '{0}'... (recursion is enabled)", alreadyApprovedAssembly.GetName().Name))
-        End If
+        Diag.Verbose(Function() $"AssemblyIndexer: adding references of '{ alreadyApprovedAssembly.GetName().Name}'... (recursion is enabled)")
         Me.AddAvaliableAssembliesReferencedBy(alreadyApprovedAssembly)
       Next
     End If
@@ -320,9 +340,7 @@ Public Class AssemblyIndexer
   Protected Overridable Sub OnAssemblyApproved(assembly As Assembly)
     Me.NotifySubscribers(assembly)
     If (_RecursiveReferencesIncluded) Then
-      If (Me.EnableTracing) Then
-        Trace.TraceInformation(String.Format("AssemblyIndexer: adding references of '{0}'... (recursion is enabled)", assembly.GetName().Name))
-      End If
+      Diag.Verbose(Function() $"AssemblyIndexer: adding references of '{assembly.GetName().Name}'... (recursion is enabled)")
       Me.AddAvaliableAssembliesReferencedBy(assembly)
     End If
   End Sub
@@ -354,25 +372,19 @@ Public Class AssemblyIndexer
 
   Public Overridable Sub ReapproveDismissedAssemblies()
 
-    If (Me.EnableTracing) Then
-      Trace.WriteLine($"'{NameOf(ReapproveDismissedAssemblies)}' was triggered...")
-    End If
+    Diag.Info($"'{NameOf(ReapproveDismissedAssemblies)}' was triggered...")
 
     For Each suppressedAssembly In _DismissedAssemblies.ToArray()
-      Dim assemblyFileName As String = Path.GetFileNameWithoutExtension(suppressedAssembly)
+      Dim assFileName As String = Path.GetFileNameWithoutExtension(suppressedAssembly)
 
       If (Not _CurrentlyApprovingAssemblies.Contains(suppressedAssembly)) Then
         'we need to do this because this method needs to be absolute thread-safe
         _CurrentlyApprovingAssemblies.Add(suppressedAssembly)
         Try
-          If (Me.EnableTracing) Then
-            Trace.TraceInformation(String.Format("AssemblyIndexer: re-approving repressed assembly '{0}'...", assemblyFileName))
-          End If
+          Diag.Verbose(Function() $"AssemblyIndexer: re-approving repressed assembly '{assFileName}'...")
 
           If (Me.VerifyAssembly(suppressedAssembly, True)) Then
-            If (Me.EnableTracing) Then
-              Trace.TraceInformation(String.Format("AssemblyIndexer: repressed assembly '{0}' was retroactively APPROVED and will be added to index!", assemblyFileName))
-            End If
+            Diag.Verbose(Function() $"AssemblyIndexer: repressed assembly '{assFileName}' was retroactively APPROVED and will be added to index!")
 
             If (Me.LoadAndAdd(suppressedAssembly)) Then
 
@@ -456,7 +468,7 @@ Public Class AssemblyIndexer
     If (Not _AlreadyDisposed) Then
       If (disposing) Then
         Me.AppDomainBindingEnabled = False
-        Me.AutoImportFromResolvePathsEnabled = False
+        Me.ResolvePathsBindingEnabled = False
       End If
       _AlreadyDisposed = True
     End If

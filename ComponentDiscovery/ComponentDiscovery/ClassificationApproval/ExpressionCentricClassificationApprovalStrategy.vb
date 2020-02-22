@@ -13,7 +13,8 @@ Namespace ClassificationApproval
 
   ''' <summary>
   ''' A 'ClassificationApprovalStrategy' opposes classifications with clearances and returns true if conformity is given.
-  ''' This one does a 'expression based' evaluation, which requires conformity with each clearance and supports extended clearance expressions like AND-Reations('Foo+Bar') or NOT-Operators('!For').
+  ''' This one does a 'expression based' evaluation, which requires conformity with each clearance and supports extended clearance 
+  ''' expressions like AND-Reations('Foo+Bar') or NOT-Operators('!For').
   ''' </summary>
   Public Class ExpressionCentricClassificationApprovalStrategy
     Inherits ClassificationApprovalStrategyBase

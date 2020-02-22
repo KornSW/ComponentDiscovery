@@ -33,10 +33,16 @@ Partial Class ClassificationBasedAssemblyIndexer
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _ClearanceExpressions As New List(Of String)
 
-    Public Sub New(dimensionName As String, assemblyClassificationStrategy As IAssemblyClassificationDetectionStrategy, classificationApprovalStrategy As IClassificationApprovalStrategy)
+    Public Sub New(
+      dimensionName As String,
+      assemblyClassificationStrategy As IAssemblyClassificationDetectionStrategy,
+      classificationApprovalStrategy As IClassificationApprovalStrategy
+    )
+
       _DimensionName = dimensionName
       _AssemblyClassificationStrategy = assemblyClassificationStrategy
       _ClassificationApprovalStrategy = classificationApprovalStrategy
+
     End Sub
 
     Public ReadOnly Property DimensionName As String
@@ -45,7 +51,7 @@ Partial Class ClassificationBasedAssemblyIndexer
       End Get
     End Property
 
-    Public ReadOnly Property AssemblyClassificationStrategy As IAssemblyClassificationDetectionStrategy
+    Public ReadOnly Property AssemblyClassificationDetectionStrategy As IAssemblyClassificationDetectionStrategy
       Get
         Return _AssemblyClassificationStrategy
       End Get
@@ -134,7 +140,14 @@ Partial Class ClassificationBasedAssemblyIndexer
       End SyncLock
 
       Dim classificationExpressions As String() = Nothing
-      If (Not Me.AssemblyClassificationStrategy.TryDetectClassificationsForAssembly(assemblyFullFilename, Me.DimensionName, classificationExpressions)) Then
+
+      Dim successfullyDetected = Me.AssemblyClassificationDetectionStrategy.TryDetectClassificationsForAssembly(
+        assemblyFullFilename,
+        Me.DimensionName,
+        classificationExpressions
+      )
+
+      If (Not successfullyDetected) Then
         classificationExpressions = Nothing
       End If
 

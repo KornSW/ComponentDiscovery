@@ -15,21 +15,22 @@ Imports System.Security.Cryptography
 Imports System.Text
 Imports System.Text.RegularExpressions
 
-Friend Module ExtensionMethods
+Friend Module HelperExtensions
 
   Private _Md5Provider As MD5CryptoServiceProvider = Nothing
 
   <Extension()>
   Public Function MD5(input As String) As String
+    SyncLock _Md5Provider
+      If (_Md5Provider Is Nothing) Then
+        _Md5Provider = New MD5CryptoServiceProvider()
+      End If
 
-    If (_Md5Provider Is Nothing) Then
-      _Md5Provider = New MD5CryptoServiceProvider()
-    End If
+      Dim newdata As Byte() = Encoding.Default.GetBytes(input)
+      Dim encrypted As Byte() = _Md5Provider.ComputeHash(newdata)
 
-    Dim newdata As Byte() = Encoding.Default.GetBytes(input)
-    Dim encrypted As Byte() = _Md5Provider.ComputeHash(newdata)
-
-    Return BitConverter.ToString(encrypted).Replace("-", "").ToLower()
+      Return BitConverter.ToString(encrypted).Replace("-", "").ToLower()
+    End SyncLock
   End Function
 
   <Extension>
@@ -49,7 +50,14 @@ Friend Module ExtensionMethods
       Return False
     End If
 
-    If (extendee.GetConstructor(BindingFlags.CreateInstance Or BindingFlags.Public Or BindingFlags.Instance, Nothing, New Type(0 - 1) {}, Nothing) Is Nothing) Then
+    Dim ctor = extendee.GetConstructor(
+      BindingFlags.CreateInstance Or BindingFlags.Public Or BindingFlags.Instance,
+      Nothing,
+      New Type(0 - 1) {},
+      Nothing
+    )
+
+    If (ctor Is Nothing) Then
       Return False 'no parameterless constructor
     End If
 
@@ -64,7 +72,7 @@ Friend Module ExtensionMethods
   ''' </summary>
   <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
   Public Function GetTypesAccessible(assembly As Assembly) As Type()
-    Return assembly.GetTypesAccessible(Sub(ex) Trace.TraceWarning(ex.Message))
+    Return assembly.GetTypesAccessible(Sub(ex) Diag.Warning(ex.Message))
   End Function
 
   ''' <summary>
@@ -155,12 +163,16 @@ Friend Module ExtensionMethods
   End Function
 
   <Extension(), EditorBrowsable(EditorBrowsableState.Advanced)>
-  Public Function FilterByName(methodInfos As IEnumerable(Of MethodInfo), methodName As String, Optional ignoreCase As Boolean = True) As IEnumerable(Of MethodInfo)
+  Public Function FilterByName(
+    methodInfos As IEnumerable(Of MethodInfo), methodName As String, Optional ignoreCase As Boolean = True
+  ) As IEnumerable(Of MethodInfo)
+
     If (ignoreCase) Then
       Return From m In methodInfos Where m.Name.ToLower() = methodName.ToLower()
     Else
       Return From m In methodInfos Where m.Name = methodName
     End If
+
   End Function
 
   <Extension(), EditorBrowsable(EditorBrowsableState.Advanced)>

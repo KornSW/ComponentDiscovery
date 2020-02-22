@@ -61,21 +61,25 @@ Friend Class PersistentIndexCache
     assemblyFileFullName As String,
     ByRef fileSize As Long, ByRef fileVersion As String, ByRef modifiedDate As DateTime
   )
+
     Dim fi As New FileInfo(assemblyFileFullName)
     fileSize = fi.Length
     modifiedDate = fi.LastWriteTime
+
     Try
       fileVersion = FileVersionInfo.GetVersionInfo(assemblyFileFullName).FileVersion
     Catch
       fileVersion = "?.?.?.?"
     End Try
+
   End Sub
 
   Private Function BuildTimestampBlock(assemblyFileFullName As String) As String
     Dim currentAssemblyFileSize As Long
     Dim currentAssemblyFileVersion As String = Nothing
     Dim currentAssemblyModifiedDate As DateTime
-    AnalyzeAssemblyFingerprintData(assemblyFileFullName, currentAssemblyFileSize, currentAssemblyFileVersion, currentAssemblyModifiedDate)
+
+    Me.AnalyzeAssemblyFingerprintData(assemblyFileFullName, currentAssemblyFileSize, currentAssemblyFileVersion, currentAssemblyModifiedDate)
 
     Return $"{currentAssemblyFileSize}|{currentAssemblyFileVersion}|{currentAssemblyModifiedDate}"
   End Function
@@ -84,7 +88,12 @@ Friend Class PersistentIndexCache
 
 #Region " Read "
 
-  Public Function TryGetClassificationExpressionsFromCache(assemblyFullFilename As String, dimensionName As String, ByRef returningClassificationExpressions As String()) As Boolean
+  Public Function TryGetClassificationExpressionsFromCache(
+    assemblyFullFilename As String,
+    dimensionName As String,
+    ByRef returningClassificationExpressions As String()
+  ) As Boolean
+
     Dim prefix = "<AssCl>|" + dimensionName + "|"
     Dim matchingLines As String() = Nothing
 
@@ -132,11 +141,17 @@ Friend Class PersistentIndexCache
     Return False
   End Function
 
-  Private Function TryReadCacheFile(assemblyFullFilename As String, searchPrefix As String, singleMatch As Boolean, ByRef returningContentLines As String()) As Boolean
+  Private Function TryReadCacheFile(
+    assemblyFullFilename As String,
+    searchPrefix As String,
+    singleMatch As Boolean,
+    ByRef returningContentLines As String()
+  ) As Boolean
+
     Dim cacheFileFullName As String = BuildCacheFileFullName(assemblyFullFilename)
 
     If (Not File.Exists(cacheFileFullName)) Then
-      Trace.WriteLine(String.Format("Assembly-Index-Cachefile '{0}' does not exsist!", cacheFileFullName))
+      Diag.Info($"Assembly-Index-Cachefile '{cacheFileFullName}' does not exsist!")
       Return False
     End If
 
@@ -191,7 +206,10 @@ Friend Class PersistentIndexCache
         fs.Close()
       End Using
     Catch ex As Exception
-      Trace.WriteLine(String.Format("Cannot read Assembly-Index-Cachefile '{0}' (a single occurrenceof this exception can be an uncritical filesystem-access-collision...): {1}", cacheFileFullName, ex))
+      Diag.Error(
+        $"Cannot read Assembly-Index-Cachefile '{cacheFileFullName}' " +
+        $"(a single occurrenceof this exception can be an uncritical filesystem-access-collision...): {ex}"
+      )
       Return False
     End Try
 
@@ -227,23 +245,33 @@ Friend Class PersistentIndexCache
   Private Sub AppendToCacheFile(assemblyFileFullName As String, contentLinesToCache As IEnumerable(Of String))
     Dim cacheFileFullName As String = ""
     Try
-      cacheFileFullName = BuildCacheFileFullName(assemblyFileFullName)
+
+      cacheFileFullName = Me.BuildCacheFileFullName(assemblyFileFullName)
       Dim mustWriteFingerprint = Not File.Exists(cacheFileFullName)
+
       Using fs As New FileStream(cacheFileFullName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)
         Using sw As New StreamWriter(fs, Encoding.Default)
+
           If (mustWriteFingerprint) Then
             sw.WriteLine(Me.BuildTimestampBlock(assemblyFileFullName))
           End If
+
           For Each contentLineToCache In contentLinesToCache
             sw.WriteLine(contentLineToCache)
           Next
+
         End Using
+
         fs.Close()
       End Using
+
     Catch ex As Exception
       'this could be caused by a collision during file access from multiple processes
       'but it is uncritical because the cache can also be rebuilded during the next call
-      Trace.WriteLine(String.Format("Cannot write Assembly-Index-Cachefile '{0}' (a single occurrenceof this exception can be an uncritical filesystem-access-collision...): {1}", cacheFileFullName, ex))
+      Diag.Error(
+        $"Cannot write Assembly-Index-Cachefile '{cacheFileFullName}' " +
+        "(a single occurrenceof this exception can be an uncritical filesystem-access-collision...): " + ex.Message
+      )
     End Try
 
   End Sub

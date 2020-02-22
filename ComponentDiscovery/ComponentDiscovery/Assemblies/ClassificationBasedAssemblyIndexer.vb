@@ -6,10 +6,12 @@
 
 Imports System
 Imports System.Collections.Generic
+Imports System.Collections.ObjectModel
 Imports System.Diagnostics
 Imports System.IO
 Imports System.Linq
 Imports System.Reflection
+Imports System.Text
 Imports ComponentDiscovery.ClassificationApproval
 Imports ComponentDiscovery.ClassificationDetection
 
@@ -22,44 +24,29 @@ Public Class ClassificationBasedAssemblyIndexer
   Private _TaxonomicDimensionsByName As New Dictionary(Of String, TaxonomicDimension)
 
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-  Private _OverwrittenApplicationWorkDir As DirectoryInfo = Nothing
+  Private _ClearanceImportScourceAssemblies As New List(Of Assembly)
 
   Public Sub New()
-    MyBase.New()
+    MyBase.New(True, True, True)
   End Sub
 
   Public Sub New(
-    preferAssemblyLoadingViaFusion As Boolean,
-    autoImportAllAssembliesFromResolvePaths As Boolean,
-    enableAppDomainBinding As Boolean
+    enableResolvePathsBinding As Boolean,
+    enableAppDomainBinding As Boolean,
+    Optional preferAssemblyLoadingViaFusion As Boolean = True
   )
 
-    MyBase.New(
-      preferAssemblyLoadingViaFusion,
-      autoImportAllAssembliesFromResolvePaths,
-      enableAppDomainBinding
-    )
-
+    MyBase.New(enableResolvePathsBinding, enableAppDomainBinding, preferAssemblyLoadingViaFusion)
   End Sub
-
-  Public Sub New(applicationWorkDir As String)
-    MyBase.New()
-    _OverwrittenApplicationWorkDir = New DirectoryInfo(applicationWorkDir)
-  End Sub
-
-  'HACK: this hook should be placed in the baseclass
-  Protected Overrides Function GetApplicationWorkDir() As DirectoryInfo
-    If (_OverwrittenApplicationWorkDir Is Nothing) Then
-      Return MyBase.GetApplicationWorkDir()
-    Else
-      Return _OverwrittenApplicationWorkDir
-    End If
-  End Function
 
 #End Region
 
 #Region " Dimension Setup "
 
+  ''' <summary>
+  ''' Dimensions to scope the set of available assemblies based on a taxonomy/wording to declare assembly classification expressions
+  ''' (independend form other dimensions). At Runtime, the clearances of EACH taxonomic dimension needs to match before an assembly becomes approved.
+  ''' </summary>
   <DebuggerBrowsable(DebuggerBrowsableState.RootHidden)>
   Public ReadOnly Property TaxonomicDimensions As TaxonomicDimension()
     Get
@@ -67,6 +54,10 @@ Public Class ClassificationBasedAssemblyIndexer
     End Get
   End Property
 
+  ''' <summary>
+  ''' Dimensions to scope the set of available assemblies based on a taxonomy/wording to declare assembly classification expressions
+  ''' (independend form other dimensions). At Runtime, the clearances of EACH taxonomic dimension needs to match before an assembly becomes approved.
+  ''' </summary>
   <DebuggerBrowsable(DebuggerBrowsableState.Never)>
   Public ReadOnly Property TaxonomicDimensions(dimensionName As String) As TaxonomicDimension
     Get
@@ -76,10 +67,14 @@ Public Class ClassificationBasedAssemblyIndexer
           Return _TaxonomicDimensionsByName(existingName)
         End If
       Next
-      Throw New KeyNotFoundException(String.Format("There is no TaxonomicDimension registered with name '{0}'!", dimensionName))
+      Throw New KeyNotFoundException($"There is no TaxonomicDimension registered with name '{dimensionName}'!")
     End Get
   End Property
 
+  ''' <summary>
+  ''' Dimensions to scope the set of available assemblies based on a taxonomy/wording to declare assembly classification expressions
+  ''' (independend form other dimensions). At Runtime, the clearances of EACH taxonomic dimension needs to match before an assembly becomes approved.
+  ''' </summary>
   Public ReadOnly Property TaxonomicDimensionNames As String()
     Get
       Return _TaxonomicDimensionsByName.Keys.ToArray()
@@ -87,16 +82,15 @@ Public Class ClassificationBasedAssemblyIndexer
   End Property
 
   ''' <summary>
-  ''' this is a Convinence method which adds a new instance of a 'AttributeBasedAssemblyClassificationDetectionStrategy'
+  ''' Declares a new dimension to scope the set of available assemblies based on a taxonomy/wording to declare assembly classification expressions
+  ''' (independend form other dimensions). At Runtime, the clearances of EACH taxonomic dimension needs to match before an assembly becomes approved.
+  ''' This is a overloaded convenience method which adds a new dimension based on 
+  ''' a 'AttributeBasedAssemblyClassificationDetectionStrategy' (which reads the clearances for any assembly out of 
+  ''' "AssemblyClassificationAttributes" within the AssemblyInfo) in combination with
+  ''' a 'DemandCentricClassificationApprovalStrategy'
   ''' </summary>
   Public Sub AddTaxonomicDimension(taxonomicDimensionName As String, ParamArray defaultClearances() As String)
-
-    Dim lowerDimensionName = taxonomicDimensionName.ToLower()
-    For Each registeredName In _TaxonomicDimensionsByName.Keys
-      If (registeredName.ToLower() = lowerDimensionName) Then
-        Throw New Exception("This dimensionName is already registered!")
-      End If
-    Next
+    Me.ThrowIfDimensionNameAlreadyExists(taxonomicDimensionName)
 
     Me.AddTaxonomicDimension(
       taxonomicDimensionName,
@@ -108,10 +102,16 @@ Public Class ClassificationBasedAssemblyIndexer
   End Sub
 
   ''' <summary>
-  ''' this is a Convinence method which adds a new instance of a 'DelegateBasedClassificationStrategy'
+  ''' Declares a new dimension to scope the set of available assemblies based on a taxonomy/wording to declare assembly classification expressions
+  ''' (independend form other dimensions). At Runtime, the clearances of EACH taxonomic dimension needs to match before an assembly becomes approved.
+  ''' This is a overloaded convenience method which adds a new dimension based on
+  ''' a 'DelegateBasedClassificationStrategy' in combination with
+  ''' a 'DemandCentricClassificationApprovalStrategy'
   ''' </summary>
-  ''' <param name="assemblyClassificationEvaluationMethod">this is how a assembly will be classified. You can specify a method to run your own code evaluating classifications for a given assembly file name into a list of string)</param>
-  ''' <param name="classificationApprovalStrategy">this is how a assembly will be approved (opposing the assembly's classifications against the enabled clearances).</param>
+  ''' <param name="assemblyClassificationEvaluationMethod"> this is how a assembly will be classified. You can specify a 
+  ''' method to run your own code evaluating classifications for a given assembly file name into a list of string)</param>
+  ''' <param name="classificationApprovalStrategy">this is how a assembly will be approved 
+  ''' (opposing the assembly's classifications against the enabled clearances).</param>
   Public Sub AddTaxonomicDimension(
     taxonomicDimensionName As String,
     assemblyClassificationEvaluationMethod As Func(Of String, List(Of String), Boolean),
@@ -119,12 +119,7 @@ Public Class ClassificationBasedAssemblyIndexer
     ParamArray defaultClearances() As String
   )
 
-    Dim lowerDimensionName = taxonomicDimensionName.ToLower()
-    For Each registeredName In _TaxonomicDimensionsByName.Keys
-      If (registeredName.ToLower() = lowerDimensionName) Then
-        Throw New Exception("This dimensionName is already registered!")
-      End If
-    Next
+    Me.ThrowIfDimensionNameAlreadyExists(taxonomicDimensionName)
 
     Me.AddTaxonomicDimension(
       taxonomicDimensionName,
@@ -136,14 +131,17 @@ Public Class ClassificationBasedAssemblyIndexer
   End Sub
 
   ''' <summary>
-  '''   Adds a Dimension to the classification/approval algorithm.
+  ''' Declares a new dimension to scope the set of available assemblies based on a taxonomy/wording to declare assembly classification expressions
+  ''' (independend form other dimensions). At Runtime, the clearances of EACH taxonomic dimension needs to match before an assembly becomes approved.
   ''' </summary>
   ''' <param name="taxonomicDimensionName"></param>
   ''' <param name="classificationStrategy">this is how a assembly will be classified. in default you can choose between 
   ''' the 'DelegateBasedClassificationStrategy' (which improves you run your own code returning a string() of classifications) OR 
-  ''' the 'AttributeBasedAssemblyClassificationStrategy' (which reads the clearances for any assembly out of "AssemblyClassificationAttributes" within the AssemblyInfo)</param>
+  ''' the 'AttributeBasedAssemblyClassificationStrategy' (which reads the clearances for any assembly out of 
+  ''' "AssemblyClassificationAttributes" within the AssemblyInfo)</param>
   ''' <param name="defaultClearances">enable this clearances by default</param>
-  ''' <param name="classificationApprovalStrategy">this is how a assembly will be approved (opposing the assembly's classifications against the enabled clearances).</param>
+  ''' <param name="classificationApprovalStrategy">this is how a assembly will be approved (opposing the assembly's classifications 
+  ''' against the enabled clearances).</param>
   ''' <remarks>
   '''   Only assemblies matching all clearances of dimensions will be approved.
   '''   So adding dimensions will tend to narrowing down the set of approvable assemblies.
@@ -155,12 +153,7 @@ Public Class ClassificationBasedAssemblyIndexer
     ParamArray defaultClearances() As String
   )
 
-    Dim lowerDimensionName = taxonomicDimensionName.ToLower()
-    For Each existingDimensionName In _TaxonomicDimensionsByName.Keys
-      If (existingDimensionName.ToLower() = lowerDimensionName) Then
-        Throw New Exception("This dimensionName is already registered!")
-      End If
-    Next
+    Me.ThrowIfDimensionNameAlreadyExists(taxonomicDimensionName)
 
     Dim newDimension As New TaxonomicDimension(taxonomicDimensionName, classificationStrategy, classificationApprovalStrategy)
     If (defaultClearances IsNot Nothing) Then
@@ -182,10 +175,7 @@ Public Class ClassificationBasedAssemblyIndexer
     _TaxonomicDimensionsByName.Add(taxonomicDimensionName, newDimension)
 
     Me.OnTaxonomicDimensionAdded(taxonomicDimensionName)
-
-    If (Me.EnableTracing) Then
-      Trace.TraceInformation(String.Format("AssemblyIndexer: TaxonomicDimension '{0}' was enabled!", taxonomicDimensionName))
-    End If
+    Diag.Verbose(Function() $"AssemblyIndexer: TaxonomicDimension '{taxonomicDimensionName}' was enabled!")
 
   End Sub
 
@@ -195,6 +185,15 @@ Public Class ClassificationBasedAssemblyIndexer
     If (TaxonomicDimensionAddedEvent IsNot Nothing) Then
       RaiseEvent TaxonomicDimensionAdded(taxonomicDimensionName)
     End If
+  End Sub
+
+  Private Sub ThrowIfDimensionNameAlreadyExists(taxonomicDimensionName As String)
+    Dim lowerDimensionName = taxonomicDimensionName.ToLower()
+    For Each existingDimensionName In _TaxonomicDimensionsByName.Keys
+      If (existingDimensionName.ToLower() = lowerDimensionName) Then
+        Throw New Exception("This dimensionName is already registered!")
+      End If
+    Next
   End Sub
 
 #End Region
@@ -209,9 +208,13 @@ Public Class ClassificationBasedAssemblyIndexer
   '''   Adds clearances to the internal clearance collection which will broaden the set of approvable assemblies.
   ''' </summary>
   ''' <remarks> Adding clearances could implicitely approve additional assemblies. </remarks>
-  Public Sub AddClearances(taxonomicDimensionName As String, ParamArray clearanceExpressions() As String)
-    Me.TaxonomicDimensions(taxonomicDimensionName).AddClearances(clearanceExpressions)
-  End Sub
+  Public Function AddClearances(taxonomicDimensionName As String, ParamArray clearanceExpressions() As String) As Boolean
+    Dim newClearencesAdded = Me.TaxonomicDimensions(taxonomicDimensionName).AddClearances(clearanceExpressions)
+    If (newClearencesAdded) Then
+      Me.OnReapproveDismissedAssembliesRequired()
+    End If
+    Return newClearencesAdded
+  End Function
 
   ''' <summary>
   '''   Fetches the classification expressions from an assembly and adds them as clearance expressions.
@@ -221,20 +224,116 @@ Public Class ClassificationBasedAssemblyIndexer
   '''   THIS METHOD DOES NOT APPROVE THE INCOMING ASSEMBLY. IF YOU WANT TO DO THIS YOU MUST USE <seealso cref="AddAssemblyAndImportClearances"/>!
   ''' </remarks>
   ''' <seealso cref="AddAssemblyAndImportClearances"/>
-  Public Sub AddClearancesFromAssembly(assembly As Assembly)
-    If (Me.EnableTracing) Then
-      Trace.TraceInformation(String.Format("AssemblyIndexer: Importing scopevalues of '{0}' to whitelists...", assembly.GetName().Name))
+  Public Function AddClearancesFromAssembly(assembly As Assembly) As Boolean
+    Diag.Info($"AssemblyIndexer: Importing scopevalues of '{assembly.GetName().Name}' to whitelists...")
+
+    SyncLock _ClearanceImportScourceAssemblies
+      _ClearanceImportScourceAssemblies.Add(assembly)
+    End SyncLock
+
+    Dim newClearencesAdded = False
+
+    'Try
+    'Me.SuspendAutoReapprove()
+
+    For Each dimension In Me.TaxonomicDimensions
+      newClearencesAdded = newClearencesAdded Or dimension.AddClearancesFromAssembly(assembly.Location)
+    Next
+
+    If (newClearencesAdded) Then
+      Me.OnReapproveDismissedAssembliesRequired()
     End If
+
+    'Finally
+    '  Me.ResumeAutoReapprove()
+    'End Try
+
+    Return newClearencesAdded
+  End Function
+
+#End Region
+
+#Region " Auto Reapprove Suspension (for better Performance) "
+
+  <ThreadStatic>
+  Private _SuspendAutoReapproveOnClearanceAdded As Boolean = False
+
+  <ThreadStatic>
+  Private _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove As Boolean = False
+
+  ''' <summary>
+  ''' Invoke the given delegate without automatically calling 'ReapproveDismissedAssemblies()' when clearances were added.
+  ''' After the given delegate has been invoked, the 'ReapproveDismissedAssemblies()' will be called exact once (if necessary).
+  ''' The return value is true, if one or more clearances were added during the invoke.
+  ''' </summary>
+  Public Function ExecuteWithoutAutoReapprove(method As Action) As Boolean
+
+    'protects the situation of a cascaded call of 'ExecuteWithoutAutoReapprove'
+    If (Me.SuspendAutoReapproveOnClearanceAdded) Then
+      method.Invoke()
+      Return _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove
+    End If
+
     Try
-      Me.SuspendAutoReapprove()
-
-      For Each dimension In Me.TaxonomicDimensions
-        dimension.AddClearancesFromAssembly(assembly.Location)
-      Next
-
+      Me.SuspendAutoReapproveOnClearanceAdded = True
+      method.Invoke()
+      Return _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove
     Finally
-      Me.ResumeAutoReapprove()
+      Me.SuspendAutoReapproveOnClearanceAdded = False
     End Try
+
+  End Function
+
+  Private Property SuspendAutoReapproveOnClearanceAdded As Boolean
+    Get
+      Return _SuspendAutoReapproveOnClearanceAdded
+    End Get
+    Set(value As Boolean)
+      If (Not _SuspendAutoReapproveOnClearanceAdded = value) Then
+        _SuspendAutoReapproveOnClearanceAdded = value
+        If (_SuspendAutoReapproveOnClearanceAdded = False AndAlso _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove) Then
+          Me.ReapproveDismissedAssemblies()
+        End If
+        _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove = False
+      End If
+    End Set
+  End Property
+
+  Protected Sub OnReapproveDismissedAssembliesRequired()
+    If (_SuspendAutoReapproveOnClearanceAdded) Then
+      _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove = True
+    Else
+      Me.ReapproveDismissedAssemblies()
+    End If
+  End Sub
+
+#End Region
+#Region " Auto Reapprove on Clearance Change "
+
+  Protected Sub SuspendAutoReapprove()
+    _AutoReapproveSuspended = True
+  End Sub
+
+  Protected Sub ResumeAutoReapprove()
+    _AutoReapproveSuspended = False
+    If (_AutoReapproveScheduled) Then
+      Me.ReapproveDismissedAssemblies()
+    End If
+  End Sub
+
+  Private _AutoReapproveSuspended As Boolean = False
+  Private _AutoReapproveScheduled As Boolean = False
+
+  Private Sub Dimension_OnClearancesChanged(dimensionName As String, addedClearanceExpressions As String())
+    Me.ReapproveDismissedAssemblies()
+  End Sub
+
+  Public Overrides Sub ReapproveDismissedAssemblies()
+    If (_AutoReapproveSuspended) Then
+      _AutoReapproveScheduled = True
+    Else
+      MyBase.ReapproveDismissedAssemblies()
+    End If
   End Sub
 
 #End Region
@@ -247,16 +346,13 @@ Public Class ClassificationBasedAssemblyIndexer
   ''' <remarks> 
   '''   Importing clearances will implicitely approve the incoming assembly PLUS other assemblies that match the newly created clearance situation.
   ''' </remarks>
-  Public Overridable Sub AddAssemblyAndImportClearances(moduleEntryAssembly As Assembly)
+  Public Overridable Sub AddAssemblyAndImportClearances(disclosingAssembly As Assembly)
 
-    If (Me.EnableTracing) Then
-      Trace.TraceInformation(String.Format("AssemblyIndexer: Expanding clearance to imply the scope values of assembly '{0}'", moduleEntryAssembly.GetName().Name))
-    End If
-
-    Me.AddClearancesFromAssembly(moduleEntryAssembly) 'unlock the scopes (new way over attributes)
+    Diag.Verbose(Function() $"AssemblyIndexer: Expanding clearance to imply the scope values of assembly '{disclosingAssembly.GetName().Name}'")
+    Me.AddClearancesFromAssembly(disclosingAssembly) 'unlock the scopes (new way over attributes)
 
     'now lets add the assembly (which will be approved successfully)
-    Me.TryApproveAssembly(moduleEntryAssembly.Location, True)
+    Me.TryApproveAssembly(disclosingAssembly.Location, True)
 
   End Sub
 
@@ -281,13 +377,24 @@ Public Class ClassificationBasedAssemblyIndexer
     Dim title = Path.GetFileNameWithoutExtension(assemblyFullFilename)
 
     If (Not isReapprove AndAlso Me.IsExternalFrameworkAssembly(assemblyFullFilename)) Then
-      If (Me.EnableTracing) Then
-        Trace.TraceInformation(String.Format("AssemblyIndexer: approving of '{0}' failed because the assembly is on the blacklist for 'external framework components'!", title))
-      End If
+
+      Diag.Verbose(
+        Function() $"AssemblyIndexer: approving of '{title}' failed because the assembly is on the blacklist for 'external framework components'!"
+      )
+
       Return False 'the assembly is on the blacklist of external framework components
+
     End If
 
     Dim matchingResultsPerDimension As New Dictionary(Of String, Boolean)
+
+    'dont ask why - weve had some strange constellation in which 
+    'our constructor was calling MyBase.New() and this was calling VerifyAssembly
+    'and we came here BEFORE the initializer in line 22 has been executed WTF!
+    If (_TaxonomicDimensionsByName Is Nothing) Then
+      _TaxonomicDimensionsByName = New Dictionary(Of String, TaxonomicDimension)
+    End If
+
     For Each dimensionName In _TaxonomicDimensionsByName.Keys
 
       If (_TaxonomicDimensionsByName(dimensionName).VerifyAssembly(assemblyFullFilename)) Then
@@ -377,6 +484,119 @@ Public Class ClassificationBasedAssemblyIndexer
 
 #Region " Import / Export "
 
+  Public Function DumpFullState() As String
+    Dim result As New StringBuilder
+
+    Dim indent As Integer = 20
+    For Each a In Me.DismissedAssemblies
+      If (a.Length > indent) Then
+        indent = a.Length
+      End If
+    Next
+    For Each a In Me.ApprovedAssemblies
+      If (a.Location.Length > indent) Then
+        indent = a.Location.Length
+      End If
+    Next
+    indent += 4
+
+    result.AppendLine("#### CLEARANCES ###")
+    result.AppendLine(Me.DumpClearances(False))
+
+    result.AppendLine("#### FULLY IMPORTED DIRECTORIES ###")
+    For Each p In Me.FullyImportedDirectories
+      result.AppendLine(p)
+    Next
+    result.AppendLine()
+
+    result.AppendLine("#### DISCLOSING ASSEMBLIES ###")
+    Dim disclosingAssemblies As Assembly() = Me.ClearanceImportScourceAssemblies
+    For Each a In disclosingAssemblies
+      result.Append(a.Location)
+      result.Append(New String(" "c, indent - a.Location.Length))
+      result.Append("(")
+      Me.DumpClassificationsForAssembly(a.Location, result)
+      result.AppendLine(" )")
+    Next
+    result.AppendLine()
+
+    result.AppendLine("#### APPROVED ASSEMBLIES ###")
+    For Each a In Me.ApprovedAssemblies.Except(disclosingAssemblies)
+      result.Append(a.Location)
+      result.Append(New String(" "c, indent - a.Location.Length))
+      result.Append("(")
+      Me.DumpClassificationsForAssembly(a.Location, result)
+      result.AppendLine(" )")
+    Next
+    result.AppendLine()
+
+    result.AppendLine("#### DISMISSED ASSEMBLIES ###")
+    For Each a In Me.DismissedAssemblies
+      result.Append(a)
+      result.Append(New String(" "c, indent - a.Length))
+      result.Append("(")
+      Me.DumpClassificationsForAssembly(a, result)
+      result.AppendLine(" )")
+    Next
+
+    Return result.ToString()
+  End Function
+
+  Public Function DumpClassificationsForAssembly(assemblyFileFullName As String) As String
+    Dim result As New StringBuilder
+    Me.DumpClassificationsForAssembly(assemblyFileFullName, result)
+    Return result.ToString()
+  End Function
+
+  Public Sub DumpClassificationsForAssembly(assemblyFileFullName As String, target As StringBuilder)
+    Dim first As Boolean = True
+    For Each dimensionName In Me.TaxonomicDimensionNames
+      Dim strat = Me.TaxonomicDimensions(dimensionName).AssemblyClassificationDetectionStrategy
+      If (first) Then
+        first = False
+      Else
+        target.Append(" | ")
+      End If
+      target.Append(dimensionName)
+      target.Append(":"c)
+      Dim classifications As String() = Nothing
+      If (strat.TryDetectClassificationsForAssembly(assemblyFileFullName, dimensionName, classifications)) Then
+        For Each classification In classifications
+          target.Append(" "c)
+          target.Append(classification)
+        Next
+      End If
+    Next
+  End Sub
+
+  Public ReadOnly Property ClearanceImportScourceAssemblies As Assembly()
+    Get
+      SyncLock _ClearanceImportScourceAssemblies
+        Return _ClearanceImportScourceAssemblies.ToArray()
+      End SyncLock
+    End Get
+  End Property
+
+  Public Function DumpClearances(Optional oneLinePerClearance As Boolean = False) As String
+    Dim result As New StringBuilder
+    For Each dimensionName In Me.TaxonomicDimensionNames
+      If (Not oneLinePerClearance) Then
+        result.Append(dimensionName + ":")
+      End If
+      For Each clearanceExpression In Me.TaxonomicDimensions(dimensionName).Clearances
+        If (oneLinePerClearance) Then
+          result.AppendLine(String.Format("{0}: {1}", dimensionName, clearanceExpression))
+        Else
+          result.Append(" " + clearanceExpression)
+        End If
+      Next
+      If (Not oneLinePerClearance) Then
+        result.AppendLine()
+      End If
+    Next
+    Return result.ToString()
+  End Function
+
   Public Function ExportClearances() As String()
     Dim result As New List(Of String)
     For Each dimensionName In Me.TaxonomicDimensionNames
@@ -392,80 +612,65 @@ Public Class ClassificationBasedAssemblyIndexer
   ''' </summary>
   ''' <param name="qualifiedClearanceExpressions">A string like "DimensionName:ClearanceExpression".</param>
   ''' <remarks> Importing clearances could implicitely approve additional assemblies. </remarks>
-  Public Sub ImportClearances(qualifiedClearanceExpressions As String())
-    Me.SuspendAutoReapprove()
-    Try
+  Public Overridable Sub ImportClearances(qualifiedClearanceExpressions As String())
 
-      For Each expression In qualifiedClearanceExpressions
-        If (expression.Contains(":")) Then
+    If ((qualifiedClearanceExpressions IsNot Nothing) AndAlso (qualifiedClearanceExpressions.Any)) Then
 
-          Dim dimensionName = expression.Substring(0, expression.IndexOf(":"))
-          Dim clearanceExpression = expression.Substring(expression.IndexOf(":") + 1)
+      Me.ExecuteWithoutAutoReapprove(
+          Sub()
 
-          If (Me.TaxonomicDimensionNames.Contains(dimensionName)) Then
-            Dim approvalStrategy = Me.TaxonomicDimensions(dimensionName)
-            approvalStrategy.AddClearances(clearanceExpression)
-          End If
+            Dim added As Boolean = False
+            For Each expression In qualifiedClearanceExpressions
+              If (expression.Contains(":")) Then
 
-        End If
-      Next
+                Dim dimensionName = expression.Substring(0, expression.IndexOf(":"))
+                Dim clearanceExpression = expression.Substring(expression.IndexOf(":") + 1)
 
-    Finally
-      Me.ResumeAutoReapprove()
-    End Try
-  End Sub
+                If (Me.TaxonomicDimensionNames.Contains(dimensionName)) Then
+                  Dim dimension = Me.TaxonomicDimensions(dimensionName)
+                  added = added Or dimension.AddClearances(clearanceExpression)
+                End If
 
-#Region " Auto Reapprove on Clearance Change "
+              End If
+            Next
+            If (added) Then
+              Me.OnReapproveDismissedAssembliesRequired()
+            End If
 
-  Protected Sub SuspendAutoReapprove()
-    _AutoReapproveSuspended = True
-  End Sub
+          End Sub
+        )
 
-  Protected Sub ResumeAutoReapprove()
-    _AutoReapproveSuspended = False
-    If (_AutoReapproveScheduled) Then
-      Me.ReapproveDismissedAssemblies()
     End If
+
   End Sub
-
-  Private _AutoReapproveSuspended As Boolean = False
-  Private _AutoReapproveScheduled As Boolean = False
-
-  Private Sub Dimension_OnClearancesChanged(dimensionName As String, addedClearanceExpressions As String())
-    Me.ReapproveDismissedAssemblies()
-  End Sub
-
-  Public Overrides Sub ReapproveDismissedAssemblies()
-    If (_AutoReapproveSuspended) Then
-      _AutoReapproveScheduled = True
-    Else
-      MyBase.ReapproveDismissedAssemblies()
-    End If
-  End Sub
-
-#End Region
 
   ''' <summary>
   '''   Adds clearances to the internal clearance collection which will broaden the set of approvable assemblies.
   ''' </summary>
   ''' <param name="clearancesSortedByDimension">A Dictionary(Of "DimensionName", {"ClearanceExpression1", "ClearanceExpression2"})</param>
   ''' <remarks> Importing clearances could implicitely approve additional assemblies. </remarks>
-  Public Sub ImportClearances(clearancesSortedByDimension As Dictionary(Of String, String()))
-    Me.SuspendAutoReapprove()
-    Try
+  Public Overridable Sub ImportClearances(clearancesSortedByDimension As Dictionary(Of String, String()))
 
-      For Each dimensionName In clearancesSortedByDimension.Keys
-        For Each clearanceExpression In clearancesSortedByDimension(dimensionName)
-          If (Me.TaxonomicDimensionNames.Contains(dimensionName)) Then
-            Dim approvalStrategy = Me.TaxonomicDimensions(dimensionName)
-            approvalStrategy.AddClearances(clearanceExpression)
-          End If
+    Me.ExecuteWithoutAutoReapprove(
+      Sub()
+
+        Dim added As Boolean = False
+        For Each dimensionName In clearancesSortedByDimension.Keys
+          For Each clearanceExpression In clearancesSortedByDimension(dimensionName)
+            If (Me.TaxonomicDimensionNames.Contains(dimensionName)) Then
+              Dim dimension = Me.TaxonomicDimensions(dimensionName)
+              dimension.AddClearances(clearanceExpression)
+              added = added Or dimension.AddClearances(clearanceExpression)
+            End If
+          Next
         Next
-      Next
+        If (added) Then
+          Me.OnReapproveDismissedAssembliesRequired()
+        End If
 
-    Finally
-      Me.ResumeAutoReapprove()
-    End Try
+      End Sub
+  )
+
   End Sub
 
 #End Region

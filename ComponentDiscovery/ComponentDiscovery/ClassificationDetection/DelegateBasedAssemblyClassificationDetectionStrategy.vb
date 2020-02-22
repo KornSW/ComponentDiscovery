@@ -20,7 +20,8 @@ Namespace ClassificationDetection
     Private _AssemblyAnalyzerMethod As Func(Of String, List(Of String), Boolean) = Nothing
 
     ''' <summary></summary>
-    ''' <param name="assemblyAnalyzerMethod">this is how a assembly will be classified. You can specify a method to run your own code defining the string based classifications for a given assembly file name)</param>
+    ''' <param name="assemblyAnalyzerMethod">this is how a assembly will be classified. You can specify a method to run your 
+    ''' own code defining the string based classifications for a given assembly file name)</param>
     Public Sub New(assemblyAnalyzerMethod As Func(Of String, List(Of String), Boolean))
       _AssemblyAnalyzerMethod = assemblyAnalyzerMethod
     End Sub
@@ -31,7 +32,10 @@ Namespace ClassificationDetection
       End Get
     End Property
 
-    Public Function TryDetectClassificationsForAssembly(assemblyFullFilename As String, taxonomicDimensionName As String, ByRef classifications As String()) As Boolean Implements IAssemblyClassificationDetectionStrategy.TryDetectClassificationsForAssembly
+    Public Function TryDetectClassificationsForAssembly(
+      assemblyFullFilename As String, taxonomicDimensionName As String, ByRef classifications As String()
+    ) As Boolean Implements IAssemblyClassificationDetectionStrategy.TryDetectClassificationsForAssembly
+
       Dim buffer As New List(Of String)
 
       If (_AssemblyAnalyzerMethod.Invoke(assemblyFullFilename, buffer)) Then

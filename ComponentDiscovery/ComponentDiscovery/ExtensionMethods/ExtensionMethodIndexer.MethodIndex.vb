@@ -65,15 +65,15 @@ Partial Class ExtensionMethodIndexer
     Private _InterfaceExtensionMethods As New Dictionary(Of Type, MethodIndex)
     Private _BaseTypeExtensionMethods As MethodIndex = Nothing
 
-    Friend Sub New(extendeeType As Type, subCacheGetter As Func(Of Type, MethodIndex))
+    Friend Sub New(extendeeType As Type, indexLookupMethod As Func(Of Type, MethodIndex))
       _ExtendeeType = extendeeType
 
       If (extendeeType.BaseType IsNot Nothing AndAlso Not extendeeType.BaseType = GetType(Object)) Then
-        _BaseTypeExtensionMethods = subCacheGetter.Invoke(extendeeType.BaseType)
+        _BaseTypeExtensionMethods = indexLookupMethod.Invoke(extendeeType.BaseType)
       End If
 
       For Each implementedInterface In extendeeType.GetInterfaces
-        _InterfaceExtensionMethods.Add(implementedInterface, subCacheGetter.Invoke(implementedInterface))
+        _InterfaceExtensionMethods.Add(implementedInterface, indexLookupMethod.Invoke(implementedInterface))
       Next
 
     End Sub
@@ -94,7 +94,7 @@ Partial Class ExtensionMethodIndexer
         allTypes = a.GetTypes()
       Catch ex As ReflectionTypeLoadException
         For Each le In ex.LoaderExceptions
-          Trace.TraceError("LoaderException bei GetTypes für Assembly '" + a.FullName + "': " + le.ToString())
+          Diag.Error("LoaderException bei GetTypes für Assembly '" + a.FullName + "': " + le.ToString())
         Next
         'This ugly workarround is the only way to get the types from a assembly
         'which contains one or more types with broken references for example:

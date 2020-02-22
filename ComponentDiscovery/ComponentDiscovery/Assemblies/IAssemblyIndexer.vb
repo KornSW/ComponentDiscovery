@@ -16,20 +16,14 @@ Public Interface IAssemblyIndexer
 
   Sub UnsubscribeFromAssemblyApproved(onAssemblyIndexedMethod As Action(Of Assembly))
 
-  <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Sub TryApproveCurrentAssembly()
-
-  <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Sub TryApproveAssembly(assembly As Assembly)
-
-  <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Sub TryApproveAssemblyFile(assemblyFullFilename As String)
-
-  <EditorBrowsable(EditorBrowsableState.Advanced)>
-  Function TryApproveAssemblyFile(fileInfo As FileInfo, Optional forceReapprove As Boolean = False) As Boolean
-
   ReadOnly Property ApprovedAssemblies As Assembly()
 
   ReadOnly Property DismissedAssemblies As String()
+
+
+  Function TryApproveCurrentAssembly() As Boolean
+  Function TryApproveAssembly(assembly As Assembly) As Boolean
+  Function TryApproveAssemblyFile(assemblyFullFilename As String) As Boolean
+  Function TryApproveAssemblyFile(fileInfo As FileInfo, Optional forceReapprove As Boolean = False) As Boolean
 
 End Interface

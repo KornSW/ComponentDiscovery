@@ -46,6 +46,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,8 +54,9 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="%28internal%29\Diag.vb" />
     <Compile Include="%28internal%29\CrossAppdomainHelperExtensions.vb" />
-    <Compile Include="%28internal%29\ExtensionMethods.vb" />
+    <Compile Include="%28internal%29\HelperExtensions.vb" />
     <Compile Include="ClassificationDetection\Attributes\AssemblyClassificationAttribute.vb" />
     <Compile Include="%28internal%29\PersistentIndexCache.vb" />
     <Compile Include="Assemblies\AssemblyIndexer.vb" />
@@ -68,6 +70,7 @@
     <Compile Include="ClassificationApproval\IClassificationApprovalStrategy.vb" />
     <Compile Include="ClassificationDetection\IAssemblyClassificationDetectionStrategy.vb" />
     <Compile Include="Assemblies\IAssemblyIndexer.vb" />
+    <Compile Include="Clearances\ClearanceContainer.vb" />
     <Compile Include="ExtensionMethods\ExtensionMethodIndexer.MethodIndex.vb" />
     <Compile Include="ExtensionMethods\ExtensionMethodIndexer.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -85,6 +88,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Providers\ProviderRepository.vb" />
     <Compile Include="Ressolving\AssemblyResolving.vb" />
     <Compile Include="Types\ClassificationBasedTypeIndexer.SemanticDimension.vb" />
     <Compile Include="Types\ClassificationBasedTypeIndexer.vb" />

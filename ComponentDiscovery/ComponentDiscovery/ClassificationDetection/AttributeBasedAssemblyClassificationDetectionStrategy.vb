@@ -9,6 +9,7 @@ Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports System.Linq
 Imports System.Reflection
+Imports System.Runtime
 Imports System.Threading
 Imports System.Threading.Tasks
 
@@ -48,7 +49,11 @@ Namespace ClassificationDetection
       End Get
     End Property
 
-    Public Function TryDetectClassificationsForAssembly(assemblyFullFilename As String, taxonomicDimensionName As String, ByRef classifications As String()) As Boolean Implements IAssemblyClassificationDetectionStrategy.TryDetectClassificationsForAssembly
+    Public Function TryDetectClassificationsForAssembly(
+      assemblyFullFilename As String,
+      taxonomicDimensionName As String,
+      ByRef classifications As String()
+    ) As Boolean Implements IAssemblyClassificationDetectionStrategy.TryDetectClassificationsForAssembly
 
       Dim result As String() = Nothing
 
@@ -64,6 +69,7 @@ Namespace ClassificationDetection
       Try
         If (_EnableAnalysisSandbox) Then
           EnsureSandboxDomainIsInitialized()
+          _NumberOfAssembliesUsedInSandbox += 1
           SyncLock _AppdomainAccessSemaphore
             result = _SandboxDomain.Invoke(Of String, String, String())(AddressOf FetchClassificationExpressionsFromAssembly, assemblyFullFilename, taxonomicDimensionName)
           End SyncLock
@@ -112,7 +118,7 @@ Namespace ClassificationDetection
       Catch ex As BadImageFormatException 'non-.NET-dll
         'EXPECTED: happens on non-.NET-dll
       Catch ex As Exception
-        System.Diagnostics.Trace.WriteLine(ex.Message)
+        Diag.Error(ex)
       End Try
 
       Return Nothing '=ERROR
@@ -130,6 +136,8 @@ Namespace ClassificationDetection
 
     Private Shared _OuterAppDomainShutDown As Boolean = False
 
+    Private Shared _NumberOfAssembliesUsedInSandbox As Integer = 0
+
     Shared Sub New()
       AddHandler AppDomain.CurrentDomain.DomainUnload,
         Sub(s, e)
@@ -143,7 +151,13 @@ Namespace ClassificationDetection
 
     Private Shared Sub EnsureSandboxDomainIsInitialized()
       SyncLock _AppdomainAccessSemaphore
+
+        If (_NumberOfAssembliesUsedInSandbox >= 40) Then
+          ShutdownSandboxAppdomain()
+        End If
+
         _KeepSandboxDomainRunningUntil = DateTime.Now.AddSeconds(10)
+
         If (_SandboxDomain Is Nothing) Then
 
           Dim parentSetup = AppDomain.CurrentDomain.SetupInformation
@@ -155,6 +169,8 @@ Namespace ClassificationDetection
           setup.LoaderOptimization = LoaderOptimization.SingleDomain
 
           _SandboxDomain = AppDomain.CreateDomain("AssemblyEvaluationSandbox", Nothing, setup)
+          _NumberOfAssembliesUsedInSandbox = 0
+
         End If
       End SyncLock
       If (_SheduledAppdomainShutdownTask Is Nothing OrElse _SheduledAppdomainShutdownTask.IsCompleted) Then
@@ -163,30 +179,30 @@ Namespace ClassificationDetection
     End Sub
 
     Private Shared Sub SheduledAppdomainShutdown()
-
       Do
-
         Try
-          Thread.Sleep(300)
+          Thread.Sleep(500)
         Catch
         End Try
-
         SyncLock _AppdomainAccessSemaphore
-
           If (_KeepSandboxDomainRunningUntil < DateTime.Now AndAlso _SandboxDomain IsNot Nothing) Then
-            Dim domainToUnload = _SandboxDomain
-            _SandboxDomain = Nothing
-            Try
-              AppDomain.Unload(domainToUnload)
-            Catch
-            End Try
+            ShutdownSandboxAppdomain()
             Exit Do
           End If
-
         End SyncLock
-
       Loop Until _OuterAppDomainShutDown
+    End Sub
 
+    Private Shared Sub ShutdownSandboxAppdomain()
+      Dim domainToUnload = _SandboxDomain
+      _SandboxDomain = Nothing
+      Try
+        AppDomain.Unload(domainToUnload)
+
+        GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce
+        GC.Collect(GC.MaxGeneration)
+      Catch
+      End Try
     End Sub
 
 #End Region

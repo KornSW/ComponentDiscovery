@@ -35,7 +35,10 @@ Namespace ClassificationDetection
       End Get
     End Property
 
-    Public Overridable Function TryDetectClassificationsForType(t As Type, taxonomicDimensionName As String, ByRef classifications As String()) As Boolean Implements ITypeClassificationDetectionStrategy.TryDetectClassificationsForType
+    Public Overridable Function TryDetectClassificationsForType(
+      t As Type, taxonomicDimensionName As String, ByRef classifications As String()
+    ) As Boolean Implements ITypeClassificationDetectionStrategy.TryDetectClassificationsForType
+
       Dim lDimensionName As String = taxonomicDimensionName.ToLower()
       Dim results As New List(Of String)
 
@@ -71,6 +74,7 @@ Namespace ClassificationDetection
     End Function
 
     Protected Function GetNamespaceAttributesForAssembly(ass As Assembly) As NamespaceClassificationAttribute()
+
       If (_NamespaceAttributesPerAssembly.ContainsKey(ass)) Then
         Return _NamespaceAttributesPerAssembly(ass)
       Else
@@ -78,6 +82,7 @@ Namespace ClassificationDetection
         _NamespaceAttributesPerAssembly.Add(ass, result)
         Return result
       End If
+
     End Function
 
   End Class

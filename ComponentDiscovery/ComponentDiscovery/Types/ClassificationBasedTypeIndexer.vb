@@ -79,7 +79,7 @@ Public Class ClassificationBasedTypeIndexer
           Return _TaxonomicDimensionsByName(existingName)
         End If
       Next
-      Throw New KeyNotFoundException(String.Format("There is no TaxonomicDimension registered with name '{0}'!", dimensionName))
+      Throw New KeyNotFoundException($"There is no TaxonomicDimension registered with name '{dimensionName}'!")
     End Get
   End Property
 

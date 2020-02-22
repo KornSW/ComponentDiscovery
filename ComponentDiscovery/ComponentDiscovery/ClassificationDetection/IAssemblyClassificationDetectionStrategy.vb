@@ -8,7 +8,9 @@ Namespace ClassificationDetection
 
   Public Interface IAssemblyClassificationDetectionStrategy
 
-    Function TryDetectClassificationsForAssembly(assemblyFullFilename As String, taxonomicDimensionName As String, ByRef classifications As String()) As Boolean
+    Function TryDetectClassificationsForAssembly(
+      assemblyFullFilename As String, taxonomicDimensionName As String, ByRef classifications As String()
+    ) As Boolean
 
   End Interface
 

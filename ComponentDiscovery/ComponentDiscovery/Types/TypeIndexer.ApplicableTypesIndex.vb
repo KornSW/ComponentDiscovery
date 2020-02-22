@@ -52,7 +52,14 @@ Partial Class TypeIndexer
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _ApprovingMethod As Func(Of Type, Boolean)
 
-    Public Sub New(selector As Type, assemblyIndexer As IAssemblyIndexer, enablePersistentCache As Boolean, approvingMethod As Func(Of Type, Boolean), enableAsyncIndexing As Boolean)
+    Public Sub New(
+      selector As Type,
+      assemblyIndexer As IAssemblyIndexer,
+      enablePersistentCache As Boolean,
+      approvingMethod As Func(Of Type, Boolean),
+      enableAsyncIndexing As Boolean
+    )
+
       _EnableAsyncIndexing = enableAsyncIndexing
       _Selector = selector
       _SelectorIsAttribute = _Selector.IsSubclassOf(GetType(Attribute))
@@ -61,18 +68,28 @@ Partial Class TypeIndexer
       _EnablePersistentCache = enablePersistentCache
       _ApprovingMethod = approvingMethod
       _AssemblyIndexer.SubscribeForAssemblyApproved(AddressOf Me.HandleAddedAssembly)
+
     End Sub
 
-    Public Sub New(selector As Type, assembliesToCrawl As Assembly(), enablePersistentCache As Boolean, approvingMethod As Func(Of Type, Boolean), enableAsyncIndexing As Boolean)
+    Public Sub New(
+      selector As Type,
+      assembliesToCrawl As Assembly(),
+      enablePersistentCache As Boolean,
+      approvingMethod As Func(Of Type, Boolean),
+      enableAsyncIndexing As Boolean
+    )
+
       _EnableAsyncIndexing = enableAsyncIndexing
       _Selector = selector
       _SelectorIsAttribute = _Selector.IsSubclassOf(GetType(Attribute))
       _SelectorIsGenericTypeDefinition = _Selector.IsGenericTypeDefinition
       _EnablePersistentCache = enablePersistentCache
       _ApprovingMethod = approvingMethod
+
       For Each assemblyToCrawl In assembliesToCrawl
         Me.HandleAddedAssembly(assemblyToCrawl)
       Next
+
     End Sub
 
 #End Region
@@ -101,13 +118,12 @@ Partial Class TypeIndexer
 
     Public Sub TryRegisterCandidate(candidate As Type)
 
-      If (Me.EnableTracing) Then
-        Dim assName As String = candidate.Assembly.GetName().Name
-        Trace.TraceInformation(
-          "TypeIndexer (for '{1}'): Manually registering candidate Type '{2}' for '{1}' (from assembly '{0}') ...",
-          assName, _Selector.Name, candidate.Name
-        )
-      End If
+      Diag.Verbose(
+        Function()
+          Dim ass As String = candidate.Assembly.GetName().Name
+          Return $"TypeIndexer (for '{_Selector.Name}'): Manually registering candidate Type '{candidate.Name}' for '{1}' (from assembly '{ass}') ..."
+        End Function
+      )
 
       Me.TryRegisterCandidate(candidate, False)
     End Sub
@@ -131,7 +147,10 @@ Partial Class TypeIndexer
 
       'skip assemblies, which are not referencing the target-types assembly
       'If (Not Me.Selector.Assembly.IsDirectReferencedBy(assemblyToCrawl)) Then
-      '  'Trace.TraceInformation("TypeIndexer (for '{1}'): Skipping assembly '{0}' because it has no reference to the assembly which is containing the selector type '{1}'", assName, _Selector.Name)
+      '  'Trace.TraceInformation(
+      '     "TypeIndexer (for '{1}'): Skipping assembly '{0}' because it has no reference to the assembly" + 
+      '     "which Is containing the selector type '{1}'", assName, _Selector.Name
+      '   )
       '  Exit Sub
       'End If
       'GEHT NICHT DA ABLEITUNGEN VON IMPLEMENTIERENDEN KLASSEN KEINE REFERENZ AUF DIE URSPRUNGSASSEMBLY HABEN MÜSSEN!
@@ -140,24 +159,34 @@ Partial Class TypeIndexer
       Dim cacheUpdateRequired As Boolean = False
       Dim persistentCacheTypeNames As String() = Nothing
 
-      If (_EnablePersistentCache AndAlso PersistentIndexCache.GetInstance().TryGetTypesFromCache(assemblyToCrawl.Location, _Selector.FullName, persistentCacheTypeNames)) Then
+      Dim sucessfullyLoadedFromCache As Boolean = False
+      If (_EnablePersistentCache) Then
+
+        sucessfullyLoadedFromCache = PersistentIndexCache.GetInstance().TryGetTypesFromCache(
+          assemblyToCrawl.Location, _Selector.FullName, persistentCacheTypeNames
+        )
+
+      End If
+
+      If (sucessfullyLoadedFromCache) Then
         foundTypes = New List(Of Type)
-        If (Me.EnableTracing) Then
-          Trace.TraceInformation("TypeIndexer (for '{1}'): Loading applicable types for '{1}' from persistent cache (for assembly '{0}')...", assName, _Selector.Name)
-        End If
+
+        Diag.Verbose(
+          Function() $"TypeIndexer (for '{1}'): Loading applicable types for '{_Selector.Name}' from persistent cache (for assembly '{assName}')..."
+        )
+
         For Each typeNameFromCache In persistentCacheTypeNames
           If (Not String.IsNullOrWhiteSpace(typeNameFromCache)) Then
             Try
               foundTypes.Add(assemblyToCrawl.GetType(typeNameFromCache))
             Catch ex As Exception
-              Trace.TraceError(ex.Message)
+              Diag.Error(ex)
             End Try
           End If
         Next
+
       Else
-        If (Me.EnableTracing) Then
-          Trace.TraceInformation("TypeIndexer (for '{1}'): Scanning assembly '{0}' to find applicable type for '{1}'...", assName, _Selector.Name)
-        End If
+        Diag.Verbose(Function() $"TypeIndexer (for '{_Selector.Name}'): Scanning assembly '{assName}' to find applicable type for '{1}'...")
         foundTypes = assemblyToCrawl.GetTypesAccessible().ToList()
         cacheUpdateRequired = _EnablePersistentCache
       End If
@@ -175,12 +204,12 @@ Partial Class TypeIndexer
         End If
 
       Catch ex As ReflectionTypeLoadException
-        Trace.TraceError(ex.Message)
+        Diag.Error(ex)
         For Each le In ex.LoaderExceptions
-          Trace.TraceError(ex.Message)
+          Diag.Error(ex)
         Next
       Catch ex As Exception
-        Trace.TraceError(ex.Message)
+        Diag.Error(ex)
       End Try
     End Sub
 
@@ -207,36 +236,31 @@ Partial Class TypeIndexer
         match = Me.Selector.IsAssignableFrom(candidate)
       End If
 
-      ' HACK: OPTIMIERUNG MÖGLICH: If (Not match) Then Exit Sub?
+      If (Not match OrElse _ApplicableTypes.Contains(candidate)) Then
+        Exit Sub
+      End If
 
       If (skipExternalApproving OrElse _ApprovingMethod.Invoke(candidate)) Then
+        Diag.Verbose(Function() $"TypeIndexer (for '{1}'): found applicable type '{candidate.Name}' (for '{ _Selector.Name}') from assembly '{assemblyName}'")
 
-        If (match AndAlso Not _ApplicableTypes.Contains(candidate)) Then
-
-
-          If (Me.EnableTracing) Then
-            Trace.TraceInformation("TypeIndexer (for '{1}'): found applicable type '{0}' (for '{1}') from assembly '{2}'", candidate.Name, _Selector.Name, assemblyName)
+        _ApplicableTypes.Add(candidate)
+        For Each subscriber In _Subscribers
+          If (_EnableAsyncIndexing) Then
+            Task.Run(Sub() subscriber.Invoke(candidate))
+          Else
+            subscriber.Invoke(candidate)
           End If
-
-          _ApplicableTypes.Add(candidate)
-          For Each subscriber In _Subscribers
+        Next
+        For Each subscriber In _ParameterlessInstantiableClassesOnlySubscribers
+          If (candidate.IsClass AndAlso candidate.IsParameterlessInstantiable) Then
             If (_EnableAsyncIndexing) Then
               Task.Run(Sub() subscriber.Invoke(candidate))
             Else
               subscriber.Invoke(candidate)
             End If
-          Next
-          For Each subscriber In _ParameterlessInstantiableClassesOnlySubscribers
-            If (candidate.IsClass AndAlso candidate.IsParameterlessInstantiable) Then
-              If (_EnableAsyncIndexing) Then
-                Task.Run(Sub() subscriber.Invoke(candidate))
-              Else
-                subscriber.Invoke(candidate)
-              End If
-            End If
-          Next
+          End If
+        Next
 
-        End If
       End If
 
     End Sub
