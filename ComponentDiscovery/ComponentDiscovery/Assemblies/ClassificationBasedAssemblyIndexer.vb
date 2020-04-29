@@ -27,16 +27,32 @@ Public Class ClassificationBasedAssemblyIndexer
   Private _ClearanceImportScourceAssemblies As New List(Of Assembly)
 
   Public Sub New()
-    MyBase.New(True, True, True)
+    MyClass.New({}, False, False, True)
+  End Sub
+
+  Public Sub New(taxonomicDimensionNames As String())
+    MyClass.New(taxonomicDimensionNames, False, False, True)
   End Sub
 
   Public Sub New(
+    taxonomicDimensionNames As String(),
     enableResolvePathsBinding As Boolean,
     enableAppDomainBinding As Boolean,
     Optional preferAssemblyLoadingViaFusion As Boolean = True
   )
 
-    MyBase.New(enableResolvePathsBinding, enableAppDomainBinding, preferAssemblyLoadingViaFusion)
+    MyBase.New(False, False, preferAssemblyLoadingViaFusion)
+
+    For Each taxonomicDimensionName In taxonomicDimensionNames
+      Me.AddTaxonomicDimension(taxonomicDimensionName)
+    Next
+
+    'this triggers assembly-add
+    Me.AppDomainBindingEnabled = enableAppDomainBinding
+
+    'this triggers assembly-add
+    Me.ResolvePathsBindingEnabled = enableResolvePathsBinding
+
   End Sub
 
 #End Region

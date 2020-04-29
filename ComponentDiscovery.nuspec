@@ -18,8 +18,8 @@
   </metadata>
   <files>
     <!-- https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
-    <file src="ComponentDiscovery\ComponentDiscovery\bin\Release\ComponentDiscovery.dll" target="lib/{tfm}" />
-    <file src="ComponentDiscovery\ComponentDiscovery\bin\Release\ComponentDiscovery.xml" target="lib/{tfm}" />
-    <file src="ComponentDiscovery\ComponentDiscovery\bin\Release\ComponentDiscovery.pdb" target="lib/{tfm}" />
+    <file src="(Stage)\Bin\ComponentDiscovery.dll" target="lib/{tfm}" />
+    <file src="(Stage)\Bin\ComponentDiscovery.xml" target="lib/{tfm}" />
+    <file src="(Stage)\Bin\ComponentDiscovery.pdb" target="lib/{tfm}" />
   </files>
 </package>

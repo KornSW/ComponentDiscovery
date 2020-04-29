@@ -5,15 +5,18 @@ Imports ComponentDiscovery
 
 <Assembly: AssemblyTitle("ComponentDiscovery - UnitTests")>
 <Assembly: AssemblyDescription("ComponentDiscovery")>
-<Assembly: AssemblyCompany("KornSW")>
 <Assembly: AssemblyProduct("ComponentDiscovery")>
+<Assembly: AssemblyCompany("KornSW")>
 <Assembly: AssemblyCopyright("KornSW")>
 <Assembly: AssemblyTrademark("KornSW")>
-<Assembly: ComVisible(False)>
+
 <Assembly: CLSCompliant(True)>
+<Assembly: ComVisible(False)>
 <Assembly: Guid("3a47a3a2-430d-4863-ba40-75062cdf825f")>
-<Assembly: AssemblyVersion("1.0.0.0")>
-<Assembly: AssemblyFileVersion("1.0.0.0")>
+
+<Assembly: AssemblyVersion("4.0.1")>
+<Assembly: AssemblyInformationalVersion("4.0.1-localbuild")>
+'WARNING: DONT SPECIFY: <Assembly: AssemblyFileVersion(...)> 
 
 <Assembly: AssemblyClassification("BusinessConcern", "ConcernA")>
 <Assembly: AssemblyClassification("BusinessConcern", "ConcernB")>
