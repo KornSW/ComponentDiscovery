@@ -14,7 +14,7 @@ Imports ComponentDiscovery
 <Assembly: ComVisible(False)>
 <Assembly: Guid("3a47a3a2-430d-4863-ba40-75062cdf825f")>
 
-<Assembly: AssemblyVersion("4.0.1")>
+<Assembly: AssemblyVersion("4.0.1.*")>
 <Assembly: AssemblyInformationalVersion("4.0.1-localbuild")>
 'WARNING: DONT SPECIFY: <Assembly: AssemblyFileVersion(...)> 
 
