@@ -108,12 +108,21 @@ Public Class ClassificationBasedAssemblyIndexer
   Public Sub AddTaxonomicDimension(taxonomicDimensionName As String, ParamArray defaultClearances() As String)
     Me.ThrowIfDimensionNameAlreadyExists(taxonomicDimensionName)
 
-    Me.AddTaxonomicDimension(
-      taxonomicDimensionName,
-      New AttributeBasedAssemblyClassificationDetectionStrategy(),
-      New DemandCentricClassificationApprovalStrategy(),
-      defaultClearances
-    )
+    If (taxonomicDimensionName.ToLower() = "namespace") Then
+      Me.AddTaxonomicDimension(
+        taxonomicDimensionName,
+        New NamespaceBasedAssemblyClassificationDetectionStrategy(),
+        New DemandCentricClassificationApprovalStrategy(),
+        defaultClearances
+      )
+    Else
+      Me.AddTaxonomicDimension(
+        taxonomicDimensionName,
+        New AttributeBasedAssemblyClassificationDetectionStrategy(),
+        New DemandCentricClassificationApprovalStrategy(),
+        defaultClearances
+      )
+    End If
 
   End Sub
 

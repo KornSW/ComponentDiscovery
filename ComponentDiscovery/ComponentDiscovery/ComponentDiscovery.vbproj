@@ -57,6 +57,8 @@
     <Compile Include="%28internal%29\Diag.vb" />
     <Compile Include="%28internal%29\CrossAppdomainHelperExtensions.vb" />
     <Compile Include="%28internal%29\HelperExtensions.vb" />
+    <Compile Include="ClassificationDetection\NamespaceBasedAssemblyClassificationDetectionStrategy.vb" />
+    <Compile Include="ClassificationDetection\NamespaceBasedTypeClassificationDetectionStrategy.vb" />
     <Compile Include="ClassificationDetection\Attributes\AssemblyClassificationAttribute.vb" />
     <Compile Include="%28internal%29\PersistentIndexCache.vb" />
     <Compile Include="Assemblies\AssemblyIndexer.vb" />

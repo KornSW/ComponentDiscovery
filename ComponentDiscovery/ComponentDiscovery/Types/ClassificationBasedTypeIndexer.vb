@@ -23,7 +23,11 @@ Public Class ClassificationBasedTypeIndexer
   Private _DismissedTypes As New List(Of Type)
 
   Private Shared Function DefaultTypeClassificationStrategyFactory(dimensionName As String) As ITypeClassificationDetectionStrategy
-    Return New AttributeBasedTypeClassificationDetectionStrategy() 'used for all dimensions
+    If (dimensionName.ToLower() = "namespace") Then
+      Return New NamespaceBasedTypeClassificationDetectionStrategy()
+    Else
+      Return New AttributeBasedTypeClassificationDetectionStrategy() 'used for all dimensions
+    End If
   End Function
 
   Public Sub New(assemblyIndexer As ClassificationBasedAssemblyIndexer)

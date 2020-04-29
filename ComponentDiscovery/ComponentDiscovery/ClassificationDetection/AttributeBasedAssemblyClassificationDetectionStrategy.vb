@@ -48,12 +48,31 @@ Namespace ClassificationDetection
         Return _DefaultsIfNoAttributeFound
       End Get
     End Property
-
     Public Function TryDetectClassificationsForAssembly(
       assemblyFullFilename As String,
       taxonomicDimensionName As String,
       ByRef classifications As String()
     ) As Boolean Implements IAssemblyClassificationDetectionStrategy.TryDetectClassificationsForAssembly
+
+      Return Me.TryDetectClassificationsForAssemblyCore(
+        assemblyFullFilename,
+        taxonomicDimensionName,
+        classifications
+      )
+
+    End Function
+
+    Protected Overridable ReadOnly Property FetchMethod As Func(Of String, String, String())
+      Get
+        Return AddressOf FetchClassificationExpressionsFromAssembly
+      End Get
+    End Property
+
+    Private Function TryDetectClassificationsForAssemblyCore(
+      assemblyFullFilename As String,
+      taxonomicDimensionName As String,
+      ByRef classifications As String()
+    ) As Boolean
 
       Dim result As String() = Nothing
 
@@ -71,11 +90,11 @@ Namespace ClassificationDetection
           EnsureSandboxDomainIsInitialized()
           _NumberOfAssembliesUsedInSandbox += 1
           SyncLock _AppdomainAccessSemaphore
-            result = _SandboxDomain.Invoke(Of String, String, String())(AddressOf FetchClassificationExpressionsFromAssembly, assemblyFullFilename, taxonomicDimensionName)
+            result = _SandboxDomain.Invoke(Of String, String, String())(Me.FetchMethod, assemblyFullFilename, taxonomicDimensionName)
           End SyncLock
         Else
           'UNSAFE!!!
-          result = FetchClassificationExpressionsFromAssembly(assemblyFullFilename, taxonomicDimensionName)
+          result = Me.FetchMethod.Invoke(assemblyFullFilename, taxonomicDimensionName)
         End If
 
       Catch ex As Exception
@@ -104,15 +123,21 @@ Namespace ClassificationDetection
         dimensionName = dimensionName.ToLower()
         If (assemblyToAnalyze IsNot Nothing) Then
 
-          Dim attribs = assemblyToAnalyze.GetCustomAttributes.Where(Function(a) a.GetType.Name = NameOf(AssemblyClassificationAttribute)).ToArray()
+          Dim attribs = assemblyToAnalyze.GetCustomAttributes.Where(Function(a) a.GetType().Name = NameOf(AssemblyMetadataAttribute) OrElse a.GetType().Name = NameOf(AssemblyClassificationAttribute)).ToArray()
 
           Dim expressions = (
-          attribs.OfType(Of AssemblyClassificationAttribute).
-          Where(Function(a) a.TaxonomicDimensionName.ToLower() = dimensionName).
-          Select(Function(a) a.ClassificationExpression).
-          ToArray()
-        )
-          Return expressions
+            attribs.OfType(Of AssemblyMetadataAttribute).
+            Where(Function(a) a.Key.ToLower() = dimensionName).
+            Select(Function(a) a.Value)
+          )
+
+          expressions = expressions.Union(
+            attribs.OfType(Of AssemblyClassificationAttribute).
+            Where(Function(a) a.TaxonomicDimensionName.ToLower() = dimensionName).
+            Select(Function(a) a.ClassificationExpression)
+          )
+
+          Return expressions.Distinct().ToArray()
 
         End If
       Catch ex As BadImageFormatException 'non-.NET-dll
