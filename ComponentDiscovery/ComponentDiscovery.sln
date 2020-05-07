@@ -1,14 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ComponentDiscovery", "ComponentDiscovery\ComponentDiscovery.vbproj", "{D5D23BBD-AAB6-4E9D-960C-71499668F4C6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9F20F2FF-0A39-4B31-BBA5-425F2FEFE817}"
 	ProjectSection(SolutionItems) = preProject
 		..\ComponentDiscovery.nuspec = ..\ComponentDiscovery.nuspec
-		..\Pack-ComponentDiscovery-Release.bat = ..\Pack-ComponentDiscovery-Release.bat
+		..\Pack-ComponentDiscovery.bat = ..\Pack-ComponentDiscovery.bat
 	EndProjectSection
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ComponentDiscoveryTests", "ComponentDiscoveryTests\ComponentDiscoveryTests.vbproj", "{4637733C-95E6-43FD-A6E9-91F46E9F7C61}"
@@ -30,5 +30,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50410137-7AFA-42CD-8C88-07DE4278718A}
 	EndGlobalSection
 EndGlobal
