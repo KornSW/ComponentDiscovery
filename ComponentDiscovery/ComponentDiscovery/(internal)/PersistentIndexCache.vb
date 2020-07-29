@@ -57,31 +57,20 @@ Friend Class PersistentIndexCache
     Return Path.Combine(_CacheDirectory, folderNameHash, fileName)
   End Function
 
-  Private Sub AnalyzeAssemblyFingerprintData(
-    assemblyFileFullName As String,
-    ByRef fileSize As Long, ByRef fileVersion As String, ByRef modifiedDate As DateTime
-  )
-
+  Private Sub AnalyzeAssemblyFingerprintData(assemblyFileFullName As String, ByRef fileSize As Long, ByRef modifiedDate As DateTime)
     Dim fi As New FileInfo(assemblyFileFullName)
     fileSize = fi.Length
     modifiedDate = fi.LastWriteTime
-
-    Try
-      fileVersion = FileVersionInfo.GetVersionInfo(assemblyFileFullName).FileVersion
-    Catch
-      fileVersion = "?.?.?.?"
-    End Try
-
   End Sub
 
   Private Function BuildTimestampBlock(assemblyFileFullName As String) As String
     Dim currentAssemblyFileSize As Long
-    Dim currentAssemblyFileVersion As String = Nothing
     Dim currentAssemblyModifiedDate As DateTime
 
-    Me.AnalyzeAssemblyFingerprintData(assemblyFileFullName, currentAssemblyFileSize, currentAssemblyFileVersion, currentAssemblyModifiedDate)
+    Me.AnalyzeAssemblyFingerprintData(assemblyFileFullName, currentAssemblyFileSize, currentAssemblyModifiedDate)
 
-    Return $"{currentAssemblyFileSize}|{currentAssemblyFileVersion}|{currentAssemblyModifiedDate}"
+    'Note: the second token was the assembly version in past, but isnt used anymore because of performance-issues!
+    Return $"{currentAssemblyFileSize}|*.*.*.*|{currentAssemblyModifiedDate}"
   End Function
 
 #End Region
@@ -156,14 +145,12 @@ Friend Class PersistentIndexCache
     End If
 
     Dim cachedAssemblyFileSize As Long
-    Dim cachedAssemblyFileVersion As String
     Dim cachedAssemblyModifiedDate As DateTime
     Dim classificationExpressionsFromCache As String() = {}
 
     Dim currentAssemblyFileSize As Long
-    Dim currentAssemblyFileVersion As String = Nothing
     Dim currentAssemblyModifiedDate As DateTime
-    Me.AnalyzeAssemblyFingerprintData(assemblyFullFilename, currentAssemblyFileSize, currentAssemblyFileVersion, currentAssemblyModifiedDate)
+    Me.AnalyzeAssemblyFingerprintData(assemblyFullFilename, currentAssemblyFileSize, currentAssemblyModifiedDate)
 
     Dim matchingLines As New List(Of String)
     Dim cacheIsValid As Boolean = False
@@ -177,10 +164,10 @@ Friend Class PersistentIndexCache
           End If
           Dim fileds = content.Split("|"c)
           cachedAssemblyFileSize = Long.Parse(fileds(0))
-          cachedAssemblyFileVersion = fileds(1)
+          'Note: fileds(1) was the assembly version in past, but isnt used anymore because of performance-issues!
           cachedAssemblyModifiedDate = DateTime.Parse(fileds(2))
 
-          If (currentAssemblyFileSize = cachedAssemblyFileSize AndAlso currentAssemblyFileVersion = cachedAssemblyFileVersion) Then
+          If (currentAssemblyFileSize = cachedAssemblyFileSize) Then
 
             'HACK: die Equals-Methode liefert hier false - immer ein paar ticks unterschied - explorer bug????
             If (currentAssemblyModifiedDate.ToString() = cachedAssemblyModifiedDate.ToString()) Then
