@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ComponentDiscovery</id>
-    <version>4.1.1-localbuild</version>
+    <version>4.5.0-localbuild</version>
     <title>Clearance and Classification based Component Discovery</title>
     <authors>KornSW</authors>
     <owners>KornSW</owners>
@@ -18,8 +18,8 @@
   </metadata>
   <files>
     <!-- https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->
-    <file src="(Stage)\Bin\ComponentDiscovery.dll" target="lib/{tfm}" />
-    <file src="(Stage)\Bin\ComponentDiscovery.xml" target="lib/{tfm}" />
-    <file src="(Stage)\Bin\ComponentDiscovery.pdb" target="lib/{tfm}" />
+    <file src="(Stage)\Bin\ComponentDiscovery.dll" target="lib/net46" />
+    <file src="(Stage)\Bin\ComponentDiscovery.xml" target="lib/net46" />
+    <file src="(Stage)\Bin\ComponentDiscovery.pdb" target="lib/net46" />
   </files>
 </package>

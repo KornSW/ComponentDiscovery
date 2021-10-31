@@ -73,8 +73,23 @@
     <Compile Include="ClassificationDetection\IAssemblyClassificationDetectionStrategy.vb" />
     <Compile Include="Assemblies\IAssemblyIndexer.vb" />
     <Compile Include="Clearances\ClearanceContainer.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\AttributeBasedAccessor.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\CreatesDiscoverableInstanceAttribute.vb" />
     <Compile Include="ExtensionMethods\ExtensionMethodIndexer.MethodIndex.vb" />
     <Compile Include="ExtensionMethods\ExtensionMethodIndexer.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\ConsumesDiscoverableInstanceAttribute.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\IInstanceProvidingAttribute.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\PriorizeInstanceDiscoveryAgainstAttribute.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\PriorizeInstanceDiscoveryAttribute.vb" />
+    <Compile Include="InstanceDiscovery\AttributeBasedDiscoverableInstanceProvider.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\ProvidesDiscoverableInstanceAttribute.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\SupportsInstanceDiscoveryAttribute.vb" />
+    <Compile Include="InstanceDiscovery\InjectionHelper.vb" />
+    <Compile Include="InstanceDiscovery\InstanceDiscoveryContext.vb" />
+    <Compile Include="InstanceDiscovery\InjectionDemand.vb" />
+    <Compile Include="InstanceDiscovery\LifetimeResponsibility.vb" />
+    <Compile Include="InstanceDiscovery\IDiscoverableInstanceProvider.vb" />
+    <Compile Include="%28internal%29\PriorityList.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
