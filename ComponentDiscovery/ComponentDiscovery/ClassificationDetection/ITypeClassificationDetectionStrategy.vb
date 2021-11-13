@@ -6,7 +6,7 @@
 
 Imports System
 
-Namespace ClassificationDetection
+Namespace ComponentDiscovery.ClassificationDetection
 
   Public Interface ITypeClassificationDetectionStrategy
 

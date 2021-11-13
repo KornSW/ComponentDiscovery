@@ -13,7 +13,7 @@ Imports System.Runtime
 Imports System.Threading
 Imports System.Threading.Tasks
 
-Namespace ClassificationDetection
+Namespace ComponentDiscovery.ClassificationDetection
 
   Public Class AttributeBasedAssemblyClassificationDetectionStrategy
     Implements IAssemblyClassificationDetectionStrategy

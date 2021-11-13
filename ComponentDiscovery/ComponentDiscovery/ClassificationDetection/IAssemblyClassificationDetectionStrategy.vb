@@ -4,7 +4,7 @@
 '  ¦ the removal of this notice is prohibited by the author!                ¦
 '  +------------------------------------------------------------------------+
 
-Namespace ClassificationDetection
+Namespace ComponentDiscovery.ClassificationDetection
 
   Public Interface IAssemblyClassificationDetectionStrategy
 

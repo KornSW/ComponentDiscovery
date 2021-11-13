@@ -10,7 +10,7 @@ Imports System.Diagnostics
 Imports System.Linq
 Imports System.Reflection
 
-Namespace ClassificationDetection
+Namespace ComponentDiscovery.ClassificationDetection
 
   Public Class AttributeBasedTypeClassificationDetectionStrategy
     Implements ITypeClassificationDetectionStrategy

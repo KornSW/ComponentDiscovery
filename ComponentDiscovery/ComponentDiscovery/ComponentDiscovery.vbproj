@@ -6,7 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{D5D23BBD-AAB6-4E9D-960C-71499668F4C6}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>ComponentDiscovery</RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <AssemblyName>ComponentDiscovery</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
@@ -73,12 +74,12 @@
     <Compile Include="ClassificationDetection\IAssemblyClassificationDetectionStrategy.vb" />
     <Compile Include="Assemblies\IAssemblyIndexer.vb" />
     <Compile Include="Clearances\ClearanceContainer.vb" />
-    <Compile Include="InstanceDiscovery\%28Attributes%29\AttributeBasedAccessor.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\AttributeInspectionHelper.vb" />
     <Compile Include="InstanceDiscovery\%28Attributes%29\CreatesDiscoverableInstanceAttribute.vb" />
     <Compile Include="ExtensionMethods\ExtensionMethodIndexer.MethodIndex.vb" />
     <Compile Include="ExtensionMethods\ExtensionMethodIndexer.vb" />
-    <Compile Include="InstanceDiscovery\%28Attributes%29\ConsumesDiscoverableInstanceAttribute.vb" />
-    <Compile Include="InstanceDiscovery\%28Attributes%29\IInstanceProvidingAttribute.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\InjectAttribute.vb" />
+    <Compile Include="InstanceDiscovery\%28Attributes%29\TryInjectAttribute.vb" />
     <Compile Include="InstanceDiscovery\%28Attributes%29\PriorizeInstanceDiscoveryAgainstAttribute.vb" />
     <Compile Include="InstanceDiscovery\%28Attributes%29\PriorizeInstanceDiscoveryAttribute.vb" />
     <Compile Include="InstanceDiscovery\AttributeBasedDiscoverableInstanceProvider.vb" />
@@ -94,6 +95,7 @@
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>

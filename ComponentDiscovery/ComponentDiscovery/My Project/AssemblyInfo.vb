@@ -13,6 +13,6 @@ Imports System.Runtime.InteropServices
 <Assembly: ComVisible(False)>
 <Assembly: Guid("5027f65d-44ad-44b7-805a-2de61c83390e")>
 
-<Assembly: AssemblyVersion("4.5.0.*")>
-<Assembly: AssemblyInformationalVersion("4.5.0-localbuild")>
+<Assembly: AssemblyVersion("4.5.1.*")>
+<Assembly: AssemblyInformationalVersion("4.5.1-localbuild")>
 'WARNING: DONT SPECIFY: <Assembly: AssemblyFileVersion(...)> 

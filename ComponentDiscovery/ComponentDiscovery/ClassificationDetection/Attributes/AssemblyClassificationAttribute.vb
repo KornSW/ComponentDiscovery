@@ -6,31 +6,35 @@
 
 Imports System
 
-<AttributeUsage(AttributeTargets.Assembly, AllowMultiple:=True)>
-Public Class AssemblyClassificationAttribute
-  Inherits Attribute
+Namespace ComponentDiscovery
 
-  Private _TaxonomicDimensionName As String
-  Private _ClassificationExpression As String
+  <AttributeUsage(AttributeTargets.Assembly, AllowMultiple:=True)>
+  Public Class AssemblyClassificationAttribute
+    Inherits Attribute
 
-  Public Sub New(taxonomicDimensionName As String, classificationExpression As String)
-    MyBase.New()
+    Private _TaxonomicDimensionName As String
+    Private _ClassificationExpression As String
 
-    _TaxonomicDimensionName = taxonomicDimensionName
-    _ClassificationExpression = classificationExpression
+    Public Sub New(taxonomicDimensionName As String, classificationExpression As String)
+      MyBase.New()
 
-  End Sub
+      _TaxonomicDimensionName = taxonomicDimensionName
+      _ClassificationExpression = classificationExpression
 
-  Public ReadOnly Property TaxonomicDimensionName As String
-    Get
-      Return _TaxonomicDimensionName
-    End Get
-  End Property
+    End Sub
 
-  Public ReadOnly Property ClassificationExpression As String
-    Get
-      Return _ClassificationExpression
-    End Get
-  End Property
+    Public ReadOnly Property TaxonomicDimensionName As String
+      Get
+        Return _TaxonomicDimensionName
+      End Get
+    End Property
 
-End Class
+    Public ReadOnly Property ClassificationExpression As String
+      Get
+        Return _ClassificationExpression
+      End Get
+    End Property
+
+  End Class
+
+End Namespace

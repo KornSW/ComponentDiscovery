@@ -6,27 +6,31 @@
 
 Imports System
 
-<AttributeUsage(
-  AttributeTargets.Class Or AttributeTargets.Interface Or AttributeTargets.Module Or AttributeTargets.Struct Or AttributeTargets.Enum,
-  AllowMultiple:=True, Inherited:=True
-)>
-Public Class IgnoreNamespaceClassificationsAttribute
-  Inherits Attribute
+Namespace ComponentDiscovery
 
-  Private _TaxonomicDimensionName As String
+  <AttributeUsage(
+    AttributeTargets.Class Or AttributeTargets.Interface Or AttributeTargets.Module Or AttributeTargets.Struct Or AttributeTargets.Enum,
+    AllowMultiple:=True, Inherited:=True
+  )>
+  Public Class IgnoreNamespaceClassificationsAttribute
+    Inherits Attribute
 
-  ''' <param name="taxonomicDimensionName"></param>
-  Public Sub New(taxonomicDimensionName As String)
-    MyBase.New()
+    Private _TaxonomicDimensionName As String
 
-    _TaxonomicDimensionName = taxonomicDimensionName
+    ''' <param name="taxonomicDimensionName"></param>
+    Public Sub New(taxonomicDimensionName As String)
+      MyBase.New()
 
-  End Sub
+      _TaxonomicDimensionName = taxonomicDimensionName
 
-  Public ReadOnly Property TaxonomicDimensionName As String
-    Get
-      Return _TaxonomicDimensionName
-    End Get
-  End Property
+    End Sub
 
-End Class
+    Public ReadOnly Property TaxonomicDimensionName As String
+      Get
+        Return _TaxonomicDimensionName
+      End Get
+    End Property
+
+  End Class
+
+End Namespace

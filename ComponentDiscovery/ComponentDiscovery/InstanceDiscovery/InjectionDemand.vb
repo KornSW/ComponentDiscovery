@@ -1,23 +1,34 @@
-﻿
-''' <summary>
-''' selects the required behavior, when trying to provide instances for requrested types
-''' </summary>
-Public Enum InjectionDemand As Integer
+﻿'  +------------------------------------------------------------------------+
+'  ¦ this file is part of an open-source solution which is originated here: ¦
+'  ¦ https://github.com/KornSW/ComponentDiscovery                           ¦
+'  ¦ the removal of this notice is prohibited by the author!                ¦
+'  +------------------------------------------------------------------------+
 
-  ''' <summary>
-  ''' This will instruct the framework to discover and inject an instance into each
-  ''' non-optional constructor-/method-argument and/or property with an 'ProvidesDiscoverableInstanceAttribute'.
-  ''' If any instance cant be discovered, then the framework will throw an Exception!
-  ''' </summary>
-  Required = 1
+Namespace Composition.InstanceDiscovery
 
-  ''' <summary>
-  ''' This will instruct the framework to discover and inject an instance into each
-  ''' non-optional constructor-/method-argument and/or property with an 'ProvidesDiscoverableInstanceAttribute'.
-  ''' If any instance cant be discovered, then the framework will pass null for these parameters / will skip setting the property!
-  ''' </summary>
-  IfAvailable = 2
+  Friend Enum InjectionDemand As Integer
 
-  Disabled = 0
+    ''' <summary>
+    ''' If the instance discovery fails, then the framework will throw an Exception!
+    ''' </summary>
+    SuccessOrThrow = 0
 
-End Enum
+    ''' <summary>
+    ''' If the instance discovery fails, then a null-refernce will be passed!
+    ''' </summary>
+    SuccessOrNull = 1
+
+    ''' <summary>
+    ''' If the instance discovery fails, then the framework shlud not provide anything!
+    ''' (only possible when the injection-target is a MEMBER or a OPTIONAL-PARAMETER)
+    ''' </summary>
+    SuccessOrSkip = 2
+
+    ''' <summary>
+    ''' used as default for OPTIONAL-PARAMETERs which dont have an injection attribute
+    ''' </summary>
+    SkipAlways = 3
+
+  End Enum
+
+End Namespace

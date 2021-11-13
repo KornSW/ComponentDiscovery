@@ -9,7 +9,7 @@ Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports System.Linq
 
-Namespace ClassificationApproval
+Namespace ComponentDiscovery.ClassificationApproval
 
   ''' <summary>
   ''' A 'ClassificationApprovalStrategy' opposes classifications with clearances and returns true if conformity is given.

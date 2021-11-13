@@ -9,7 +9,7 @@ Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports System.Linq
 
-Namespace ClassificationApproval
+Namespace ComponentDiscovery.ClassificationApproval
 
   Public MustInherit Class ClassificationApprovalStrategyBase
 

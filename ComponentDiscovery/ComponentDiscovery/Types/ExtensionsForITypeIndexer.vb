@@ -8,28 +8,32 @@ Imports System
 Imports System.ComponentModel
 Imports System.Runtime.CompilerServices
 
-Public Module ExtensionsForITypeIndexer
+Namespace ComponentDiscovery
 
-  ''' <summary>
-  '''   Subscribe Types on the receiver delegate. WARNING: the delegate needs to be thread-safe!!!
-  ''' </summary>
-  <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
-  Public Sub SubscribeForApplicableTypeFound(Of TSelector)(
+  Public Module ExtensionsForITypeIndexer
+
+    ''' <summary>
+    '''   Subscribe Types on the receiver delegate. WARNING: the delegate needs to be thread-safe!!!
+    ''' </summary>
+    <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
+    Public Sub SubscribeForApplicableTypeFound(Of TSelector)(
     extendee As ITypeIndexer, parameterlessInstantiableClassesOnly As Boolean, onApplicableTypeFoundMethod As Action(Of Type)
   )
-    extendee.SubscribeForApplicableTypeFound(GetType(TSelector), parameterlessInstantiableClassesOnly, onApplicableTypeFoundMethod)
-  End Sub
+      extendee.SubscribeForApplicableTypeFound(GetType(TSelector), parameterlessInstantiableClassesOnly, onApplicableTypeFoundMethod)
+    End Sub
 
-  <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
-  Public Sub UnsubscribeFromApplicableTypeFound(Of TSelector)(
+    <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
+    Public Sub UnsubscribeFromApplicableTypeFound(Of TSelector)(
     extendee As ITypeIndexer, parameterlessInstantiableClassesOnly As Boolean, onApplicableTypeFoundMethod As Action(Of Type)
   )
-    extendee.UnsubscribeFromApplicableTypeFound(GetType(TSelector), parameterlessInstantiableClassesOnly, onApplicableTypeFoundMethod)
-  End Sub
+      extendee.UnsubscribeFromApplicableTypeFound(GetType(TSelector), parameterlessInstantiableClassesOnly, onApplicableTypeFoundMethod)
+    End Sub
 
-  <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
-  Public Function GetApplicableTypes(Of TSelector)(extendee As ITypeIndexer, parameterlessInstantiableClassesOnly As Boolean) As Type()
-    Return extendee.GetApplicableTypes(GetType(TSelector), parameterlessInstantiableClassesOnly)
-  End Function
+    <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
+    Public Function GetApplicableTypes(Of TSelector)(extendee As ITypeIndexer, parameterlessInstantiableClassesOnly As Boolean) As Type()
+      Return extendee.GetApplicableTypes(GetType(TSelector), parameterlessInstantiableClassesOnly)
+    End Function
 
-End Module
+  End Module
+
+End Namespace

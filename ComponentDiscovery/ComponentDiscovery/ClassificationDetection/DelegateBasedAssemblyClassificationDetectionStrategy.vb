@@ -8,7 +8,7 @@ Imports System
 Imports System.Collections.Generic
 Imports System.Diagnostics
 
-Namespace ClassificationDetection
+Namespace ComponentDiscovery.ClassificationDetection
 
   Public Class DelegateBasedAssemblyClassificationDetectionStrategy
     Implements IAssemblyClassificationDetectionStrategy

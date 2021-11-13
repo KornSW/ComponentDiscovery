@@ -6,42 +6,46 @@
 
 Imports System
 
-<AttributeUsage(AttributeTargets.Assembly, AllowMultiple:=True)>
-Public Class NamespaceClassificationAttribute
-  Inherits Attribute
+Namespace ComponentDiscovery
 
-  Private _NamespaceAndOrTypenameMask As String
-  Private _TaxonomicDimensionName As String
-  Private _ClassificationExpression As String
+  <AttributeUsage(AttributeTargets.Assembly, AllowMultiple:=True)>
+  Public Class NamespaceClassificationAttribute
+    Inherits Attribute
 
-  ''' <param name="namespaceAndOrTypenameMask">a include-mask for namespace and/or typename (can be used with wildcard '*')</param>
-  ''' <param name="taxonomicDimensionName"></param>
-  ''' <param name="classificationExpression"></param>
-  Public Sub New(namespaceAndOrTypenameMask As String, taxonomicDimensionName As String, classificationExpression As String)
-    MyBase.New()
+    Private _NamespaceAndOrTypenameMask As String
+    Private _TaxonomicDimensionName As String
+    Private _ClassificationExpression As String
 
-    _NamespaceAndOrTypenameMask = namespaceAndOrTypenameMask
-    _TaxonomicDimensionName = taxonomicDimensionName
-    _ClassificationExpression = classificationExpression
+    ''' <param name="namespaceAndOrTypenameMask">a include-mask for namespace and/or typename (can be used with wildcard '*')</param>
+    ''' <param name="taxonomicDimensionName"></param>
+    ''' <param name="classificationExpression"></param>
+    Public Sub New(namespaceAndOrTypenameMask As String, taxonomicDimensionName As String, classificationExpression As String)
+      MyBase.New()
 
-  End Sub
+      _NamespaceAndOrTypenameMask = namespaceAndOrTypenameMask
+      _TaxonomicDimensionName = taxonomicDimensionName
+      _ClassificationExpression = classificationExpression
 
-  Public ReadOnly Property NamespaceAndOrTypenameMask As String
-    Get
-      Return _NamespaceAndOrTypenameMask
-    End Get
-  End Property
+    End Sub
 
-  Public ReadOnly Property TaxonomicDimensionName As String
-    Get
-      Return _TaxonomicDimensionName
-    End Get
-  End Property
+    Public ReadOnly Property NamespaceAndOrTypenameMask As String
+      Get
+        Return _NamespaceAndOrTypenameMask
+      End Get
+    End Property
 
-  Public ReadOnly Property ClassificationExpression As String
-    Get
-      Return _ClassificationExpression
-    End Get
-  End Property
+    Public ReadOnly Property TaxonomicDimensionName As String
+      Get
+        Return _TaxonomicDimensionName
+      End Get
+    End Property
 
-End Class
+    Public ReadOnly Property ClassificationExpression As String
+      Get
+        Return _ClassificationExpression
+      End Get
+    End Property
+
+  End Class
+
+End Namespace

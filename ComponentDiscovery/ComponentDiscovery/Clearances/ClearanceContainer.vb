@@ -3,6 +3,8 @@
 'Imports System.Collections.Generic
 'Imports ComponentDiscovery
 
+'Namespace ComponentDiscovery
+
 '<Serializable>
 'Public Class ClearanceContainer
 '  Implements IEnumerable(Of Tuple(Of String, String))
@@ -129,3 +131,5 @@
 '#End Region
 
 'End Class
+
+'End Namespace
