@@ -23,7 +23,7 @@ Namespace ComponentDiscovery
 
       If (_Instance Is Nothing) Then
 
-        Dim cacheDirectory = My.Settings.AssemblyIndexCacheDirectory
+        Dim cacheDirectory = Global.My.Settings.AssemblyIndexCacheDirectory
 
         If (String.IsNullOrWhiteSpace(cacheDirectory)) Then
           cacheDirectory = Path.Combine("%PUBLIC%", "AssemblyIndex")

@@ -63,7 +63,7 @@ Namespace ComponentDiscovery
 
           If (Not _ItemsByPriority.Contains(lowerPriorityItem)) Then
             Dim indexOfNull = _ItemsByPriority.IndexOf(Nothing)
-            _ItemsByPriority.Insert(indexOfNull, higherPriorityItem)
+            _ItemsByPriority.Insert(indexOfNull, lowerPriorityItem)
           End If
         End SyncLock
 
@@ -87,18 +87,19 @@ Namespace ComponentDiscovery
       'later processed rules could corrupt the results
       'from other rules - so we do this as often, as there
       'are rules present +1. if were are not compliant after
-      'that, we can be sure, that the rules are is cyclic...
+      'that, we can be sure, that the rules are cyclic...
       For i As Integer = 1 To preferences.Count + 1
 
         Dim wasReordered As Boolean = False
         For Each pref In preferences 'move items for every pereference
 
-          Dim indexOfPrefered = _ItemsByPriority.IndexOf(pref.Item1)
-          Dim indexOfOverridden = _ItemsByPriority.IndexOf(pref.Item2)
+          Dim indexOfPrefered = snapshot.IndexOf(pref.Item1)
+          Dim indexOfOverridden = snapshot.IndexOf(pref.Item2)
 
           If (indexOfPrefered > indexOfOverridden) Then
-            _ItemsByPriority.RemoveAt(indexOfPrefered)
-            _ItemsByPriority.Insert(indexOfOverridden, pref.Item1)
+            snapshot.RemoveAt(indexOfPrefered)
+            snapshot.Insert(indexOfOverridden, pref.Item1)
+            wasReordered = True
           End If
 
         Next

@@ -12,7 +12,7 @@ Option Strict On
 Option Explicit On
 
 
-Namespace My
+Namespace ComponentDiscovery.My
     
     <Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
      Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.8.1.0"),  _
@@ -56,19 +56,19 @@ Namespace My
         
         <Global.System.Configuration.ApplicationScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
-        Public ReadOnly Property AssemblyIndexCacheDirectory() As String
+         Global.System.Configuration.DefaultSettingValueAttribute(".\")>  _
+        Public ReadOnly Property AssemblyResolvePaths() As String
             Get
-                Return CType(Me("AssemblyIndexCacheDirectory"),String)
+                Return CType(Me("AssemblyResolvePaths"),String)
             End Get
         End Property
         
         <Global.System.Configuration.ApplicationScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute(".\")>  _
-        Public ReadOnly Property AssemblyResolvePaths() As String
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public ReadOnly Property AssemblyIndexCacheDirectory() As String
             Get
-                Return CType(Me("AssemblyResolvePaths"),String)
+                Return CType(Me("AssemblyIndexCacheDirectory"),String)
             End Get
         End Property
     End Class
@@ -82,9 +82,9 @@ Namespace My
     Friend Module MySettingsProperty
         
         <Global.System.ComponentModel.Design.HelpKeywordAttribute("My.Settings")>  _
-        Friend ReadOnly Property Settings() As Global.My.MySettings
+        Friend ReadOnly Property Settings() As Global.ComponentDiscovery.My.MySettings
             Get
-                Return Global.My.MySettings.Default
+                Return Global.ComponentDiscovery.My.MySettings.Default
             End Get
         End Property
     End Module

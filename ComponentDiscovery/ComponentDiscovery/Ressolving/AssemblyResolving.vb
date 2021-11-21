@@ -196,7 +196,7 @@ Namespace ComponentDiscovery
     Public Shared ReadOnly Property ConfiguredResolvePaths As String()
       Get
         Dim paths As New List(Of String)
-        For Each folder In My.Settings.AssemblyResolvePaths.Split(";"c)
+        For Each folder In Global.My.Settings.AssemblyResolvePaths.Split(";"c)
           If (Not String.IsNullOrWhiteSpace(folder)) Then
             paths.Add(AssemblyResolving.NormalizePath(folder, Nothing))
           End If
