@@ -14,9 +14,6 @@ Namespace ComponentDiscovery
 
   Public Class AssemblyResolving
 
-    Private Sub New()
-    End Sub
-
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private Shared _IsInitialized As Boolean = False
 
@@ -42,9 +39,13 @@ Namespace ComponentDiscovery
         AssemblyResolving.AddResolvePath(Path.GetDirectoryName(Assembly.GetEntryAssembly.Location))
       End If
 
+#If NET461 Then
       If (System.Web.HttpRuntime.AppDomainId IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(System.Web.HttpRuntime.BinDirectory)) Then
         AssemblyResolving.AddResolvePath(System.Web.HttpRuntime.BinDirectory) '(not 'HttpRuntime.AppDomainAppPath'!!!)
       End If
+#Else
+      'HttpRuntime & HttpContext are not available in .net CORE!
+#End If
 
       AssemblyResolving.AddResolvePath(AppDomain.CurrentDomain.BaseDirectory)
 
@@ -52,9 +53,13 @@ Namespace ComponentDiscovery
         AssemblyResolving.AddResolvePath(AppDomain.CurrentDomain.RelativeSearchPath)
       End If
 
+#If NET461 Then
       For Each entry In ConfiguredResolvePaths
         AssemblyResolving.AddResolvePath(entry, AssemblyResolvingFixpoint.LocationOfAppdomainConfigFile)
       Next
+#Else
+      'MySettings are not available in .net CORE!
+#End If
 
     End Sub
 
@@ -67,10 +72,12 @@ Namespace ComponentDiscovery
       Get
         If (Assembly.GetEntryAssembly() IsNot Nothing) Then
           Return Path.GetDirectoryName(Assembly.GetEntryAssembly.Location)
-
+#If NET461 Then
         ElseIf (System.Web.HttpRuntime.AppDomainId IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(System.Web.HttpRuntime.AppDomainAppPath)) Then
           Return System.Web.HttpRuntime.AppDomainAppPath '(not 'HttpRuntime.BinDirectory'!!!)
-
+#Else
+       'HttpRuntime & HttpContext are not available in .net CORE!
+#End If
         Else
           Return AppDomain.CurrentDomain.BaseDirectory
 
@@ -87,10 +94,12 @@ Namespace ComponentDiscovery
       Get
         If (Assembly.GetEntryAssembly() IsNot Nothing) Then
           Return Path.GetDirectoryName(Assembly.GetEntryAssembly.Location)
-
+#If NET461 Then
         ElseIf (System.Web.HttpRuntime.AppDomainId IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(System.Web.HttpRuntime.AppDomainAppPath)) Then
           Return System.Web.HttpRuntime.BinDirectory '(not 'HttpRuntime.AppDomainAppPath'!!!)
-
+#Else
+          'HttpRuntime & HttpContext are not available in .net CORE!
+#End If
         Else
           Return AppDomain.CurrentDomain.BaseDirectory
 
@@ -107,12 +116,17 @@ Namespace ComponentDiscovery
         Case AssemblyResolvingFixpoint.LocationOfAssemblyResolving
           AssemblyResolving.AddResolvePath(fullOrRelativePath, Assembly.GetExecutingAssembly())
 
+#If NET461 Then
         Case AssemblyResolvingFixpoint.LocationOfAppdomainConfigFile
           Dim configFilePath As String = Nothing
           If (AppDomain.CurrentDomain.SetupInformation?.ConfigurationFile IsNot Nothing) Then
             configFilePath = Path.GetDirectoryName(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile)
           End If
           AssemblyResolving.AddResolvePath(fullOrRelativePath, configFilePath)
+
+#Else
+          'AppDomain.CurrentDomain.SetupInformation.ConfigurationFile is not available in .net CORE!
+#End If
 
         Case Else 'AssemblyResolvingFixpoint.PrimaryApplicationDirectory
           AssemblyResolving.AddResolvePath(fullOrRelativePath, PrimaryApplicationRootDirectory)
@@ -188,6 +202,8 @@ Namespace ComponentDiscovery
       End Get
     End Property
 
+#If NET461 Then
+
     ''' <summary>
     ''' Please dont use this property to build your own resolver! If the AssemblyResolving is initialized,
     ''' you can easy use .NET (Fusion) to load your assembly without knowing its location: Assembly.Load("YourAssemblyName") 'without file extension!
@@ -204,6 +220,10 @@ Namespace ComponentDiscovery
         Return paths.ToArray()
       End Get
     End Property
+
+#Else
+    'MySettings is not available in .net CORE!
+#End If
 
 #Region " Relative Paths and Placeholders "
 
@@ -369,7 +389,11 @@ Namespace ComponentDiscovery
       PrimaryApplicationDirectory = 0
       LocationOfCallingAssembly = 1
       LocationOfAssemblyResolving = 2
+#If NET461 Then
       LocationOfAppdomainConfigFile = 3
+#Else
+      'AppDomain.CurrentDomain.SetupInformation.ConfigurationFile is not available in .net CORE!
+#End If
     End Enum
 
   End Class

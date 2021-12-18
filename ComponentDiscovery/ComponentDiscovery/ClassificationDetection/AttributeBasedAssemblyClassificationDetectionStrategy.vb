@@ -28,11 +28,28 @@ Namespace ComponentDiscovery.ClassificationDetection
     Private _DefaultsIfNoAttributeFound As String()
 
     Public Sub New(ParamArray defaultsIfNoAttributeFound As String())
-      MyClass.New(True, False, defaultsIfNoAttributeFound)
+      MyClass.New(False, defaultsIfNoAttributeFound)
     End Sub
 
-    Public Sub New(enableAnalysisSandbox As Boolean, enablePersistentCache As Boolean, ParamArray defaultsIfNoAttributeFound As String())
+    Public Sub New(enablePersistentCache As Boolean, ParamArray defaultsIfNoAttributeFound As String())
+#If NET461 Then
+      MyClass.New(True, False, defaultsIfNoAttributeFound)
+#Else
+#Disable Warning BC40000 'this call is safe!
+      MyClass.New(False, enablePersistentCache, defaultsIfNoAttributeFound)
+#Enable Warning BC40000
+#End If
+    End Sub
 
+#If NET461 Then
+     Public Sub New(enableAnalysisSandbox As Boolean, enablePersistentCache As Boolean, ParamArray defaultsIfNoAttributeFound As String())
+#Else
+    <Obsolete("WARNING: In .NET CORE there are no AppDomains anymore - so we cannot use them to run a AnalysisSandbox! were working to find another solution to provide this feature again!")>
+    Public Sub New(enableAnalysisSandbox As Boolean, enablePersistentCache As Boolean, ParamArray defaultsIfNoAttributeFound As String())
+      If (enableAnalysisSandbox) Then
+        Throw New NotSupportedException("In .NET CORE there are no AppDomains anymore - so we cannot use them to run a AnalysisSandbox! were working to find another solution to provide this feature again!")
+      End If
+#End If
       _EnableAnalysisSandbox = enableAnalysisSandbox
       _EnablePersistentCache = enablePersistentCache
       _DefaultsIfNoAttributeFound = defaultsIfNoAttributeFound
@@ -87,11 +104,19 @@ Namespace ComponentDiscovery.ClassificationDetection
 
       Try
         If (_EnableAnalysisSandbox) Then
+#If NET461 Then
           EnsureSandboxDomainIsInitialized()
           _NumberOfAssembliesUsedInSandbox += 1
           SyncLock _AppdomainAccessSemaphore
             result = _SandboxDomain.Invoke(Of String, String, String())(Me.FetchMethod, assemblyFullFilename, taxonomicDimensionName)
           End SyncLock
+#Else
+          Throw New NotSupportedException()
+
+          '  https://www.michael-whelan.net/replacing-appdomain-in-dotnet-core/
+
+
+#End If
         Else
           'UNSAFE!!!
           result = Me.FetchMethod.Invoke(assemblyFullFilename, taxonomicDimensionName)
@@ -185,8 +210,11 @@ Namespace ComponentDiscovery.ClassificationDetection
 
         If (_SandboxDomain Is Nothing) Then
 
+#If NET461 Then
+
           Dim parentSetup = AppDomain.CurrentDomain.SetupInformation
           Dim setup As New AppDomainSetup()
+
           setup.ApplicationName = "Sandbox for Assembly Indexing"
           setup.ApplicationBase = parentSetup.ApplicationBase
           setup.PrivateBinPath = parentSetup.PrivateBinPath
@@ -194,6 +222,10 @@ Namespace ComponentDiscovery.ClassificationDetection
           setup.LoaderOptimization = LoaderOptimization.SingleDomain
 
           _SandboxDomain = AppDomain.CreateDomain("AssemblyEvaluationSandbox", Nothing, setup)
+#Else
+          Throw New NotSupportedException()
+#End If
+
           _NumberOfAssembliesUsedInSandbox = 0
 
         End If

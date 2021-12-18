@@ -22,8 +22,13 @@ Namespace ComponentDiscovery
     Public Shared Function GetInstance() As PersistentIndexCache
 
       If (_Instance Is Nothing) Then
+        Dim cacheDirectory As String = Nothing
 
-        Dim cacheDirectory = Global.My.Settings.AssemblyIndexCacheDirectory
+#If NET461 Then
+        cacheDirectory = Global.My.Settings.AssemblyIndexCacheDirectory
+#Else
+        'in .NET Core there are no MySettings!
+#End If
 
         If (String.IsNullOrWhiteSpace(cacheDirectory)) Then
           cacheDirectory = Path.Combine("%PUBLIC%", "AssemblyIndex")

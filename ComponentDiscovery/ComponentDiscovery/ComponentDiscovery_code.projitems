@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>9c04bcf1-18f1-4d96-bb13-bc6ff83407a4</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>ComponentDiscovery_code</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)%28internal%29\CrossAppdomainHelperExtensions.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)%28internal%29\Diag.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)%28internal%29\HelperExtensions.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)%28internal%29\PersistentIndexCache.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)%28internal%29\PriorityList.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Assemblies\AssemblyIndexer.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Assemblies\ClassificationBasedAssemblyIndexer.TaxonomicDimension.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Assemblies\ClassificationBasedAssemblyIndexer.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Assemblies\IAssemblyIndexer.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationApproval\ClassificationApprovalStrategyBase.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationApproval\DemandCentricClassificationApprovalStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationApproval\ExpressionCentricClassificationApprovalStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationApproval\IClassificationApprovalStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\AttributeBasedAssemblyClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\AttributeBasedTypeClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\Attributes\AssemblyClassificationAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\Attributes\IgnoreNamespaceClassificationsAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\Attributes\NamespaceClassificationAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\Attributes\TypeClassificationAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\DelegateBasedAssemblyClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\IAssemblyClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\ITypeClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\NamespaceBasedAssemblyClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\NamespaceBasedTypeClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Clearances\ClearanceContainer.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\ExtensionMethodIndexer.MethodIndex.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\ExtensionMethodIndexer.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\%28Attributes%29\AttributeInspectionHelper.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\%28Attributes%29\CreatesDiscoverableInstanceAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\%28Attributes%29\InjectAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\%28Attributes%29\PriorizeInstanceDiscoveryAgainstAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\%28Attributes%29\PriorizeInstanceDiscoveryAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\%28Attributes%29\ProvidesDiscoverableInstanceAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\%28Attributes%29\SupportsInstanceDiscoveryAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\%28Attributes%29\TryInjectAttribute.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\AttributeBasedDiscoverableInstanceProvider.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\IDiscoverableInstanceProvider.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\InjectionDemand.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\InjectionHelper.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\InstanceDiscoveryContext.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\LifetimeResponsibility.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Providers\ProviderRepository.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ressolving\AssemblyResolving.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Types\ClassificationBasedTypeIndexer.SemanticDimension.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Types\ClassificationBasedTypeIndexer.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Types\ExtensionsForITypeIndexer.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Types\ITypeIndexer.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Types\TypeIndexer.ApplicableTypesIndex.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Types\TypeIndexer.vb" />
+  </ItemGroup>
+</Project>

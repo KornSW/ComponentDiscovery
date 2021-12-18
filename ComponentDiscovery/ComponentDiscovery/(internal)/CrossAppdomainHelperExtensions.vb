@@ -15,6 +15,7 @@ Imports System.Runtime.CompilerServices
 Imports System.Text
 
 Namespace ComponentDiscovery
+#If NET461 Then
 
   Friend Module ExtensionsForAppDomain
 
@@ -451,4 +452,5 @@ Namespace ComponentDiscovery
 
 #End Region
 
+#End If
 End Namespace

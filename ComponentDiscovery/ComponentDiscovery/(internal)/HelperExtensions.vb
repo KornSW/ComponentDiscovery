@@ -291,8 +291,8 @@ Namespace ComponentDiscovery
         Return inputArray.Contains(search)
       End If
 
-      For Each str In inputArray
-        If (String.Equals(str, search, StringComparison.CurrentCultureIgnoreCase)) Then
+      For Each element In inputArray
+        If (String.Equals(element, search, StringComparison.CurrentCultureIgnoreCase)) Then
           Return True
         End If
       Next

@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <OutputPath>..\..\%28Stage%29\Bin\</OutputPath>
+    <OutputPath>..\..\%28Stage%29\Bin\net461\</OutputPath>
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
@@ -33,7 +33,7 @@
     <DefineDebug>false</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\%28Stage%29\Bin\</OutputPath>
+    <OutputPath>..\..\%28Stage%29\Bin\net461\</OutputPath>
     <DocumentationFile>
     </DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
@@ -115,9 +115,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ComponentDiscovery\ComponentDiscovery.vbproj">
+    <ProjectReference Include="..\ComponentDiscovery.net461\ComponentDiscovery_net461.vbproj">
       <Project>{d5d23bbd-aab6-4e9d-960c-71499668f4c6}</Project>
-      <Name>ComponentDiscovery</Name>
+      <Name>ComponentDiscovery_net461</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Choose>
