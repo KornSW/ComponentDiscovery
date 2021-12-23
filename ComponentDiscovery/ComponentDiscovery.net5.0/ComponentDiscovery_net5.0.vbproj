@@ -23,6 +23,7 @@
     <OutputPath>..\..\(Stage)\Bin\net5.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Deterministic>false</Deterministic>
+    <DefineConstants>NET5</DefineConstants>
   </PropertyGroup>
 
   <Import Project="..\ComponentDiscovery\ComponentDiscovery_code.projitems" Label="Shared" />
