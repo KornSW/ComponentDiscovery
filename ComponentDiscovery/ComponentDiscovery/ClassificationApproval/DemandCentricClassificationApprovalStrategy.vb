@@ -53,9 +53,9 @@ Namespace ComponentDiscovery.ClassificationApproval
       For Each classification In classificationExpressions
 
         Dim resultForCurrentClearanceExpression = Me.RequireClearanceForConcreteClassification(
-        classification,
-        clearanceExpressions
-      )
+          classification,
+          clearanceExpressions
+        )
 
         'ww are 'demand based', which requires at least one clearance for EACH classification to reach conformity!
 

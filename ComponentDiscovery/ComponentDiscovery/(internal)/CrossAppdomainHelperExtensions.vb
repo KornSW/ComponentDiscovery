@@ -46,8 +46,8 @@ Namespace ComponentDiscovery
 
     <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
     Public Function Invoke(Of TArg1, TArg2, TReturn)(
-    appDomain As AppDomain, method As Func(Of TArg1, TArg2, TReturn), arg1 As TArg1, arg2 As TArg2
-  ) As TReturn
+      appDomain As AppDomain, method As Func(Of TArg1, TArg2, TReturn), arg1 As TArg1, arg2 As TArg2
+    ) As TReturn
 
       Return CrossAppdomainFuncProxy(Of TArg1, TArg2, TReturn).Invoke(appDomain, method, arg1, arg2)
     End Function

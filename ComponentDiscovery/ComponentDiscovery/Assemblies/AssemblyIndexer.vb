@@ -73,20 +73,20 @@ Namespace ComponentDiscovery
     End Function
 
     Public Sub TryApproveAssemblyFilesFromApplicationAssemblyDirectory(
-    recursive As Boolean,
-    Optional pattern As String = "*.dll|*.exe",
-    Optional forceReapprove As Boolean = False
-  )
+      recursive As Boolean,
+      Optional pattern As String = "*.dll|*.exe",
+      Optional forceReapprove As Boolean = False
+    )
 
       Me.TryApproveAssemblyFilesFrom(Me.GetPrimaryApplicationAssemblyDirectory, recursive, pattern, forceReapprove)
     End Sub
 
     Public Sub TryApproveAssemblyFilesFrom(
-    directoryInfo As DirectoryInfo,
-    recursive As Boolean,
-    Optional searchPattern As String = "*.dll|*.exe",
-    Optional forceReapprove As Boolean = False
-  )
+      directoryInfo As DirectoryInfo,
+      recursive As Boolean,
+      Optional searchPattern As String = "*.dll|*.exe",
+      Optional forceReapprove As Boolean = False
+    )
 
       searchPattern = searchPattern.ToLower()
 
@@ -193,19 +193,24 @@ Namespace ComponentDiscovery
     End Function
 
     Protected Function IsAssemblyAlreadyProcessed(assemblyFullFilename As String) As Boolean
+
       If (_DismissedAssemblies.Contains(assemblyFullFilename)) Then
         Return True
       End If
+
       Return Me.IsAssemblyAlreadyIndexed(assemblyFullFilename)
     End Function
 
     Protected Function IsAssemblyAlreadyIndexed(assemblyFullFilename As String) As Boolean
+
       assemblyFullFilename = assemblyFullFilename.ToLower()
+
       For Each ia In _ApprovedAssemblies
         If (ia.Location.ToLower() = assemblyFullFilename) Then
           Return True
         End If
       Next
+
       Return False
     End Function
 
@@ -231,11 +236,11 @@ Namespace ComponentDiscovery
         Dim fileName As String = Path.GetFileNameWithoutExtension(assemblyFullFilename)
 
         Diag.Warning(
-        String.Format(
-          "AssemblyIndexer: assembly '{0}' could not be added to index because because 'Assembly.LoadFile(""{1}"")' caused the following exception: {2}",
-          fileName, assemblyFullFilename, ex.Message
+          String.Format(
+            "AssemblyIndexer: assembly '{0}' could not be added to index because because 'Assembly.LoadFile(""{1}"")' caused the following exception: {2}",
+            fileName, assemblyFullFilename, ex.Message
+          )
         )
-      )
 
         Return False
       End Try

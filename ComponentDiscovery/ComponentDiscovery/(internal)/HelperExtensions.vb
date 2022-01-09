@@ -53,11 +53,11 @@ Namespace ComponentDiscovery
       End If
 
       Dim ctor = extendee.GetConstructor(
-      BindingFlags.CreateInstance Or BindingFlags.Public Or BindingFlags.Instance,
-      Nothing,
-      New Type(0 - 1) {},
-      Nothing
-    )
+        BindingFlags.CreateInstance Or BindingFlags.Public Or BindingFlags.Instance,
+        Nothing,
+        New Type(0 - 1) {},
+        Nothing
+      )
 
       If (ctor Is Nothing) Then
         Return False 'no parameterless constructor
@@ -150,13 +150,13 @@ Namespace ComponentDiscovery
     <Extension>
     Public Function HasDefaultConstructor(extendee As Type) As Boolean
       Return (
-      extendee.IsPrimitive OrElse
-      Not (
-        extendee.GetConstructor(
-          BindingFlags.CreateInstance Or BindingFlags.Public Or BindingFlags.Instance, Nothing, New Type(0 - 1) {}, Nothing
-        ) Is Nothing
+        extendee.IsPrimitive OrElse
+        Not (
+          extendee.GetConstructor(
+            BindingFlags.CreateInstance Or BindingFlags.Public Or BindingFlags.Instance, Nothing, New Type(0 - 1) {}, Nothing
+          ) Is Nothing
+        )
       )
-    )
     End Function
 
     <Extension(), EditorBrowsable(EditorBrowsableState.Always)>
@@ -166,8 +166,8 @@ Namespace ComponentDiscovery
 
     <Extension(), EditorBrowsable(EditorBrowsableState.Advanced)>
     Public Function FilterByName(
-    methodInfos As IEnumerable(Of MethodInfo), methodName As String, Optional ignoreCase As Boolean = True
-  ) As IEnumerable(Of MethodInfo)
+      methodInfos As IEnumerable(Of MethodInfo), methodName As String, Optional ignoreCase As Boolean = True
+    ) As IEnumerable(Of MethodInfo)
 
       If (ignoreCase) Then
         Return From m In methodInfos Where m.Name.ToLower() = methodName.ToLower()

@@ -138,22 +138,23 @@ Namespace ComponentDiscovery.ClassificationApproval
 
       'advanced matches
       If (_EnableRecursionForArborescentClassifications) Then
-        If (classificationTag.IsSubPathOf(clearanceTag, HierarchySeparatorChar)) Then
 
+        If (classificationTag.IsSubPathOf(clearanceTag, HierarchySeparatorChar)) Then
           If (oneSideIsNegated) Then
             Return EvaluationConclusion.Dismissed
           Else
             Return EvaluationConclusion.Unlocked
           End If
         End If
-        If (clearanceTag.IsSubPathOf(classificationTag, HierarchySeparatorChar)) Then
 
+        If (clearanceTag.IsSubPathOf(classificationTag, HierarchySeparatorChar)) Then
           If (oneSideIsNegated) Then
             Return EvaluationConclusion.Dismissed
           Else
             Return EvaluationConclusion.Inconclusive
           End If
         End If
+
       End If
 
       Return EvaluationConclusion.Inconclusive

@@ -18,7 +18,7 @@ Namespace ComponentDiscovery
 #If DEBUG Then
     Public Shared Property IncludeStacktraces As Boolean = True
 #Else
-  Public Shared Property IncludeStacktraces As Boolean = False
+    Public Shared Property IncludeStacktraces As Boolean = False
 #End If
 
     Public Shared Property ErrorNotificationMethod As Action(Of String) = (
@@ -34,12 +34,12 @@ Namespace ComponentDiscovery
   )
 
     Public Shared Property InfoNotificationMethod As Action(Of String) = (
-    Sub(message As String)
+      Sub(message As String)
 #If DEBUG Then
-      Trace.TraceInformation(message)
+        Trace.TraceInformation(message)
 #End If
-    End Sub
-  )
+      End Sub
+    )
 
     Public Shared Property VerboseNotificationMethod As Action(Of String) = Nothing
 

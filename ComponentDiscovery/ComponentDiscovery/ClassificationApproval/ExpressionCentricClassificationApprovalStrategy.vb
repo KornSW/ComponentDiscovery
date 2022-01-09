@@ -56,9 +56,9 @@ Namespace ComponentDiscovery.ClassificationApproval
       For Each clearanceExpression In clearanceExpressions
 
         Dim resultForCurrentClearanceExpression = Me.RequireClassificationForAndLinkedClearances(
-        clearanceExpression.Split(AndChar),
-        classificationExpressions
-      )
+          clearanceExpression.Split(AndChar),
+          classificationExpressions
+        )
 
         'in the "expression based" iterpretation, ALL classifications have to be unlocked!!!
         Select Case resultForCurrentClearanceExpression

@@ -36,10 +36,10 @@ Namespace ComponentDiscovery
       Private _ClearanceExpressions As New List(Of String)
 
       Public Sub New(
-      dimensionName As String,
-      assemblyClassificationStrategy As IAssemblyClassificationDetectionStrategy,
-      classificationApprovalStrategy As IClassificationApprovalStrategy
-    )
+        dimensionName As String,
+        assemblyClassificationStrategy As IAssemblyClassificationDetectionStrategy,
+        classificationApprovalStrategy As IClassificationApprovalStrategy
+      )
 
         _DimensionName = dimensionName
         _AssemblyClassificationStrategy = assemblyClassificationStrategy
@@ -74,7 +74,7 @@ Namespace ComponentDiscovery
       Public Delegate Sub ClearancesAddedEventHandler(dimensionName As String, addedClearanceExpressions() As String)
 
       ''' <summary>
-      '''   Occurs when clearance expressions have actually been added to the ClearanceLabels collection.
+      '''   Occurs when clearance expressions have actually been added to the clearance collection.
       ''' </summary>
       ''' <param name="addedClearanceExpressions"> An array of the effectively added labels. </param>
       Public Event ClearancesAdded As ClearancesAddedEventHandler
@@ -86,11 +86,11 @@ Namespace ComponentDiscovery
       End Sub
 
       ''' <summary>
-      '''   Adds the classification expressions of an assembly to the ClearanceLabels collection.
+      '''   Adds the classification expressions of an assembly to the clearance collection.
       '''   This will instantly make the assembly approvable.
       ''' </summary>
       ''' <returns>
-      '''   True, if at least one new expression has actually been added to the ClearanceLabels collection.
+      '''   True, if at least one new expression has actually been added to the clearance collection.
       ''' </returns>
       Public Function AddClearancesFromAssembly(assemblyFullFilename As String) As Boolean
         Dim classificationExpressions = Me.GetClassificationsWithRuntimeCaching(assemblyFullFilename)
@@ -101,17 +101,19 @@ Namespace ComponentDiscovery
       End Function
 
       ''' <summary>
-      '''   Adds further labels to the ClearanceLabels collection. Duplicates will be ignored.
-      '''   Expanding the clearance labels collection will broaden the set of approvable assemblies.
+      '''   Adds further expressions to the clearance collection. Duplicates will be ignored.
+      '''   Expanding the clearance collection will broaden the set of approvable assemblies.
+      '''   Note: if you plan to call this method multiple times (may be to setup multiple dimensions) then you
+      '''   should use the 'ClassifiactionBAsedAssemblyIndexer.ImportClearances' instead to prevent performance-issues!
       ''' </summary>
       ''' <returns>
       '''   True, if at least one new expression has actually been added to the ClearanceLabels collection.
       ''' </returns>
-      Public Function AddClearances(ParamArray addingExpressions() As String) As Boolean
+      Public Function AddClearances(ParamArray expressionsToAdd() As String) As Boolean
         Dim newExpressionsDetected As Boolean = False
         Dim addedExpressions As New List(Of String)
 
-        For Each addingExpression In addingExpressions
+        For Each addingExpression In expressionsToAdd
           addingExpression = addingExpression.ToLower()
 
           If (Not _ClearanceExpressions.Contains(addingExpression)) Then
@@ -144,10 +146,10 @@ Namespace ComponentDiscovery
         Dim classificationExpressions As String() = Nothing
 
         Dim successfullyDetected = Me.AssemblyClassificationDetectionStrategy.TryDetectClassificationsForAssembly(
-        assemblyFullFilename,
-        Me.DimensionName,
-        classificationExpressions
-      )
+          assemblyFullFilename,
+          Me.DimensionName,
+          classificationExpressions
+        )
 
         If (Not successfullyDetected) Then
           classificationExpressions = Nothing

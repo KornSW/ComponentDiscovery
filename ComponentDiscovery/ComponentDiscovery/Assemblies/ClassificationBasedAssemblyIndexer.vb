@@ -227,19 +227,34 @@ Namespace ComponentDiscovery
 
 #Region " dealing with Clearances "
 
+    Private Sub Dimension_OnClearancesChanged(dimensionName As String, addedClearanceExpressions As String())
+
+      'this directly calls 'ReapproveDismissedAssemblies()' OR
+      '(if the auto reapproval is currently suspended) sets the dirty-marker,
+      'which indicates, that it needs to be called later...
+      Me.OnReapproveDismissedAssembliesRequired()
+
+    End Sub
+
     Public Function GetClearances(taxonomicDimensionName As String) As String()
       Return _TaxonomicDimensionsByName(taxonomicDimensionName).Clearances
     End Function
 
     ''' <summary>
-    '''   Adds clearances to the internal clearance collection which will broaden the set of approvable assemblies.
+    '''  Adds clearances to the internal clearance collection which will broaden the set of approvable assemblies.
+    '''  Note: if you plan to call this method multiple times (may be to setup multiple dimensions) then you
+    '''  should use the 'ImportClearances'-Method instead to prevent performance-issues!
     ''' </summary>
     ''' <remarks> Adding clearances could implicitely approve additional assemblies. </remarks>
     Public Function AddClearances(taxonomicDimensionName As String, ParamArray clearanceExpressions() As String) As Boolean
       Dim newClearencesAdded = Me.TaxonomicDimensions(taxonomicDimensionName).AddClearances(clearanceExpressions)
-      If (newClearencesAdded) Then
-        Me.OnReapproveDismissedAssembliesRequired()
-      End If
+
+      '*** COMMENTED OUT, BEACAUSE WHE HAVE THE Dimension_OnClearancesChanged EVENT HANDLER DOING THAT
+      'If (newClearencesAdded) Then
+      '  'sets the dirty-marker which indicates, that 'ReapproveDismissedAssemblies()' needs to be called
+      '  Me.OnReapproveDismissedAssembliesRequired()
+      'End If
+
       Return newClearencesAdded
     End Function
 
@@ -260,20 +275,29 @@ Namespace ComponentDiscovery
 
       Dim newClearencesAdded = False
 
-      'Try
-      'Me.SuspendAutoReapprove()
+      Me.ExecuteWithAggregatedReapprove(
+        Sub()
 
-      For Each dimension In Me.TaxonomicDimensions
-        newClearencesAdded = newClearencesAdded Or dimension.AddClearancesFromAssembly(assembly.Location)
-      Next
+          For Each dimension In Me.TaxonomicDimensions
+            newClearencesAdded = newClearencesAdded Or dimension.AddClearancesFromAssembly(assembly.Location)
+          Next
 
-      If (newClearencesAdded) Then
-        Me.OnReapproveDismissedAssembliesRequired()
-      End If
+          '*** COMMENTED OUT, BEACAUSE WHE HAVE THE Dimension_OnClearancesChanged EVENT HANDLER DOING THAT
+          'If (newClearencesAdded) Then
+          '  'sets the dirty-marker which indicates, that 'ReapproveDismissedAssemblies()' needs to be called
+          '  Me.OnReapproveDismissedAssembliesRequired()
+          'End If
 
-      'Finally
-      '  Me.ResumeAutoReapprove()
-      'End Try
+        End Sub
+      )
+
+      '*** COMMENTED OUT, BEACAUSE THE ExecuteWithoutAutoReapprove SHOULD DO THIS INTERNALLY
+      'This needs to be called manually, because we have explicitly executed
+      'the previous actions 'WithoutAutoReapprove' to prevent performance
+      'issues. Dont worry we have an internal dirty-marker - so that this
+      'will only take time, if there was at least one clearance added during
+      'the previous actions...
+      'Me.ReapproveDismissedAssemblies()
 
       Return newClearencesAdded
     End Function
@@ -283,83 +307,83 @@ Namespace ComponentDiscovery
 #Region " Auto Reapprove Suspension (for better Performance) "
 
     <ThreadStatic>
-    Private _SuspendAutoReapproveOnClearanceAdded As Boolean = False
+    Private _AutoReapproveSuspendedForCurrentThread As Boolean = False
 
-    <ThreadStatic>
-    Private _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove As Boolean = False
+    Private _OutstandingReapprovalAfterClearanceWereAdded As Boolean = False
 
     ''' <summary>
-    ''' Invoke the given delegate without automatically calling 'ReapproveDismissedAssemblies()' when clearances were added.
-    ''' After the given delegate has been invoked, the 'ReapproveDismissedAssemblies()' will be called exact once (if necessary).
+    ''' NOTE: this will only reapprove when the internal dirty-marker is set!
+    ''' To enforce a reapproval use the overload and set the 'force' parameter.
+    ''' </summary>
+    Public Overrides Sub ReapproveDismissedAssemblies()
+      MyClass.ReapproveDismissedAssemblies(False) 'MYCLASS!!! see method below!
+    End Sub
+
+    ''' <summary>
+    ''' NOTE: this will only reapprove when the internal dirty-marker is set OR
+    ''' the 'force' parameter is set.
+    ''' </summary>
+    ''' <param name="force"></param>
+    Public Overloads Sub ReapproveDismissedAssemblies(force As Boolean)
+      If (_OutstandingReapprovalAfterClearanceWereAdded Or force) Then
+        MyBase.ReapproveDismissedAssemblies()
+        _OutstandingReapprovalAfterClearanceWereAdded = False
+      End If
+    End Sub
+
+    ''' <summary>
+    ''' Invoke the given delegate without automatically calling 'ReapproveDismissedAssemblies()' for each clearance added.
+    ''' After the given delegate has been invoked, the 'ReapproveDismissedAssemblies()'
+    ''' will be called exactly once internally!
     ''' The return value is true, if one or more clearances were added during the invoke.
     ''' </summary>
-    Public Function ExecuteWithoutAutoReapprove(method As Action) As Boolean
+    Public Function ExecuteWithAggregatedReapprove(method As Action) As Boolean
 
-      'protects the situation of a cascaded call of 'ExecuteWithoutAutoReapprove'
-      If (Me.SuspendAutoReapproveOnClearanceAdded) Then
+      'protects the situation of a cascaded call of 'ExecuteWithAggregatedReapprove'
+      If (Me.AutoReapproveSuspendedForCurrentThread) Then
         method.Invoke()
-        Return _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove
+        Return _OutstandingReapprovalAfterClearanceWereAdded
       End If
 
       Try
-        Me.SuspendAutoReapproveOnClearanceAdded = True
+        Me.AutoReapproveSuspendedForCurrentThread = True
         method.Invoke()
-        Return _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove
+        Return _OutstandingReapprovalAfterClearanceWereAdded
       Finally
-        Me.SuspendAutoReapproveOnClearanceAdded = False
+        'REACTIVATING THE AUTO-APPROVAL WILL IMPLICITELY
+        'TRIGGER REAPPROVAL IF THE DIRTY-MARKER IS SET
+        Me.AutoReapproveSuspendedForCurrentThread = False
       End Try
 
     End Function
 
-    Private Property SuspendAutoReapproveOnClearanceAdded As Boolean
+    ''' <summary>
+    ''' REACTIVATING THE AUTO-APPROVAL WILL IMPLICITELY
+    ''' TRIGGER REAPPROVAL IF THE DIRTY-MARKER IS SET
+    ''' </summary>
+    Private Property AutoReapproveSuspendedForCurrentThread As Boolean
       Get
-        Return _SuspendAutoReapproveOnClearanceAdded
+        Return _AutoReapproveSuspendedForCurrentThread
       End Get
       Set(value As Boolean)
-        If (Not _SuspendAutoReapproveOnClearanceAdded = value) Then
-          _SuspendAutoReapproveOnClearanceAdded = value
-          If (_SuspendAutoReapproveOnClearanceAdded = False AndAlso _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove) Then
+        If (Not _AutoReapproveSuspendedForCurrentThread = value) Then
+          _AutoReapproveSuspendedForCurrentThread = value
+          If (_AutoReapproveSuspendedForCurrentThread = False) Then
             Me.ReapproveDismissedAssemblies()
           End If
-          _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove = False
         End If
       End Set
     End Property
 
+    ''' <summary>
+    '''  directly calls 'ReapproveDismissedAssemblies()' OR
+    '''  (if the auto reapproval is currently suspended) sets the dirty-marker,
+    '''  which indicates, that it needs to be called later...
+    ''' </summary>
     Protected Sub OnReapproveDismissedAssembliesRequired()
-      If (_SuspendAutoReapproveOnClearanceAdded) Then
-        _ClearanceHaveBeenAddedDuringSuspendedAutoReapprove = True
-      Else
+      _OutstandingReapprovalAfterClearanceWereAdded = True
+      If (Not _AutoReapproveSuspendedForCurrentThread) Then
         Me.ReapproveDismissedAssemblies()
-      End If
-    End Sub
-
-#End Region
-#Region " Auto Reapprove on Clearance Change "
-
-    Protected Sub SuspendAutoReapprove()
-      _AutoReapproveSuspended = True
-    End Sub
-
-    Protected Sub ResumeAutoReapprove()
-      _AutoReapproveSuspended = False
-      If (_AutoReapproveScheduled) Then
-        Me.ReapproveDismissedAssemblies()
-      End If
-    End Sub
-
-    Private _AutoReapproveSuspended As Boolean = False
-    Private _AutoReapproveScheduled As Boolean = False
-
-    Private Sub Dimension_OnClearancesChanged(dimensionName As String, addedClearanceExpressions As String())
-      Me.ReapproveDismissedAssemblies()
-    End Sub
-
-    Public Overrides Sub ReapproveDismissedAssemblies()
-      If (_AutoReapproveSuspended) Then
-        _AutoReapproveScheduled = True
-      Else
-        MyBase.ReapproveDismissedAssemblies()
       End If
     End Sub
 
@@ -415,7 +439,7 @@ Namespace ComponentDiscovery
 
       Dim matchingResultsPerDimension As New Dictionary(Of String, Boolean)
 
-      'dont ask why - weve had some strange constellation in which 
+      'dont ask why - weve had some strange concurrency constellation in which 
       'our constructor was calling MyBase.New() and this was calling VerifyAssembly
       'and we came here BEFORE the initializer in line 22 has been executed WTF!
       If (_TaxonomicDimensionsByName Is Nothing) Then
@@ -637,13 +661,13 @@ Namespace ComponentDiscovery
     ''' <summary>
     '''   Adds clearances to the internal clearance collection which will broaden the set of approvable assemblies.
     ''' </summary>
-    ''' <param name="qualifiedClearanceExpressions">A string like "DimensionName:ClearanceExpression".</param>
+    ''' <param name="qualifiedClearanceExpressions">a string-array where each element has a syntax like "DimensionName:ClearanceExpression".</param>
     ''' <remarks> Importing clearances could implicitely approve additional assemblies. </remarks>
     Public Overridable Sub ImportClearances(qualifiedClearanceExpressions As String())
 
       If ((qualifiedClearanceExpressions IsNot Nothing) AndAlso (qualifiedClearanceExpressions.Any)) Then
 
-        Me.ExecuteWithoutAutoReapprove(
+        Me.ExecuteWithAggregatedReapprove(
           Sub()
 
             Dim added As Boolean = False
@@ -660,12 +684,23 @@ Namespace ComponentDiscovery
 
               End If
             Next
-            If (added) Then
-              Me.OnReapproveDismissedAssembliesRequired()
-            End If
+
+            '*** COMMENTED OUT, BEACAUSE WE HAVE THE Dimension_OnClearancesChanged EVENT HANDLER DOING THAT
+            'If (added) Then
+            '  'sets the dirty-marker which indicates, that 'ReapproveDismissedAssemblies()' needs to be called
+            '  Me.OnReapproveDismissedAssembliesRequired()
+            'End If
 
           End Sub
         )
+
+        '*** COMMENTED OUT, BEACAUSE THE ExecuteWithoutAutoReapprove SHOULD DO THIS INTERNALLY
+        'This needs to be called manually, because we have explicitly executed
+        'the previous actions 'WithoutAutoReapprove' to prevent performance
+        'issues. Dont worry we have an internal dirty-marker - so that this
+        'will only take time, if there was at least one clearance added during
+        'the previous actions...
+        'Me.ReapproveDismissedAssemblies()
 
       End If
 
@@ -674,29 +709,40 @@ Namespace ComponentDiscovery
     ''' <summary>
     '''   Adds clearances to the internal clearance collection which will broaden the set of approvable assemblies.
     ''' </summary>
-    ''' <param name="clearancesSortedByDimension">A Dictionary(Of "DimensionName", {"ClearanceExpression1", "ClearanceExpression2"})</param>
+    ''' <param name="clearancesSortedByDimension">a dictionary, where the KEY is the "DimensionName" and the VALUE is a string-array where each element is a ClearanceExpression (without a DimensionName)</param>
     ''' <remarks> Importing clearances could implicitely approve additional assemblies. </remarks>
     Public Overridable Sub ImportClearances(clearancesSortedByDimension As Dictionary(Of String, String()))
 
-      Me.ExecuteWithoutAutoReapprove(
-      Sub()
+      Me.ExecuteWithAggregatedReapprove(
+        Sub()
 
-        Dim added As Boolean = False
-        For Each dimensionName In clearancesSortedByDimension.Keys
-          For Each clearanceExpression In clearancesSortedByDimension(dimensionName)
-            If (Me.TaxonomicDimensionNames.Contains(dimensionName)) Then
-              Dim dimension = Me.TaxonomicDimensions(dimensionName)
-              dimension.AddClearances(clearanceExpression)
-              added = added Or dimension.AddClearances(clearanceExpression)
-            End If
+          Dim added As Boolean = False
+          For Each dimensionName In clearancesSortedByDimension.Keys
+            For Each clearanceExpression In clearancesSortedByDimension(dimensionName)
+              If (Me.TaxonomicDimensionNames.Contains(dimensionName)) Then
+                Dim dimension = Me.TaxonomicDimensions(dimensionName)
+                dimension.AddClearances(clearanceExpression)
+                added = added Or dimension.AddClearances(clearanceExpression)
+              End If
+            Next
           Next
-        Next
-        If (added) Then
-          Me.OnReapproveDismissedAssembliesRequired()
-        End If
 
-      End Sub
-  )
+          '*** COMMENTED OUT, BEACAUSE WE HAVE THE Dimension_OnClearancesChanged EVENT HANDLER DOING THAT
+          'If (added) Then
+          '  'sets the dirty-marker which indicates, that 'ReapproveDismissedAssemblies()' needs to be called
+          '  Me.OnReapproveDismissedAssembliesRequired()
+          'End If
+
+        End Sub
+      )
+
+      '*** COMMENTED OUT, BEACAUSE THE ExecuteWithoutAutoReapprove SHOULD DO THIS INTERNALLY
+      'This needs to be called manually, because we have explicitly executed
+      'the previous actions 'WithoutAutoReapprove' to prevent performance
+      'issues. Dont worry we have an internal dirty-marker - so that this
+      'will only take time, if there was at least one clearance added during
+      'the previous actions...
+      'Me.ReapproveDismissedAssemblies()
 
     End Sub
 

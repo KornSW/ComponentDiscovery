@@ -61,6 +61,7 @@ Namespace ComponentDiscovery
         Directory.CreateDirectory(fullDir)
         File.WriteAllText(Path.Combine(fullDir, "_Info.txt"), "This Cache is related to assemblies located in: " + assemblyLocationDirectory)
       End If
+
       Return Path.Combine(_CacheDirectory, folderNameHash, fileName)
     End Function
 
@@ -85,10 +86,10 @@ Namespace ComponentDiscovery
 #Region " Read "
 
     Public Function TryGetClassificationExpressionsFromCache(
-    assemblyFullFilename As String,
-    dimensionName As String,
-    ByRef returningClassificationExpressions As String()
-  ) As Boolean
+      assemblyFullFilename As String,
+      dimensionName As String,
+      ByRef returningClassificationExpressions As String()
+    ) As Boolean
 
       Dim prefix = "<AssCl>|" + dimensionName + "|"
       Dim matchingLines As String() = Nothing
@@ -138,11 +139,11 @@ Namespace ComponentDiscovery
     End Function
 
     Private Function TryReadCacheFile(
-    assemblyFullFilename As String,
-    searchPrefix As String,
-    singleMatch As Boolean,
-    ByRef returningContentLines As String()
-  ) As Boolean
+      assemblyFullFilename As String,
+      searchPrefix As String,
+      singleMatch As Boolean,
+      ByRef returningContentLines As String()
+    ) As Boolean
 
       Dim cacheFileFullName As String = BuildCacheFileFullName(assemblyFullFilename)
 
@@ -201,9 +202,9 @@ Namespace ComponentDiscovery
         End Using
       Catch ex As Exception
         Diag.Error(
-        $"Cannot read Assembly-Index-Cachefile '{cacheFileFullName}' " +
-        $"(a single occurrenceof this exception can be an uncritical filesystem-access-collision...): {ex}"
-      )
+          $"Cannot read Assembly-Index-Cachefile '{cacheFileFullName}' " +
+          $"(a single occurrenceof this exception can be an uncritical filesystem-access-collision...): {ex}"
+        )
         Return False
       End Try
 
@@ -263,9 +264,9 @@ Namespace ComponentDiscovery
         'this could be caused by a collision during file access from multiple processes
         'but it is uncritical because the cache can also be rebuilded during the next call
         Diag.Error(
-        $"Cannot write Assembly-Index-Cachefile '{cacheFileFullName}' " +
-        "(a single occurrenceof this exception can be an uncritical filesystem-access-collision...): " + ex.Message
-      )
+          $"Cannot write Assembly-Index-Cachefile '{cacheFileFullName}' " +
+          "(a single occurrenceof this exception can be an uncritical filesystem-access-collision...): " + ex.Message
+        )
       End Try
 
     End Sub
