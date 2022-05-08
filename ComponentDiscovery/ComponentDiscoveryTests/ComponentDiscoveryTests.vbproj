@@ -79,6 +79,9 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="%28internal%29\AsyncDisposalDelayTests.vb" />
+    <Compile Include="%28internal%29\ContextAmbienceManagerTests.vb" />
+    <Compile Include="%28internal%29\CallTreeTrackerTests.vb" />
     <Compile Include="ExpressionCentricClassificationApprovalStrategyTests.vb" />
     <Compile Include="TestContent\MyBusinessClass3.vb" />
     <Compile Include="TestContent\MyBusinessInterfaceA.vb" />

@@ -15,57 +15,8 @@ Namespace Composition.InstanceDiscovery
   ''' <summary>
   ''' provides access to discoverable instances
   ''' </summary>
-  Public Class InstanceDiscoveryContext
+  Partial Public Class InstanceDiscoveryContext
     Implements IDisposable
-
-    'this is an interceptor to hook up any logic for scope the availability of providers
-    Public Shared ProviderRepositoryLookupMethod As Func(Of ProviderRepository(Of IDiscoverableInstanceProvider)) = AddressOf GetOrCreateAppdomainScopedProviderRepository
-
-#Region " default-logic for simple usecases (global-scoped appdomain usage) "
-
-    <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private Shared _AppDomainAssemblyIndexer As IAssemblyIndexer = Nothing
-
-    <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private Shared _AppDomainTypeIndexer As ITypeIndexer = Nothing
-
-    <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private Shared _AppDomainProviderRepo As ProviderRepository(Of IDiscoverableInstanceProvider) = Nothing
-
-    <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private Shared _AppDomainScopedProviderForAttribs As AttributeBasedDiscoverableInstanceProvider = Nothing
-
-    Private Shared Function GetOrCreateAppdomainScopedProviderRepository() As ProviderRepository(Of IDiscoverableInstanceProvider)
-
-      If (_AppDomainAssemblyIndexer Is Nothing) Then
-        _AppDomainAssemblyIndexer = New AssemblyIndexer() With {.AppDomainBindingEnabled = True}
-      End If
-
-      If (_AppDomainTypeIndexer Is Nothing) Then
-        _AppDomainTypeIndexer = New TypeIndexer(_AppDomainAssemblyIndexer)
-      End If
-
-      If (_AppDomainProviderRepo Is Nothing) Then
-        'here the typeindexer will be used to find all 'IDiscoverableInstanceProvider' implementations
-        _AppDomainProviderRepo = New ProviderRepository(Of IDiscoverableInstanceProvider)(_AppDomainTypeIndexer)
-
-        'instances of this special-provider will need to be added manually, because there is no parameterless constructor 
-        _AppDomainTypeIndexer.SubscribeForApplicableTypeFound(Of SupportsInstanceDiscoveryAttribute)(
-          False,
-          Sub(t)
-            Dim newProvider = AttributeBasedDiscoverableInstanceProvider.CreateForCandidateIfValid(t)
-            If (newProvider IsNot Nothing) Then
-              _AppDomainProviderRepo.AddProvider(newProvider)
-            End If
-          End Sub
-         )
-
-      End If
-
-      Return _AppDomainProviderRepo
-    End Function
-
-#End Region
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _ProvidersUnsorted As IDiscoverableInstanceProvider()
@@ -78,6 +29,36 @@ Namespace Composition.InstanceDiscovery
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _PriorityRules As New PriorityList(Of Type)
+
+    Public Sub New()
+
+      _ContextCreationHandler.Invoke(Me)
+
+      'create a snapshot, so that the amount of available providers cannot change during the usage of the context
+      _ProvidersUnsorted = _ProviderDiscoveryMethod.Invoke()
+
+      'first lets add the overriding rules
+      For Each p In _ProvidersUnsorted
+        Dim providerOriginType As Type = p.RepresentingOriginType
+        p.DeclarePriorizationRules(
+          Sub(foreignOrigin As Type, provHasPriority As Boolean)
+            Dim higher As Type
+            Dim lower As Type
+            If (provHasPriority) Then
+              higher = providerOriginType
+              lower = foreignOrigin
+            Else
+              higher = foreignOrigin
+              lower = providerOriginType
+            End If
+            If (Not _PriorityRules.TryDeclarePreference(higher, lower)) Then
+              Trace.TraceError($"Instance-Discovery source '{higher}' cannot override '{lower}' because of cyclic references!")
+            End If
+          End Sub
+        )
+      Next
+
+    End Sub
 
     Protected ReadOnly Property ProvidersByPriority As IDiscoverableInstanceProvider()
       Get
@@ -103,34 +84,6 @@ Namespace Composition.InstanceDiscovery
         Return _PriorityRules
       End Get
     End Property
-
-    Public Sub New()
-
-      'create a snapshot, so that the amount of available providers cannot change during the usage of the context
-      _ProvidersUnsorted = ProviderRepositoryLookupMethod.Invoke().Providers.ToArray()
-
-      'first lets add the overriding rules
-      For Each p In _ProvidersUnsorted
-        Dim providerOriginType As Type = p.RepresentingOriginType
-        p.DeclarePriorizationRules(
-          Sub(foreignOrigin As Type, provHasPriority As Boolean)
-            Dim higher As Type
-            Dim lower As Type
-            If (provHasPriority) Then
-              higher = providerOriginType
-              lower = foreignOrigin
-            Else
-              higher = foreignOrigin
-              lower = providerOriginType
-            End If
-            If (Not _PriorityRules.TryDeclarePreference(higher, lower)) Then
-              Trace.TraceError($"Instance-Discovery source '{higher}' cannot override '{lower}' because of cyclic references!")
-            End If
-          End Sub
-        )
-      Next
-
-    End Sub
 
     Public Function DeclareOriginOverride(Of THigherPriorityOrigin, TLowerPriorityOrigin)() As Boolean
       Return Me.DeclareOriginOverride(GetType(THigherPriorityOrigin), GetType(TLowerPriorityOrigin))
@@ -218,20 +171,6 @@ Namespace Composition.InstanceDiscovery
 
       Return False
     End Function
-
-    ''' <summary>
-    ''' disposes all 'self-managed' instances for which the lifetime-handling has been delegated to this context
-    ''' </summary>
-    Public Sub Dispose() Implements IDisposable.Dispose
-      SyncLock _SelfManagedInstances
-        For Each selfManagedInstance In _SelfManagedInstances.Values
-          If (selfManagedInstance IsNot Nothing AndAlso TypeOf (selfManagedInstance) Is IDisposable) Then
-            DirectCast(selfManagedInstance, IDisposable).Dispose()
-          End If
-        Next
-        _SelfManagedInstances.Clear()
-      End SyncLock
-    End Sub
 
   End Class
 

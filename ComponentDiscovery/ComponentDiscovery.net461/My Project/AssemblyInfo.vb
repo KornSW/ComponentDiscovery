@@ -1,5 +1,6 @@
 ﻿Imports System
 Imports System.Reflection
+Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 
 <Assembly: AssemblyTitle("ComponentDiscovery")>
@@ -9,10 +10,12 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyCopyright("KornSW")>
 <Assembly: AssemblyTrademark("KornSW")>
 
+<Assembly: InternalsVisibleTo("ComponentDiscoveryTests")>
+
 <Assembly: CLSCompliant(True)>
 <Assembly: ComVisible(False)>
 <Assembly: Guid("5027f65d-44ad-44b7-805a-2de61c83390e")>
 
-<Assembly: AssemblyVersion("4.6.1.*")>
-<Assembly: AssemblyInformationalVersion("4.6.1-localbuild")>
+<Assembly: AssemblyVersion("4.7.0.*")>
+<Assembly: AssemblyInformationalVersion("4.7.0-localbuild")>
 'WARNING: DONT SPECIFY: <Assembly: AssemblyFileVersion(...)> 
