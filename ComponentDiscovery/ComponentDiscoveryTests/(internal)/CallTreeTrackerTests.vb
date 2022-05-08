@@ -4,6 +4,7 @@
 '  ¦ the removal of this notice is prohibited by the author!                ¦
 '  +------------------------------------------------------------------------+
 
+Imports System
 Imports System.Collections.Generic
 Imports System.Threading
 Imports System.Threading.Tasks
@@ -108,8 +109,12 @@ Public Class CallTreeTrackerTests
       End Sub
       )
 
+    Dim timeout = DateTime.Now.AddSeconds(10)
     Do Until allTrackedThreadsAreFinished
       Thread.Sleep(10)
+      If (DateTime.Now > timeout) Then
+        Assert.Fail("Received no lifetime-end notification from 'CallTreeTracker'...")
+      End If
     Loop
 
     Dim log = String.Join(" > ", timeLog)

@@ -62,8 +62,12 @@ Public Class AsyncDisposalDelayTests
     Assert.IsFalse(isDisposed)
 
     'keep the unit-test running, until the delayed disposal has been executed
+    Dim timeout = DateTime.Now.AddSeconds(10)
     Do Until isDisposed
       Thread.Sleep(10)
+      If (DateTime.Now > Timeout) Then
+        Assert.Fail("Received no lifetime-end notification from 'CallTreeTracker'...")
+      End If
     Loop
 
   End Sub
