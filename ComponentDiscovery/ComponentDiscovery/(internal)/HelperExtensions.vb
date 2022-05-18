@@ -19,14 +19,11 @@ Namespace ComponentDiscovery
 
   Friend Module HelperExtensions
 
-    Private _Md5Provider As MD5CryptoServiceProvider = Nothing
+    Private _Md5Provider As New MD5CryptoServiceProvider()
 
     <Extension()>
     Public Function MD5(input As String) As String
       SyncLock _Md5Provider
-        If (_Md5Provider Is Nothing) Then
-          _Md5Provider = New MD5CryptoServiceProvider()
-        End If
 
         Dim newdata As Byte() = Encoding.Default.GetBytes(input)
         Dim encrypted As Byte() = _Md5Provider.ComputeHash(newdata)

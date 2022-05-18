@@ -13,8 +13,7 @@ Namespace Composition.InstanceDiscovery
     Implements IDisposable
 
     Private _LifetimeTracker As New CallTreeTracker(
-      AddressOf Me.DisposeSelfManagedInstances,
-      Function() ReferenceEquals(Current, Me) 'only track new threads, when we are currently bound
+      AddressOf Me.DisposeSelfManagedInstances
     )
 
     ''' <summary>

@@ -132,7 +132,8 @@ Namespace ComponentDiscovery
     Public Function TryApproveAssemblyFile(fileInfo As FileInfo, Optional forceReapprove As Boolean = False) As Boolean Implements IAssemblyIndexer.TryApproveAssemblyFile
       Try
         Return Me.TryApproveAssembly(fileInfo.FullName, forceReapprove)
-      Catch
+      Catch ex As Exception
+        Diag.Error(ex)
       End Try
       Return False
     End Function
