@@ -10,6 +10,7 @@ Imports System.ComponentModel
 Imports System.Diagnostics
 Imports System.Linq
 Imports System.Reflection
+Imports System.Text
 
 Namespace ComponentDiscovery
 
@@ -275,6 +276,45 @@ Namespace ComponentDiscovery
       Me.GetApplicableTypes(selector).RemoveSubscriber(onTypeIndexedMethod, parameterlessInstantiableClassesOnly)
 
     End Sub
+
+#End Region
+
+#Region " Diagnostics "
+
+    ''' <summary>
+    ''' Generates a Report for Diagnostics and Troubleshooting
+    ''' </summary>
+    Public Function DumpFullState() As String
+      Dim result As New StringBuilder
+
+      If (_ManuallyRegisteredCandidates IsNot Nothing AndAlso _ManuallyRegisteredCandidates.Any()) Then
+        result.AppendLine("#### MANUALLY REGISTERED CANDIDATES (for Type-Search) ###")
+        For Each t In _ManuallyRegisteredCandidates
+          result.AppendLine($"  >> '{t.FullName}'")
+        Next
+        result.AppendLine()
+      End If
+
+      If (_StaticAssemblyList IsNot Nothing AndAlso _StaticAssemblyList.Any()) Then
+        result.AppendLine("#### STATIC ASSEMBLY LIST (for Type-Search) ###")
+        For Each a In _StaticAssemblyList
+          result.AppendLine($"  >> '{a.FullName}'")
+        Next
+        result.AppendLine()
+      End If
+
+      If (_AssemblyIndexer IsNot Nothing) Then
+        result.AppendLine("#### ASSEMBLY-INDEXING ###")
+        If (TypeOf _AssemblyIndexer Is ComponentDiscovery.AssemblyIndexer) Then
+          result.Append(DirectCast(_AssemblyIndexer, ComponentDiscovery.AssemblyIndexer).DumpFullState())
+        Else
+          result.AppendLine("CUSTOM IMPLEMENTATION OF IAssemblyIndexer - NO INFO AVAILABLE!")
+        End If
+        result.AppendLine()
+      End If
+
+      Return result.ToString()
+    End Function
 
 #End Region
 

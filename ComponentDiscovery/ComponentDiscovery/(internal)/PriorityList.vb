@@ -2,6 +2,7 @@
 Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports System.Linq
+Imports System.Text
 
 Namespace ComponentDiscovery
 
@@ -13,6 +14,34 @@ Namespace ComponentDiscovery
     Public Sub New()
       _ItemsByPriority.Add(Nothing)
     End Sub
+
+    ''' <summary>
+    ''' Generates a Report for Diagnostics and Troubleshooting
+    ''' </summary>
+    Public Function DumpPreferences() As String
+      Dim result As New StringBuilder
+      result.AppendLine("RULES:")
+      For Each p In _Preferences
+        result.AppendLine($"  >> prefer '{Me.ItemToString(p.Item1)}' before '{Me.ItemToString(p.Item2)}'")
+      Next
+      result.Append("FINAL ORDER:")
+      For Each i In _ItemsByPriority
+        result.Append($" '{Me.ItemToString(i)}'")
+      Next
+      result.AppendLine()
+      Return result.ToString()
+    End Function
+
+    Private Function ItemToString(item As T) As String
+      If (item Is Nothing) Then
+        Return "<DEFAULT>"
+      End If
+      If (GetType(T) = GetType(Type)) Then
+        Return DirectCast(DirectCast(item, Object), Type).FullName
+      Else
+        Return item.ToString() + "(" + item.GetType().FullName + ")"
+      End If
+    End Function
 
 #Region " Item-Management "
 

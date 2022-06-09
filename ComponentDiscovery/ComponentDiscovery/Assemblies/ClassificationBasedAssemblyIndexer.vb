@@ -533,10 +533,9 @@ Namespace ComponentDiscovery
 
 #End Region
 
-#Region " Import / Export "
+#Region " Diagnostics "
 
-    Public Function DumpFullState() As String
-      Dim result As New StringBuilder
+    Protected Overrides Sub DumpFullStateTo(result As StringBuilder)
 
       Dim indent As Integer = 20
       For Each a In Me.DismissedAssemblies
@@ -589,9 +588,10 @@ Namespace ComponentDiscovery
         Me.DumpClassificationsForAssembly(a, result)
         result.AppendLine(" )")
       Next
+      result.AppendLine()
 
-      Return result.ToString()
-    End Function
+      Me.DumpBaseConfigTo(result)
+    End Sub
 
     Public Function DumpClassificationsForAssembly(assemblyFileFullName As String) As String
       Dim result As New StringBuilder
@@ -619,6 +619,11 @@ Namespace ComponentDiscovery
         End If
       Next
     End Sub
+
+
+#End Region
+
+#Region " Import / Export "
 
     Public ReadOnly Property ClearanceImportScourceAssemblies As Assembly()
       Get

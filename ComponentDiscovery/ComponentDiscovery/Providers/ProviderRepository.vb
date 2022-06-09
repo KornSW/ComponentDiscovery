@@ -8,6 +8,8 @@ Imports System
 Imports System.Collections.Generic
 Imports System.ComponentModel
 Imports System.Diagnostics
+Imports System.Linq
+Imports System.Text
 
 Namespace ComponentDiscovery
 
@@ -57,6 +59,13 @@ Namespace ComponentDiscovery
 
 #Region " Consume "
 
+    'for debugging only
+    Private ReadOnly Property TypeIndexer As ITypeIndexer
+      Get
+        Return _TypeIndexer
+      End Get
+    End Property
+
     <DebuggerBrowsable(DebuggerBrowsableState.RootHidden)>
     Public ReadOnly Property Providers As TProvider()
       Get
@@ -102,6 +111,36 @@ Namespace ComponentDiscovery
         End If
       End SyncLock
     End Sub
+
+#End Region
+
+#Region " Diagnostics "
+
+    ''' <summary>
+    ''' Generates a Report for Diagnostics and Troubleshooting
+    ''' </summary>
+    Public Function DumpFullState() As String
+      Dim result As New StringBuilder
+
+      result.AppendLine("#### LOADED INSTANCES ###")
+      If (_Providers.Any()) Then
+        result.AppendLine("<none>")
+      Else
+        For Each prov In _Providers
+          result.AppendLine($"  >> '{prov.GetType().FullName}'")
+        Next
+      End If
+      result.AppendLine()
+
+      result.AppendLine("#### TYPE-INDEXING ###")
+      If (TypeOf Me.TypeIndexer Is ComponentDiscovery.TypeIndexer) Then
+        result.Append(DirectCast(Me.TypeIndexer, ComponentDiscovery.TypeIndexer).DumpFullState())
+      Else
+        result.AppendLine("CUSTOM IMPLEMENTATION OF ITypeIndexer - NO INFO AVAILABLE!")
+      End If
+
+      Return result.ToString()
+    End Function
 
 #End Region
 

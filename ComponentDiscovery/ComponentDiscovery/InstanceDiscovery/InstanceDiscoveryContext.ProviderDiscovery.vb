@@ -17,13 +17,16 @@ Namespace Composition.InstanceDiscovery
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private Shared _ProviderDiscoveryMethod As Func(Of IDiscoverableInstanceProvider()) = AddressOf GetOrCreateAppdomainScopedProviderRepository
 
+    <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+    Private Shared _ProviderDiscoveryMethodIsHooked As Boolean = False
+
 #Region " default-logic for simple usecases (global-scoped appdomain usage) "
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private Shared _AppDomainAssemblyIndexer As IAssemblyIndexer = Nothing
+    Private Shared _AppDomainAssemblyIndexer As AssemblyIndexer = Nothing
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private Shared _AppDomainTypeIndexer As ITypeIndexer = Nothing
+    Private Shared _AppDomainTypeIndexer As TypeIndexer = Nothing
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private Shared _AppDomainProviderRepo As ProviderRepository(Of IDiscoverableInstanceProvider) = Nothing
@@ -65,6 +68,7 @@ Namespace Composition.InstanceDiscovery
 
     Public Shared Sub HookProviderDiscovery(providerDiscoveryMethod As Func(Of IDiscoverableInstanceProvider()))
       _ProviderDiscoveryMethod = providerDiscoveryMethod
+      _ProviderDiscoveryMethodIsHooked = True
     End Sub
 
   End Class

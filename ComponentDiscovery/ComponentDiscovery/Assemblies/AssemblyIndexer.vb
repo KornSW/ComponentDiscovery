@@ -10,6 +10,7 @@ Imports System.ComponentModel
 Imports System.Diagnostics
 Imports System.IO
 Imports System.Reflection
+Imports System.Text
 
 Namespace ComponentDiscovery
 
@@ -92,7 +93,9 @@ Namespace ComponentDiscovery
 
       If (directoryInfo.Exists) Then
         SyncLock _FullyImportedDirectories
-          _FullyImportedDirectories.Add(directoryInfo.FullName)
+          If (Not _FullyImportedDirectories.Contains(directoryInfo.FullName)) Then
+            _FullyImportedDirectories.Add(directoryInfo.FullName)
+          End If
         End SyncLock
       Else
         Exit Sub
@@ -460,6 +463,79 @@ Namespace ComponentDiscovery
         _OnAssemblyApprovedMethods.Remove(onAssemblyApprovedMethod)
       End If
 
+    End Sub
+
+#End Region
+
+#Region " Diagnostics "
+
+    ''' <summary>
+    ''' Generates a Report for Diagnostics and Troubleshooting
+    ''' </summary>
+    Public Function DumpFullState() As String
+      Dim result As New StringBuilder
+      result.AppendLine($"{Me.GetType().Name}:")
+      result.AppendLine()
+
+      Me.DumpFullStateTo(result)
+      Return result.ToString()
+    End Function
+
+    Protected Overridable Sub DumpFullStateTo(result As StringBuilder)
+
+      Dim indent As Integer = 20
+      For Each a In Me.DismissedAssemblies
+        If (a.Length > indent) Then
+          indent = a.Length
+        End If
+      Next
+      For Each a In Me.ApprovedAssemblies
+        If (a.Location.Length > indent) Then
+          indent = a.Location.Length
+        End If
+      Next
+      indent += 4
+
+      result.AppendLine("#### FULLY IMPORTED DIRECTORIES ###")
+      For Each p In Me.FullyImportedDirectories
+        result.AppendLine(p)
+      Next
+      result.AppendLine()
+
+      result.AppendLine("#### APPROVED ASSEMBLIES ###")
+      For Each a In Me.ApprovedAssemblies
+        result.Append(a.Location)
+        result.Append(New String(" "c, indent - a.Location.Length))
+      Next
+      result.AppendLine()
+
+      result.AppendLine("#### DISMISSED ASSEMBLIES ###")
+      For Each a In Me.DismissedAssemblies
+        result.Append(a)
+        result.Append(New String(" "c, indent - a.Length))
+      Next
+      result.AppendLine()
+
+      Me.DumpBaseConfigTo(result)
+    End Sub
+
+    Protected Sub DumpBaseConfigTo(result As StringBuilder)
+      result.AppendLine("#### CONFIGURATION ###")
+      If (_PreferAssemblyLoadingViaFusion) Then
+        result.AppendLine("PreferAssemblyLoadingViaFusion: ENABLED")
+      Else
+        result.AppendLine("PreferAssemblyLoadingViaFusion: disabled")
+      End If
+      If (_AppDomainBindingIsEnabled) Then
+        result.AppendLine("AppDomainBinding: ENABLED")
+      Else
+        result.AppendLine("AppDomainBinding: disabled")
+      End If
+      If (_AutoImportFromResolvePathsEnabled) Then
+        result.AppendLine("AutoImportFromResolvePaths: ENABLED")
+      Else
+        result.AppendLine("AutoImportFromResolvePaths: disabled")
+      End If
     End Sub
 
 #End Region

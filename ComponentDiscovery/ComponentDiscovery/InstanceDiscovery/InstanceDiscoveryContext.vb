@@ -8,6 +8,7 @@ Imports System
 Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports System.Linq
+Imports System.Text
 Imports ComponentDiscovery
 
 Namespace Composition.InstanceDiscovery
@@ -171,6 +172,60 @@ Namespace Composition.InstanceDiscovery
 
       Return False
     End Function
+
+#Region " Diagnostics "
+
+    ''' <summary>
+    ''' Generates a Report for Diagnostics and Troubleshooting
+    ''' </summary>
+    Public Function DumpFullState() As String
+      Dim result As New StringBuilder
+
+      result.AppendLine("#### SELF MANAGED INSTANCES ###")
+      If (Me.SelfManagedInstances.Any()) Then
+        result.AppendLine("<none>")
+      Else
+        For Each smi In Me.SelfManagedInstances
+          result.AppendLine($"  >> '{smi.Key.FullName}'")
+        Next
+      End If
+      result.AppendLine()
+
+      result.AppendLine("#### PROVIDERS BY PRIORITY ###")
+      For Each provider In Me.ProvidersByPriority
+        result.AppendLine($"Provider-Type: {provider.GetType().FullName}")
+        result.AppendLine($"represent. 'Origin'-Type: {provider.RepresentingOriginType?.FullName}")
+        If (provider.DedicatedDiscoverableTypes IsNot Nothing AndAlso provider.DedicatedDiscoverableTypes.Length > 0) Then
+          result.AppendLine($"Fixed set of discoverable Types:")
+          For Each ddt In provider.DedicatedDiscoverableTypes
+            result.AppendLine($"  {ddt.FullName}")
+          Next
+        Else
+          result.AppendLine($"Dedicated-Discoverable-Types: <none>")
+        End If
+        result.AppendLine()
+      Next
+
+      result.AppendLine("#### PRIORITY RULES ####")
+      result.AppendLine("(based on represent. 'Origin'-Types)")
+      result.Append(Me.PriorityRules.DumpPreferences())
+      result.AppendLine()
+
+      result.AppendLine("#### PROVIDER DISCOVERY ###")
+      If (_ProviderDiscoveryMethodIsHooked) Then
+        result.AppendLine("WAS HOOKED - NO INFO AVAILABLE!")
+      ElseIf (_AppDomainAssemblyIndexer Is Nothing) Then
+        result.Append("oob-mode, but not yet initialized...")
+      Else
+        result.Append("oob-mode, via appdomain-Scoped ")
+        result.Append(_AppDomainAssemblyIndexer.DumpFullState())
+      End If
+      result.AppendLine()
+
+      Return result.ToString()
+    End Function
+
+#End Region
 
   End Class
 
