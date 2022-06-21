@@ -12,9 +12,20 @@ Namespace Composition.InstanceDiscovery
   Partial Class InstanceDiscoveryContext
     Implements IDisposable
 
-    Private _LifetimeTracker As New CallTreeTracker(
-      AddressOf Me.DisposeSelfManagedInstances
-    )
+    Private _LifetimeTracker As CallTreeTracker = Nothing
+
+    ''' <summary>
+    ''' starts tracking of sub-threads in order to wait for them
+    ''' to finish during the disposal of this instance.
+    ''' Calling the 'Dispose' method will NOT wait and immediately end,
+    ''' but the disposal itself will be delayed in background 
+    ''' (so this works fine with a 'using'-block)!  
+    ''' </summary>
+    Public Sub EnableDelayedDisposal()
+      _LifetimeTracker = New CallTreeTracker(
+        AddressOf Me.DisposeSelfManagedInstances
+      )
+    End Sub
 
     ''' <summary>
     ''' disposes all 'self-managed' instances for which the lifetime-handling has been delegated to this context
@@ -22,9 +33,13 @@ Namespace Composition.InstanceDiscovery
     Public Sub Dispose() Implements IDisposable.Dispose
       _ContextDisposalHandler.Invoke(Me)
 
-      _LifetimeTracker.EnterTerminationPhase()
+      If (_LifetimeTracker IsNot Nothing) Then
+        _LifetimeTracker.EnterTerminationPhase()
+        'Me.DisposeSelfManagedInstances() ... should now be called via _LifetimeTracker
+      Else
+        Me.DisposeSelfManagedInstances()
+      End If
 
-      'Me.DisposeSelfManagedInstances() ... should no be called via _LifetimeTracker
     End Sub
 
     Private Sub DisposeSelfManagedInstances()

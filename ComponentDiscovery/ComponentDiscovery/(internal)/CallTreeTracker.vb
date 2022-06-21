@@ -36,7 +36,7 @@ Namespace System.Threading
         Sub()
           Thread.CurrentThread.Priority = ThreadPriority.Lowest
           Do Until _TerminationPhase
-            Thread.Yield()
+            Thread.Sleep(200)
           Loop
           Do While Me.HasActiveChildThreads
             Thread.Sleep(50)
