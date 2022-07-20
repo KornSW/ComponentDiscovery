@@ -65,6 +65,7 @@ Namespace ComponentDiscovery.ClassificationDetection
         Return _DefaultsIfNoAttributeFound
       End Get
     End Property
+
     Public Function TryDetectClassificationsForAssembly(
       assemblyFullFilename As String,
       taxonomicDimensionName As String,
@@ -99,6 +100,10 @@ Namespace ComponentDiscovery.ClassificationDetection
       ) Then
 
         classifications = result
+        If (classifications.Length = 0) Then
+          classifications = _DefaultsIfNoAttributeFound
+        End If
+
         Return True
       End If
 
@@ -111,10 +116,9 @@ Namespace ComponentDiscovery.ClassificationDetection
             result = _SandboxDomain.Invoke(Of String, String, String())(Me.FetchMethod, assemblyFullFilename, taxonomicDimensionName)
           End SyncLock
 #Else
+
           Throw New NotSupportedException()
-
-          '  https://www.michael-whelan.net/replacing-appdomain-in-dotnet-core/
-
+          'https://www.michael-whelan.net/replacing-appdomain-in-dotnet-core/
 
 #End If
         Else
@@ -129,9 +133,6 @@ Namespace ComponentDiscovery.ClassificationDetection
       If (result Is Nothing) Then
         'Nothing = ERROR
         Return False
-      ElseIf (result.Length = 0) Then
-        'no Attributes found -> take the default
-        result = _DefaultsIfNoAttributeFound
       End If
 
       If (_EnablePersistentCache) Then
@@ -139,6 +140,10 @@ Namespace ComponentDiscovery.ClassificationDetection
       End If
 
       classifications = result
+      If (classifications.Length = 0) Then
+        classifications = _DefaultsIfNoAttributeFound
+      End If
+
       Return True
     End Function
 

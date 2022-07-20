@@ -5,6 +5,7 @@
 '  +------------------------------------------------------------------------+
 
 Imports System
+Imports System.Collections.Generic
 Imports System.Diagnostics
 Imports ComponentDiscovery
 
@@ -15,7 +16,7 @@ Namespace Composition.InstanceDiscovery
 
     'this is an interceptor to hook up any logic for scope the availability of providers
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private Shared _ProviderDiscoveryMethod As Func(Of IDiscoverableInstanceProvider()) = AddressOf GetOrCreateAppdomainScopedProviderRepository
+    Private Shared _ProviderDiscoveryMethod As Func(Of IEnumerable(Of IDiscoverableInstanceProvider)) = AddressOf GetOrCreateAppdomainScopedProviderRepository
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private Shared _ProviderDiscoveryMethodIsHooked As Boolean = False
@@ -34,7 +35,7 @@ Namespace Composition.InstanceDiscovery
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private Shared _AppDomainScopedProviderForAttribs As AttributeBasedDiscoverableInstanceProvider = Nothing
 
-    Private Shared Function GetOrCreateAppdomainScopedProviderRepository() As IDiscoverableInstanceProvider()
+    Private Shared Iterator Function GetOrCreateAppdomainScopedProviderRepository() As IEnumerable(Of IDiscoverableInstanceProvider)
 
       If (_AppDomainAssemblyIndexer Is Nothing) Then
         _AppDomainAssemblyIndexer = New AssemblyIndexer() With {.AppDomainBindingEnabled = True}
@@ -61,12 +62,15 @@ Namespace Composition.InstanceDiscovery
 
       End If
 
-      Return _AppDomainProviderRepo.Providers
+      For Each p In _AppDomainProviderRepo.Providers
+        Yield p
+      Next
+
     End Function
 
 #End Region
 
-    Public Shared Sub HookProviderDiscovery(providerDiscoveryMethod As Func(Of IDiscoverableInstanceProvider()))
+    Public Shared Sub HookProviderDiscovery(providerDiscoveryMethod As Func(Of IEnumerable(Of IDiscoverableInstanceProvider)))
       _ProviderDiscoveryMethod = providerDiscoveryMethod
       _ProviderDiscoveryMethodIsHooked = True
     End Sub

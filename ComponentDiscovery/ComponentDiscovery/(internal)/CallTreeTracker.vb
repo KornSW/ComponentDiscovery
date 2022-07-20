@@ -32,6 +32,10 @@ Namespace System.Threading
     ''' </param>
     Public Sub New(onLifetimeEnded As Action, Optional trackingFilter As Func(Of Boolean, Boolean) = Nothing)
 
+      _OnLifetimeEnded = onLifetimeEnded
+      _TrackingFilter = trackingFilter
+      _RootNode = New ThreadNode()
+
       Task.Run(
         Sub()
           Thread.CurrentThread.Priority = ThreadPriority.Lowest
@@ -45,10 +49,7 @@ Namespace System.Threading
         End Sub
       )
 
-      _OnLifetimeEnded = onLifetimeEnded
-      _TrackingFilter = trackingFilter
       _AsyncLocal = New AsyncLocal(Of Guid)(AddressOf Me.OnAsyncLocalChanged)
-      _RootNode = New ThreadNode()
       _AsyncLocal.Value = _RootNode.NodeUid
 
     End Sub

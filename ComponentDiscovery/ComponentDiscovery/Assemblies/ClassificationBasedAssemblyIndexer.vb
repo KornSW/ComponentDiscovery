@@ -616,6 +616,8 @@ Namespace ComponentDiscovery
             target.Append(" "c)
             target.Append(classification)
           Next
+        Else
+          target.Append(" !!!EVALUATION-FAILURE!!!")
         End If
       Next
     End Sub

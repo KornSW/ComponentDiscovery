@@ -257,10 +257,10 @@ Namespace ComponentDiscovery
 #Region " Subscription "
 
     Public Sub SubscribeForApplicableTypeFound(
-    selector As Type,
-    parameterlessInstantiableClassesOnly As Boolean,
-    onApplicableTypeFoundMethod As Action(Of Type)
-  ) Implements ITypeIndexer.SubscribeForApplicableTypeFound
+      selector As Type,
+      parameterlessInstantiableClassesOnly As Boolean,
+      onApplicableTypeFoundMethod As Action(Of Type)
+    ) Implements ITypeIndexer.SubscribeForApplicableTypeFound
 
       Me.GetApplicableTypes(selector).AddSubscriber(onApplicableTypeFoundMethod, parameterlessInstantiableClassesOnly)
 
@@ -268,10 +268,10 @@ Namespace ComponentDiscovery
 
     <EditorBrowsable(EditorBrowsableState.Advanced)>
     Public Sub UnsubscribeFromApplicableTypeFound(
-    selector As Type,
-    parameterlessInstantiableClassesOnly As Boolean,
-    onTypeIndexedMethod As Action(Of Type)
-  ) Implements ITypeIndexer.UnsubscribeFromApplicableTypeFound
+      selector As Type,
+      parameterlessInstantiableClassesOnly As Boolean,
+      onTypeIndexedMethod As Action(Of Type)
+    ) Implements ITypeIndexer.UnsubscribeFromApplicableTypeFound
 
       Me.GetApplicableTypes(selector).RemoveSubscriber(onTypeIndexedMethod, parameterlessInstantiableClassesOnly)
 

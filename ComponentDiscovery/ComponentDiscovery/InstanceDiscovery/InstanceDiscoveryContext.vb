@@ -20,7 +20,7 @@ Namespace Composition.InstanceDiscovery
     Implements IDisposable
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
-    Private _ProvidersUnsorted As IDiscoverableInstanceProvider()
+    Private _ProvidersUnsorted As IEnumerable(Of IDiscoverableInstanceProvider)
 
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _ProvidersByPriority As IDiscoverableInstanceProvider() = Nothing
@@ -32,8 +32,11 @@ Namespace Composition.InstanceDiscovery
     Private _PriorityRules As New PriorityList(Of Type)
 
     Public Sub New()
-
       _ContextCreationHandler.Invoke(Me)
+      Me.LoadProviders()
+    End Sub
+
+    Private Sub LoadProviders()
 
       'create a snapshot, so that the amount of available providers cannot change during the usage of the context
       _ProvidersUnsorted = _ProviderDiscoveryMethod.Invoke()
@@ -63,6 +66,12 @@ Namespace Composition.InstanceDiscovery
 
     Protected ReadOnly Property ProvidersByPriority As IDiscoverableInstanceProvider()
       Get
+
+        If (_ProvidersUnsorted.Count <> _ProviderDiscoveryMethod.Invoke().Count) Then
+          Me.LoadProviders()
+          _ProvidersByPriority = Nothing
+        End If
+
         If (_ProvidersByPriority Is Nothing) Then
           SyncLock _PriorityRules
             _ProvidersByPriority = _ProvidersUnsorted.OrderBy(
@@ -132,13 +141,14 @@ Namespace Composition.InstanceDiscovery
     Public Function TryGetInstanceOf(requestedType As Type, ByRef instance As Object) As Boolean
       Dim foundInstance As Object = Nothing
 
-      SyncLock _PriorityRules
-        If (_ProvidersByPriority Is Nothing) Then
-          _ProvidersByPriority = _ProvidersUnsorted.OrderBy(
-            Function(p) _PriorityRules.PriorityOf(p.RepresentingOriginType)
-          ).ToArray()
-        End If
-      End SyncLock
+      Dim prefetchedProviders = Me.ProvidersByPriority
+      'SyncLock _PriorityRules
+      '  If (_ProvidersByPriority Is Nothing) Then
+      '    _ProvidersByPriority = _ProvidersUnsorted.OrderBy(
+      '      Function(p) _PriorityRules.PriorityOf(p.RepresentingOriginType)
+      '    ).ToArray()
+      '  End If
+      'End SyncLock
 
       SyncLock _SelfManagedInstances
 
@@ -147,7 +157,7 @@ Namespace Composition.InstanceDiscovery
           Return True
         End If
 
-        For Each p As IDiscoverableInstanceProvider In _ProvidersByPriority
+        For Each p As IDiscoverableInstanceProvider In prefetchedProviders
           Dim dedicatedTypes As Type() = p.DedicatedDiscoverableTypes
           If (dedicatedTypes Is Nothing OrElse dedicatedTypes.Contains(requestedType)) Then
             Dim ltResponsibility As LifetimeResponsibility

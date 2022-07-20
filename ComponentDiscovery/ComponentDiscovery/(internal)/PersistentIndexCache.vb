@@ -152,8 +152,8 @@ Namespace ComponentDiscovery
         Return False
       End If
 
-      Dim cachedAssemblyFileSize As Long
-      Dim cachedAssemblyModifiedDate As DateTime
+      Dim cachedAssemblyFileSize As Long = 0
+      Dim cachedAssemblyModifiedDate As DateTime = DateTime.MinValue
       Dim classificationExpressionsFromCache As String() = {}
 
       Dim currentAssemblyFileSize As Long
@@ -170,10 +170,15 @@ Namespace ComponentDiscovery
             If (String.IsNullOrWhiteSpace(content)) Then
               Return False
             End If
-            Dim fileds = content.Split("|"c)
-            cachedAssemblyFileSize = Long.Parse(fileds(0))
-            'Note: fileds(1) was the assembly version in past, but isnt used anymore because of performance-issues!
-            cachedAssemblyModifiedDate = DateTime.Parse(fileds(2))
+            Dim fields = content.Split("|"c)
+
+            Long.TryParse(fields(0), cachedAssemblyFileSize)
+
+            'Note: fields(1) was the assembly version in past, but isnt used anymore because of performance-issues!
+
+            If (fields.Length > 2) Then
+              DateTime.TryParse(fields(2), cachedAssemblyModifiedDate)
+            End If
 
             If (currentAssemblyFileSize = cachedAssemblyFileSize) Then
 
