@@ -140,7 +140,7 @@ Namespace ComponentDiscovery
 
     Private Function TryReadCacheFile(
       assemblyFullFilename As String,
-      searchPrefix As String,
+      searchPrefixForLinesToPeek As String,
       singleMatch As Boolean,
       ByRef returningContentLines As String()
     ) As Boolean
@@ -167,17 +167,20 @@ Namespace ComponentDiscovery
         Using fs As New FileStream(cacheFileFullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
           Using sr As New StreamReader(fs, Encoding.Default)
             Dim content = sr.ReadLine()
-            If (String.IsNullOrWhiteSpace(content)) Then
+
+            'StartsWith("<") is an indicator for a malformed file
+            If (String.IsNullOrWhiteSpace(content) OrElse content.StartsWith("<")) Then
               Return False
             End If
-            Dim fields = content.Split("|"c)
 
-            Long.TryParse(fields(0), cachedAssemblyFileSize)
+            Dim fieldsOfFirstLine = content.Split("|"c)
+            Long.TryParse(fieldsOfFirstLine(0), cachedAssemblyFileSize)
 
-            'Note: fields(1) was the assembly version in past, but isnt used anymore because of performance-issues!
+            'NOTE: fields(1) was the assembly version in past,
+            'but isnt used anymore because of performance-issues!
 
-            If (fields.Length > 2) Then
-              DateTime.TryParse(fields(2), cachedAssemblyModifiedDate)
+            If (fieldsOfFirstLine.Length > 2) Then
+              DateTime.TryParse(fieldsOfFirstLine(2), cachedAssemblyModifiedDate)
             End If
 
             If (currentAssemblyFileSize = cachedAssemblyFileSize) Then
@@ -189,7 +192,7 @@ Namespace ComponentDiscovery
                 Do While Not sr.EndOfStream
                   content = sr.ReadLine()
 
-                  If (content.StartsWith(searchPrefix)) Then
+                  If (content.StartsWith(searchPrefixForLinesToPeek)) Then
                     matchingLines.Add(content)
                     If (singleMatch) Then
                       Exit Do
@@ -210,7 +213,7 @@ Namespace ComponentDiscovery
           $"Cannot read Assembly-Index-Cachefile '{cacheFileFullName}' " +
           $"(a single occurrenceof this exception can be an uncritical filesystem-access-collision...): {ex}"
         )
-        Return False
+        cacheIsValid = False
       End Try
 
       If (cacheIsValid) Then
@@ -218,7 +221,7 @@ Namespace ComponentDiscovery
         Return True
       Else
         Try
-          IO.File.Delete(cacheFileFullName)
+          File.Delete(cacheFileFullName)
         Catch
         End Try
         Return False
@@ -230,34 +233,39 @@ Namespace ComponentDiscovery
 
 #Region " Write "
 
-    Public Sub WriteTypesToCache(assemblyFileFullName As String, targeTypeFullName As String, foundTypeFullNames As String())
+    Public Sub AppendTypesToCache(assemblyFileFullName As String, targeTypeFullName As String, foundTypeFullNames As String())
       Dim prefix = "<Type>|" + targeTypeFullName + "|"
       Dim content As String = prefix + String.Join(","c, foundTypeFullNames)
       Me.AppendToCacheFile(assemblyFileFullName, {content})
     End Sub
 
-    Public Sub WriteClassificationExpressionToCache(assemblyFileFullName As String, dimensionName As String, classificationExpressions As String())
+    Public Sub AppendClassificationExpressionToCache(assemblyFileFullName As String, dimensionName As String, classificationExpressions As String())
       Dim prefix = "<AssCl>|" + dimensionName + "|"
       Dim content As String = prefix + String.Join(","c, classificationExpressions)
       Me.AppendToCacheFile(assemblyFileFullName, {content})
     End Sub
 
-    Private Sub AppendToCacheFile(assemblyFileFullName As String, contentLinesToCache As IEnumerable(Of String))
+    Private Sub AppendToCacheFile(assemblyFileFullName As String, contentLinesToAppend As IEnumerable(Of String))
       Dim cacheFileFullName As String = ""
       Try
 
-        cacheFileFullName = Me.BuildCacheFileFullName(assemblyFileFullName)
-        Dim mustWriteFingerprint = Not File.Exists(cacheFileFullName)
+        Dim fileMode As FileMode = FileMode.CreateNew
+        Dim fileShare As FileShare = FileShare.None
+        If (File.Exists(cacheFileFullName)) Then
+          fileMode = FileMode.Append
+          fileShare = FileShare.ReadWrite
+        End If
 
-        Using fs As New FileStream(cacheFileFullName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)
+        Using fs As New FileStream(cacheFileFullName, fileMode, FileAccess.Write, fileShare)
           Using sw As New StreamWriter(fs, Encoding.Default)
 
-            If (mustWriteFingerprint) Then
+            If (fileMode = FileMode.CreateNew) Then
+              'write the one header line containing the timestamp
               sw.WriteLine(Me.BuildTimestampBlock(assemblyFileFullName))
             End If
 
-            For Each contentLineToCache In contentLinesToCache
-              sw.WriteLine(contentLineToCache)
+            For Each contentLineToAppend In contentLinesToAppend
+              sw.WriteLine(contentLineToAppend)
             Next
 
           End Using

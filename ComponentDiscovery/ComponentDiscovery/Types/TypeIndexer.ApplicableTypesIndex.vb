@@ -165,8 +165,8 @@ Namespace ComponentDiscovery
         If (_EnablePersistentCache) Then
 
           sucessfullyLoadedFromCache = PersistentIndexCache.GetInstance().TryGetTypesFromCache(
-          assemblyToCrawl.Location, _Selector.FullName, persistentCacheTypeNames
-        )
+            assemblyToCrawl.Location, _Selector.FullName, persistentCacheTypeNames
+          )
 
         End If
 
@@ -202,7 +202,7 @@ Namespace ComponentDiscovery
 
           If (cacheUpdateRequired) Then
             persistentCacheTypeNames = _ApplicableTypes.Where(Function(t) t.Assembly = assemblyToCrawl).Select(Function(t) t.FullName).ToArray()
-            PersistentIndexCache.GetInstance().WriteTypesToCache(assemblyToCrawl.Location, _Selector.FullName, persistentCacheTypeNames)
+            PersistentIndexCache.GetInstance().AppendTypesToCache(assemblyToCrawl.Location, _Selector.FullName, persistentCacheTypeNames)
           End If
 
         Catch ex As ReflectionTypeLoadException

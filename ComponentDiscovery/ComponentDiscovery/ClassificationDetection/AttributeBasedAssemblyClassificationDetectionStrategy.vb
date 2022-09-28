@@ -96,7 +96,9 @@ Namespace ComponentDiscovery.ClassificationDetection
 
       If (
         _EnablePersistentCache AndAlso
-        PersistentIndexCache.GetInstance().TryGetClassificationExpressionsFromCache(assemblyFullFilename, taxonomicDimensionName, result)
+        PersistentIndexCache.GetInstance().TryGetClassificationExpressionsFromCache(
+          assemblyFullFilename, taxonomicDimensionName, result
+        )
       ) Then
 
         classifications = result
@@ -136,7 +138,7 @@ Namespace ComponentDiscovery.ClassificationDetection
       End If
 
       If (_EnablePersistentCache) Then
-        PersistentIndexCache.GetInstance().WriteClassificationExpressionToCache(assemblyFullFilename, taxonomicDimensionName, result)
+        PersistentIndexCache.GetInstance().AppendClassificationExpressionToCache(assemblyFullFilename, taxonomicDimensionName, result)
       End If
 
       classifications = result
