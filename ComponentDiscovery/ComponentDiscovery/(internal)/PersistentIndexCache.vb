@@ -249,6 +249,8 @@ Namespace ComponentDiscovery
       Dim cacheFileFullName As String = ""
       Try
 
+        cacheFileFullName = Me.BuildCacheFileFullName(assemblyFileFullName)
+
         Dim fileMode As FileMode = FileMode.CreateNew
         Dim fileShare As FileShare = FileShare.None
         If (File.Exists(cacheFileFullName)) Then
