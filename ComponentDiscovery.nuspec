@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ComponentDiscovery</id>
-    <version>4.7.4-localbuild</version>
+    <version>4.7.5-localbuild</version>
     <title>Clearance and Classification based Component Discovery</title>
     <authors>KornSW</authors>
     <owners>KornSW</owners>

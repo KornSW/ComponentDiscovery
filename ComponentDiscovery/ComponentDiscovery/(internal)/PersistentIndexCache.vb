@@ -43,15 +43,17 @@ Namespace ComponentDiscovery
 
     Private _CacheDirectory As String
 
-    Private Sub New(cacheDirectory As String)
+    Friend Sub New(cacheDirectory As String)
       _CacheDirectory = Environment.ExpandEnvironmentVariables(cacheDirectory)
     End Sub
 
 #End Region
 
+    Private _InvalidCacheFileNames As New List(Of String)
+
 #Region " internal Helpers "
 
-    Private Function BuildCacheFileFullName(assemblyFullFilename As String) As String
+    Friend Function BuildCacheFileFullName(assemblyFullFilename As String) As String
       Dim assemblyLocationDirectory As String = Path.GetDirectoryName(assemblyFullFilename)
       Dim folderNameHash As String = assemblyLocationDirectory.ToLower().MD5()
       Dim fileName As String = Path.GetFileNameWithoutExtension(assemblyFullFilename) + ".cache"
@@ -138,6 +140,40 @@ Namespace ComponentDiscovery
       Return False
     End Function
 
+    Private Function TryParseFirstLineOfCache(
+      firstLineOfCache As String,
+      ByRef cachedAssemblyFileSize As Long,
+      ByRef cachedAssemblyModifiedDate As DateTime
+    ) As Boolean
+
+      If (String.IsNullOrWhiteSpace(firstLineOfCache)) Then
+        Return False
+      End If
+
+      'StartsWith("<") is an indicator for a malformed file
+      If (firstLineOfCache.StartsWith("<")) Then
+        Return False
+      End If
+
+      Dim fieldsOfFirstLine = firstLineOfCache.Split("|"c)
+      If (Not Long.TryParse(fieldsOfFirstLine(0), cachedAssemblyFileSize)) Then
+        Return False
+      End If
+
+      'NOTE: fields(1) was the assembly version in past,
+      'but isnt used anymore because of performance-issues!
+
+      If (fieldsOfFirstLine.Length < 3) Then
+        Return False
+      End If
+
+      If (Not DateTime.TryParse(fieldsOfFirstLine(2), cachedAssemblyModifiedDate)) Then
+        Return False
+      End If
+
+      Return True
+    End Function
+
     Private Function TryReadCacheFile(
       assemblyFullFilename As String,
       searchPrefixForLinesToPeek As String,
@@ -168,27 +204,20 @@ Namespace ComponentDiscovery
           Using sr As New StreamReader(fs, Encoding.Default)
             Dim content = sr.ReadLine()
 
-            'StartsWith("<") is an indicator for a malformed file
-            If (String.IsNullOrWhiteSpace(content) OrElse content.StartsWith("<")) Then
-              Return False
-            End If
-
-            Dim fieldsOfFirstLine = content.Split("|"c)
-            Long.TryParse(fieldsOfFirstLine(0), cachedAssemblyFileSize)
-
-            'NOTE: fields(1) was the assembly version in past,
-            'but isnt used anymore because of performance-issues!
-
-            If (fieldsOfFirstLine.Length > 2) Then
-              DateTime.TryParse(fieldsOfFirstLine(2), cachedAssemblyModifiedDate)
-            End If
-
-            If (currentAssemblyFileSize = cachedAssemblyFileSize) Then
+            If (Me.TryParseFirstLineOfCache(content, cachedAssemblyFileSize, cachedAssemblyModifiedDate)) Then
 
               'HACK: die Equals-Methode liefert hier false - immer ein paar ticks unterschied - explorer bug????
-              If (currentAssemblyModifiedDate.ToString() = cachedAssemblyModifiedDate.ToString()) Then
+              Dim modificationDateIsMatching As Boolean = (currentAssemblyModifiedDate.ToString() = cachedAssemblyModifiedDate.ToString())
+              Dim filesizeIsMatching As Boolean = (currentAssemblyFileSize = cachedAssemblyFileSize)
 
+              If (filesizeIsMatching AndAlso modificationDateIsMatching) Then
                 cacheIsValid = True
+                SyncLock _InvalidCacheFileNames
+                  If (_InvalidCacheFileNames.Contains(cacheFileFullName)) Then
+                    _InvalidCacheFileNames.Remove(cacheFileFullName)
+                  End If
+                End SyncLock
+
                 Do While Not sr.EndOfStream
                   content = sr.ReadLine()
 
@@ -202,7 +231,6 @@ Namespace ComponentDiscovery
                 Loop
 
               End If
-
             End If
 
           End Using
@@ -220,13 +248,13 @@ Namespace ComponentDiscovery
         returningContentLines = matchingLines.ToArray()
         Return True
       Else
-        Try
-          File.Delete(cacheFileFullName)
-        Catch
-        End Try
+        SyncLock _InvalidCacheFileNames
+          If (Not _InvalidCacheFileNames.Contains(cacheFileFullName)) Then
+            _InvalidCacheFileNames.Add(cacheFileFullName)
+          End If
+        End SyncLock
         Return False
       End If
-
     End Function
 
 #End Region
@@ -251,17 +279,19 @@ Namespace ComponentDiscovery
 
         cacheFileFullName = Me.BuildCacheFileFullName(assemblyFileFullName)
 
-        Dim fileMode As FileMode = FileMode.CreateNew
+        Dim fileMode As FileMode = FileMode.Create
         Dim fileShare As FileShare = FileShare.None
-        If (File.Exists(cacheFileFullName)) Then
-          fileMode = FileMode.Append
-          fileShare = FileShare.ReadWrite
-        End If
+        SyncLock _InvalidCacheFileNames
+          If (File.Exists(cacheFileFullName) AndAlso Not _InvalidCacheFileNames.Contains(cacheFileFullName)) Then
+            fileMode = FileMode.Append
+            fileShare = FileShare.ReadWrite
+          End If
+        End SyncLock
 
         Using fs As New FileStream(cacheFileFullName, fileMode, FileAccess.Write, fileShare)
           Using sw As New StreamWriter(fs, Encoding.Default)
 
-            If (fileMode = FileMode.CreateNew) Then
+            If (Not fileMode = FileMode.Append) Then
               'write the one header line containing the timestamp
               sw.WriteLine(Me.BuildTimestampBlock(assemblyFileFullName))
             End If
@@ -274,6 +304,12 @@ Namespace ComponentDiscovery
 
           fs.Close()
         End Using
+
+        SyncLock _InvalidCacheFileNames
+          If (_InvalidCacheFileNames.Contains(cacheFileFullName)) Then
+            _InvalidCacheFileNames.Remove(cacheFileFullName)
+          End If
+        End SyncLock
 
       Catch ex As Exception
         'this could be caused by a collision during file access from multiple processes
