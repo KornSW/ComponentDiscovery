@@ -119,7 +119,9 @@ Namespace ComponentDiscovery.ClassificationDetection
           End SyncLock
 #Else
 
-          Throw New NotSupportedException()
+          Throw New NotSupportedException(
+            "The 'AnalysisSandbox' (using a sub-appdomain) was enabled, but is currently not supported for .NET CORE!"
+          )
           'https://www.michael-whelan.net/replacing-appdomain-in-dotnet-core/
 
 #End If
@@ -129,6 +131,11 @@ Namespace ComponentDiscovery.ClassificationDetection
         End If
 
       Catch ex As Exception
+        If (TypeOf (ex) Is TargetInvocationException) Then
+          ex = DirectCast(ex, TargetInvocationException).InnerException
+        End If
+        Diag.Error($"AssemblyIndexer: Exception in '{NameOf(AttributeBasedAssemblyClassificationDetectionStrategy)}.{NameOf(TryDetectClassificationsForAssemblyCore)}()' (EnableAnalysisSandbox={_EnableAnalysisSandbox}) while invoking the '{NameOf(FetchMethod)}': {ex.Message}")
+        Diag.Verbose(Function() ex.StackTrace)
         result = Nothing
       End Try
 
@@ -174,8 +181,10 @@ Namespace ComponentDiscovery.ClassificationDetection
         End If
       Catch ex As BadImageFormatException 'non-.NET-dll
         'EXPECTED: happens on non-.NET-dll
+        Diag.Verbose(Function() $"BadImageFormatException: '{assemblyFullFilename}' seems to be not a valid .NET Assembly!")
       Catch ex As Exception
-        Diag.Error(ex)
+        Diag.Error($"AssemblyIndexer: Exception in '{NameOf(AttributeBasedAssemblyClassificationDetectionStrategy)}.{NameOf(FetchClassificationExpressionsFromAssembly)}()': {ex.Message}")
+        Diag.Verbose(Function() ex.StackTrace)
       End Try
 
       Return Nothing '=ERROR

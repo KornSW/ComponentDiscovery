@@ -134,7 +134,7 @@ Namespace ComponentDiscovery
       ''' <summary>
       ''' </summary>
       ''' <param name="assemblyFullFilename"></param>
-      ''' <returns>CAN BE NOTHING !</returns>
+      ''' <returns>RETURNS NOTHING IN CASE OF A DETECTION ERROR!</returns>
       Protected Function GetClassificationsWithRuntimeCaching(assemblyFullFilename As String) As String()
 
         SyncLock _ClassificationExpressionsPerAssembly
@@ -152,7 +152,8 @@ Namespace ComponentDiscovery
         )
 
         If (Not successfullyDetected) Then
-          classificationExpressions = Nothing
+          'classificationExpressions = Nothing
+          Return Nothing
         End If
 
         SyncLock _ClassificationExpressionsPerAssembly
@@ -166,8 +167,12 @@ Namespace ComponentDiscovery
         Dim classificationExpressions = Me.GetClassificationsWithRuntimeCaching(assemblyFullFilename)
 
         If (classificationExpressions Is Nothing) Then
-          'if there was an error during the evaluation, the assembly will be handled as un-marked
-          classificationExpressions = New String() {}
+          'classificationExpressions = New String() {}
+          Diag.Warning(
+            $"AssemblyIndexer: after the classifications could not be detected for '{assemblyFullFilename}', " +
+            $"{NameOf(VerifyAssembly)} will now return a negative outcome!"
+          )
+          Return False
         End If
 
         Return Me.ClassificationApprovalStrategy.VerifyTarget(classificationExpressions, Me.Clearances, Me.DimensionName)

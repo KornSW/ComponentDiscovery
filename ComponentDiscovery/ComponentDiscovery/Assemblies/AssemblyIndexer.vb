@@ -210,7 +210,7 @@ Namespace ComponentDiscovery
       assemblyFullFilename = assemblyFullFilename.ToLower()
 
       For Each ia In _ApprovedAssemblies
-        If (ia.Location.ToLower() = assemblyFullFilename) Then
+        If (ia.Location.Equals(assemblyFullFilename, StringComparison.InvariantCultureIgnoreCase)) Then
           Return True
         End If
       Next
