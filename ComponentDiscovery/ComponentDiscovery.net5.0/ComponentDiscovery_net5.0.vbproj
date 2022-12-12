@@ -6,9 +6,9 @@
     <AssemblyName>ComponentDiscovery</AssemblyName>
     <Authors>KornSW</Authors>
     <Copyright>KornSW</Copyright>
-    <Version>4.7.6</Version>
-    <FileVersion>4.7.6.0</FileVersion>
-    <AssemblyVersion>4.7.6.0</AssemblyVersion>
+    <Version>4.8.0</Version>
+    <FileVersion>4.8.0.0</FileVersion>
+    <AssemblyVersion>4.8.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -28,5 +28,9 @@
   </PropertyGroup>
 
   <Import Project="..\ComponentDiscovery\ComponentDiscovery_code.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
 
 </Project>

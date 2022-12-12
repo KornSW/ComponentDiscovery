@@ -63,6 +63,9 @@
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\(Vendor)\NuGet\MSTest.TestFramework.2.2.8\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\(Vendor)\NuGet\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -82,6 +85,7 @@
     <Compile Include="%28internal%29\AsyncDisposalDelayTests.vb" />
     <Compile Include="%28internal%29\ContextAmbienceManagerTests.vb" />
     <Compile Include="%28internal%29\CallTreeTrackerTests.vb" />
+    <Compile Include="ManifestBasedAssemblyClassificationDetectionStrategyTests.vb" />
     <Compile Include="AttributeBasedAssemblyClassificationDetectionStrategyTests.vb" />
     <Compile Include="%28internal%29\PersistentIndexCacheTests.vb" />
     <Compile Include="ExpressionCentricClassificationApprovalStrategyTests.vb" />
@@ -127,6 +131,9 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="packages.config" />
+    <None Include="ComponentDiscoveryTests.cl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ComponentDiscovery.net461\ComponentDiscovery_net461.vbproj">

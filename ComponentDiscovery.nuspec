@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ComponentDiscovery</id>
-    <version>4.7.6-localbuild</version>
+    <version>4.8.0-localbuild</version>
     <title>Clearance and Classification based Component Discovery</title>
     <authors>KornSW</authors>
     <owners>KornSW</owners>
@@ -16,8 +16,10 @@
     <projectUrl>https://github.com/KornSW/ComponentDiscovery</projectUrl>
     <dependencies>
       <group targetFramework=".NETFramework4.6">
+        <dependency id="Newtonsoft.Json" version="[8.0.3,13.9999]" />
       </group>
       <group targetFramework="net5.0">
+        <dependency id="Newtonsoft.Json" version="[8.0.3,13.9999]" />
       </group>
     </dependencies>
   </metadata>

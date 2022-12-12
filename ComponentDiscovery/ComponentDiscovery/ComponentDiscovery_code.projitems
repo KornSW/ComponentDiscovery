@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationApproval\DemandCentricClassificationApprovalStrategy.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationApproval\ExpressionCentricClassificationApprovalStrategy.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationApproval\IClassificationApprovalStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\[ManifestBased]\ManifestBasedAssemblyClassificationDetectionStrategy.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\AttributeBasedAssemblyClassificationDetectionStrategy.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\AttributeBasedTypeClassificationDetectionStrategy.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\Attributes\AssemblyClassificationAttribute.vb" />
@@ -36,6 +37,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\ITypeClassificationDetectionStrategy.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\NamespaceBasedAssemblyClassificationDetectionStrategy.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\NamespaceBasedTypeClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)ClassificationDetection\[ManifestBased]\ManifestParser.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)Clearances\ClearanceContainer.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\ExtensionMethodIndexer.MethodIndex.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\ExtensionMethodIndexer.vb" />
