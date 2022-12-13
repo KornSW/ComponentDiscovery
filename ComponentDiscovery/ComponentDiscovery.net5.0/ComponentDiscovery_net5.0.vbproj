@@ -30,7 +30,7 @@
   <Import Project="..\ComponentDiscovery\ComponentDiscovery_code.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="8.0.3" />
   </ItemGroup>
 
 </Project>
