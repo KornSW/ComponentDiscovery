@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ComponentDiscovery</id>
-    <version>4.8.0-localbuild</version>
+    <version>4.9.0-localbuild</version>
     <title>Clearance and Classification based Component Discovery</title>
     <authors>KornSW</authors>
     <owners>KornSW</owners>
@@ -21,6 +21,9 @@
       <group targetFramework="net5.0">
         <dependency id="Newtonsoft.Json" version="[8.0.3,13.9999]" />
       </group>
+      <group targetFramework="net6.0">
+        <dependency id="Newtonsoft.Json" version="[8.0.3,13.9999]" />
+      </group>
     </dependencies>
   </metadata>
   <files>
@@ -34,5 +37,9 @@
     <file src="(Stage)\Bin\net5.0\ComponentDiscovery.dll" target="lib/net5.0" />
     <file src="(Stage)\Bin\net5.0\ComponentDiscovery.xml" target="lib/net5.0" />
     <file src="(Stage)\Bin\net5.0\ComponentDiscovery.pdb" target="lib/net5.0" />
+    <!-- .NET 6.0 -->
+    <file src="(Stage)\Bin\net6.0\ComponentDiscovery.dll" target="lib/net6.0" />
+    <file src="(Stage)\Bin\net6.0\ComponentDiscovery.xml" target="lib/net6.0" />
+    <file src="(Stage)\Bin\net6.0\ComponentDiscovery.pdb" target="lib/net6.0" />
   </files>
 </package>

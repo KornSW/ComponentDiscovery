@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29009.5
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ComponentDiscovery_net461", "ComponentDiscovery.net461\ComponentDiscovery_net461.vbproj", "{D5D23BBD-AAB6-4E9D-960C-71499668F4C6}"
 EndProject
@@ -20,12 +20,9 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "ComponentDiscovery_net5.0",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "targets", "targets", "{AE715A42-336A-484F-9478-B3870AE48D6B}"
 EndProject
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "ComponentDiscovery_net6.0", "ComponentDiscovery.net6.0\ComponentDiscovery_net6.0.vbproj", "{4A202EA2-EBC9-4B36-9614-FA7862D624B3}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		ComponentDiscovery\ComponentDiscovery_code.projitems*{9c04bcf1-18f1-4d96-bb13-bc6ff83407a4}*SharedItemsImports = 13
-		ComponentDiscovery\ComponentDiscovery_code.projitems*{b39fb8cc-ba28-4c13-9761-43bd7fc88ca5}*SharedItemsImports = 5
-		ComponentDiscovery\ComponentDiscovery_code.projitems*{d5d23bbd-aab6-4e9d-960c-71499668f4c6}*SharedItemsImports = 4
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -43,6 +40,10 @@ Global
 		{B39FB8CC-BA28-4C13-9761-43BD7FC88CA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B39FB8CC-BA28-4C13-9761-43BD7FC88CA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B39FB8CC-BA28-4C13-9761-43BD7FC88CA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A202EA2-EBC9-4B36-9614-FA7862D624B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A202EA2-EBC9-4B36-9614-FA7862D624B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A202EA2-EBC9-4B36-9614-FA7862D624B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A202EA2-EBC9-4B36-9614-FA7862D624B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,8 +51,15 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{D5D23BBD-AAB6-4E9D-960C-71499668F4C6} = {AE715A42-336A-484F-9478-B3870AE48D6B}
 		{B39FB8CC-BA28-4C13-9761-43BD7FC88CA5} = {AE715A42-336A-484F-9478-B3870AE48D6B}
+		{4A202EA2-EBC9-4B36-9614-FA7862D624B3} = {AE715A42-336A-484F-9478-B3870AE48D6B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {50410137-7AFA-42CD-8C88-07DE4278718A}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ComponentDiscovery\ComponentDiscovery_code.projitems*{4a202ea2-ebc9-4b36-9614-fa7862d624b3}*SharedItemsImports = 5
+		ComponentDiscovery\ComponentDiscovery_code.projitems*{9c04bcf1-18f1-4d96-bb13-bc6ff83407a4}*SharedItemsImports = 13
+		ComponentDiscovery\ComponentDiscovery_code.projitems*{b39fb8cc-ba28-4c13-9761-43bd7fc88ca5}*SharedItemsImports = 5
+		ComponentDiscovery\ComponentDiscovery_code.projitems*{d5d23bbd-aab6-4e9d-960c-71499668f4c6}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal

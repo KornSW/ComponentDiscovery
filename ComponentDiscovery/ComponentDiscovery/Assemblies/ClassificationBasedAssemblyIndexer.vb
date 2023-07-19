@@ -37,11 +37,11 @@ Namespace ComponentDiscovery
     End Sub
 
     Public Sub New(
-    taxonomicDimensionNames As String(),
-    enableResolvePathsBinding As Boolean,
-    enableAppDomainBinding As Boolean,
-    Optional preferAssemblyLoadingViaFusion As Boolean = True
-  )
+      taxonomicDimensionNames As String(),
+      enableResolvePathsBinding As Boolean,
+      enableAppDomainBinding As Boolean,
+      Optional preferAssemblyLoadingViaFusion As Boolean = True
+    )
 
       MyBase.New(False, False, preferAssemblyLoadingViaFusion)
 

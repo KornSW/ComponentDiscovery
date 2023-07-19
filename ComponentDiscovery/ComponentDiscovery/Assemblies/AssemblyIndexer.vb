@@ -54,9 +54,6 @@ Namespace ComponentDiscovery
 
       _PreferAssemblyLoadingViaFusion = preferAssemblyLoadingViaFusion
 
-      'this triggers the registration of the appdomain resolve handlers!!!
-      AssemblyResolving.Initialize()
-
       'this triggers assembly-add
       Me.AppDomainBindingEnabled = enableAppDomainBinding
 
@@ -165,13 +162,15 @@ Namespace ComponentDiscovery
         Return False
       End If
 
-      If (_DismissedAssemblies.Contains(assemblyFileFullName)) Then
-        If (forceReapprove) Then
-          _DismissedAssemblies.Remove(assemblyFileFullName)
-        Else
-          Return False
+      SyncLock _DismissedAssemblies
+        If (_DismissedAssemblies.Contains(assemblyFileFullName)) Then
+          If (forceReapprove) Then
+            _DismissedAssemblies.Remove(assemblyFileFullName)
+          Else
+            Return False
+          End If
         End If
-      End If
+      End SyncLock
 
       ' We need to do this because this method needs to be absolutely thread-safe
       _CurrentlyApprovingAssemblies.Add(assemblyFileFullName)
@@ -185,8 +184,11 @@ Namespace ComponentDiscovery
 
         Else
           Diag.Verbose(Function() $"AssemblyIndexer: incomming assembly '{fileName}' was REPRESSED and will not be added to index!")
-          _DismissedAssemblies.Add(assemblyFileFullName)
-
+          SyncLock _DismissedAssemblies
+            If (Not _DismissedAssemblies.Contains(assemblyFileFullName)) Then
+              _DismissedAssemblies.Add(assemblyFileFullName)
+            End If
+          End SyncLock
         End If
 
       Finally
@@ -198,9 +200,11 @@ Namespace ComponentDiscovery
 
     Protected Function IsAssemblyAlreadyProcessed(assemblyFullFilename As String) As Boolean
 
-      If (_DismissedAssemblies.Contains(assemblyFullFilename)) Then
-        Return True
-      End If
+      SyncLock _DismissedAssemblies
+        If (_DismissedAssemblies.Contains(assemblyFullFilename)) Then
+          Return True
+        End If
+      End SyncLock
 
       Return Me.IsAssemblyAlreadyIndexed(assemblyFullFilename)
     End Function
@@ -209,11 +213,13 @@ Namespace ComponentDiscovery
 
       assemblyFullFilename = assemblyFullFilename.ToLower()
 
-      For Each ia In _ApprovedAssemblies
-        If (ia.Location.Equals(assemblyFullFilename, StringComparison.InvariantCultureIgnoreCase)) Then
-          Return True
-        End If
-      Next
+      SyncLock _ApprovedAssemblies
+        For Each ia In _ApprovedAssemblies
+          If (ia.Location.Equals(assemblyFullFilename, StringComparison.InvariantCultureIgnoreCase)) Then
+            Return True
+          End If
+        Next
+      End SyncLock
 
       Return False
     End Function
@@ -249,7 +255,11 @@ Namespace ComponentDiscovery
         Return False
       End Try
 
-      _ApprovedAssemblies.Add(ass)
+      SyncLock _ApprovedAssemblies
+        If (Not _ApprovedAssemblies.Contains(ass)) Then
+          _ApprovedAssemblies.Add(ass)
+        End If
+      End SyncLock
 
       Me.OnAssemblyApproved(ass)
 
@@ -267,28 +277,36 @@ Namespace ComponentDiscovery
       Set(value As Boolean)
         If (Not _AppDomainBindingIsEnabled = value) Then
           _AppDomainBindingIsEnabled = value
-          If (_AppDomainBindingIsEnabled) Then
 
-            AddHandler AppDomain.CurrentDomain.AssemblyLoad, AddressOf Me.AppDomain_AssemblyLoad
-            Diag.Info("AssemblyIndexer: Appdomain subscription ENABLED")
+          'if we are not active yet, postpone the wireups until were getting active
+          If (_IsLazyInitialized) Then
 
-            For Each assembly In AppDomain.CurrentDomain.GetAssemblies()
-              If (Not assembly.IsDynamic) Then
-
-                Diag.Verbose(Function() $"AssemblyIndexer: assembly '{assembly.GetName().Name}' received over appdomain subscription")
-                Me.TryApproveAssembly(assembly)
-
-              End If
-            Next
-
-          Else
-            RemoveHandler AppDomain.CurrentDomain.AssemblyLoad, AddressOf Me.AppDomain_AssemblyLoad
-            Diag.Info("AssemblyIndexer: appdomain subscription DISABLED")
+            If (_AppDomainBindingIsEnabled) Then
+              Me.SubscribeAssembliesFromAppdomain()
+            Else
+              RemoveHandler AppDomain.CurrentDomain.AssemblyLoad, AddressOf Me.AppDomain_AssemblyLoad
+              Diag.Info("AssemblyIndexer: appdomain subscription DISABLED")
+            End If
 
           End If
         End If
       End Set
     End Property
+
+    Private Sub SubscribeAssembliesFromAppdomain()
+
+      AddHandler AppDomain.CurrentDomain.AssemblyLoad, AddressOf Me.AppDomain_AssemblyLoad
+      Diag.Info("AssemblyIndexer: Appdomain subscription ENABLED")
+
+      'import the assemblies for which were missed the AssemblyLoad-Events
+      For Each assembly In AppDomain.CurrentDomain.GetAssemblies()
+        If (Not assembly.IsDynamic) Then
+          Diag.Verbose(Function() $"AssemblyIndexer: assembly '{assembly.GetName().Name}' received over appdomain subscription")
+          Me.TryApproveAssembly(assembly)
+        End If
+      Next
+
+    End Sub
 
     Private Sub AppDomain_AssemblyLoad(sender As Object, args As AssemblyLoadEventArgs)
       If (Me.AppDomainBindingEnabled) Then
@@ -311,18 +329,23 @@ Namespace ComponentDiscovery
       End Get
       Set(value As Boolean)
 
-        If (_AutoImportFromResolvePathsEnabled = True AndAlso value = False) Then
-          AssemblyResolving.UnsubscribeFromNewResolvePathAdded(AddressOf OnNewResolvePathAdded)
+        'if we are not active yet, postpone the wireups until were getting active
+        If (_IsLazyInitialized) Then
+          If (_AutoImportFromResolvePathsEnabled = True AndAlso value = False) Then
+            AssemblyResolving.UnsubscribeFromNewResolvePathAdded(AddressOf OnNewResolvePathAdded)
 
-        ElseIf (_AutoImportFromResolvePathsEnabled = False AndAlso value = True) Then
-          AssemblyResolving.SubscribeForNewResolvePathAdded(AddressOf OnNewResolvePathAdded)
+          ElseIf (_AutoImportFromResolvePathsEnabled = False AndAlso value = True) Then
+            Me.SubscribeAssembliesResolvePaths()
 
+          End If
         End If
-
         _AutoImportFromResolvePathsEnabled = value
-
       End Set
     End Property
+
+    Private Sub SubscribeAssembliesResolvePaths()
+      AssemblyResolving.SubscribeForNewResolvePathAdded(AddressOf OnNewResolvePathAdded)
+    End Sub
 
     Private Sub OnNewResolvePathAdded(newResolvePath As String)
       Me.TryApproveAssemblyFilesFrom(New DirectoryInfo(newResolvePath), False, "*.dll")
@@ -385,28 +408,41 @@ Namespace ComponentDiscovery
 
       Diag.Info($"'{NameOf(ReapproveDismissedAssemblies)}' was triggered...")
 
-      For Each suppressedAssembly In _DismissedAssemblies.ToArray()
-        Dim assFileName As String = Path.GetFileNameWithoutExtension(suppressedAssembly)
+      For Each dismissedAssembly In Me.DismissedAssemblies 'liefert array snapshot
+        Dim assFileName As String = Path.GetFileNameWithoutExtension(dismissedAssembly)
 
-        If (Not _CurrentlyApprovingAssemblies.Contains(suppressedAssembly)) Then
-          'we need to do this because this method needs to be absolute thread-safe
-          _CurrentlyApprovingAssemblies.Add(suppressedAssembly)
+        Dim cascadeDetected As Boolean = False
+        SyncLock _CurrentlyApprovingAssemblies
+          cascadeDetected = _CurrentlyApprovingAssemblies.Contains(dismissedAssembly)
+        End SyncLock
+
+        If (Not cascadeDetected) Then
+
+          SyncLock _CurrentlyApprovingAssemblies
+            'we need to do this because this method needs to be absolutely thread-safe
+            _CurrentlyApprovingAssemblies.Add(dismissedAssembly)
+          End SyncLock
+
           Try
             Diag.Verbose(Function() $"AssemblyIndexer: re-approving repressed assembly '{assFileName}'...")
 
-            If (Me.VerifyAssembly(suppressedAssembly, True)) Then
+            If (Me.VerifyAssembly(dismissedAssembly, True)) Then
               Diag.Verbose(Function() $"AssemblyIndexer: repressed assembly '{assFileName}' was retroactively APPROVED and will be added to index!")
 
-              If (Me.LoadAndAdd(suppressedAssembly)) Then
+              If (Me.LoadAndAdd(dismissedAssembly)) Then
 
-                _DismissedAssemblies.Remove(suppressedAssembly)
+                SyncLock _DismissedAssemblies
+                  _DismissedAssemblies.Remove(dismissedAssembly)
+                End SyncLock
 
               End If
 
             End If
 
           Finally
-            _CurrentlyApprovingAssemblies.Remove(suppressedAssembly)
+            SyncLock _CurrentlyApprovingAssemblies
+              _CurrentlyApprovingAssemblies.Remove(dismissedAssembly)
+            End SyncLock
           End Try
         End If
 
@@ -427,15 +463,50 @@ Namespace ComponentDiscovery
     <EditorBrowsable(EditorBrowsableState.Advanced)>
     Public ReadOnly Property DismissedAssemblies As String() Implements IAssemblyIndexer.DismissedAssemblies
       Get
-        Return _DismissedAssemblies.ToArray()
+        SyncLock _DismissedAssemblies
+          Return _DismissedAssemblies.ToArray()
+        End SyncLock
       End Get
     End Property
 
     Public ReadOnly Property ApprovedAssemblies As Assembly() Implements IAssemblyIndexer.ApprovedAssemblies
       Get
-        Return _ApprovedAssemblies.ToArray()
+        SyncLock _ApprovedAssemblies
+          Return _ApprovedAssemblies.ToArray()
+        End SyncLock
       End Get
     End Property
+
+
+    Private _IsLazyInitialized As Boolean = False
+
+    ''' <summary>
+    ''' a Hook to do some self-initialzation logic (for example pulling some default clearances)
+    ''' exactly at the moment when the current instance gets its first subscriber
+    ''' </summary>
+    Protected Overridable Sub OnLazyInitializing()
+    End Sub
+
+    Private Sub EnsureIsLazyInitialized()
+      If (_IsLazyInitialized) Then
+        Exit Sub
+      End If
+      _IsLazyInitialized = True
+
+      'this triggers the registration of the appdomain resolve handlers!!!
+      AssemblyResolving.Initialize()
+
+      Me.OnLazyInitializing()
+
+      If (_AutoImportFromResolvePathsEnabled) Then
+        Me.SubscribeAssembliesResolvePaths()
+      End If
+
+      If (_AppDomainBindingIsEnabled) Then
+        Me.SubscribeAssembliesFromAppdomain()
+      End If
+
+    End Sub
 
     Public Sub SubscribeForAssemblyApproved(onAssemblyApprovedMethod As Action(Of Assembly)) Implements IAssemblyIndexer.SubscribeForAssemblyApproved
 
@@ -444,8 +515,9 @@ Namespace ComponentDiscovery
       End If
 
       _OnAssemblyApprovedMethods.Add(onAssemblyApprovedMethod)
+      Me.EnsureIsLazyInitialized()
 
-      For Each approvedAssembly In _ApprovedAssemblies.ToArray()
+      For Each approvedAssembly In Me.ApprovedAssemblies
         onAssemblyApprovedMethod.Invoke(approvedAssembly)
       Next
 
@@ -474,6 +546,7 @@ Namespace ComponentDiscovery
     ''' </summary>
     Public Function DumpFullState() As String
       Dim result As New StringBuilder
+
       result.AppendLine($"{Me.GetType().Name}:")
       result.AppendLine()
 
@@ -482,6 +555,13 @@ Namespace ComponentDiscovery
     End Function
 
     Protected Overridable Sub DumpFullStateTo(result As StringBuilder)
+
+      If (_IsLazyInitialized) Then
+        result.AppendLine("Initially activated: YES")
+      Else
+        result.AppendLine("Initially activated: NO")
+      End If
+      result.AppendLine()
 
       Dim indent As Integer = 20
       For Each a In Me.DismissedAssemblies
