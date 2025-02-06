@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace></RootNamespace>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>ComponentDiscovery.DspAnalysis</AssemblyName>
+    <Authors>KornSW</Authors>
+    <Copyright>KornSW</Copyright>
+    <Version>4.9.0</Version>
+    <FileVersion>4.9.0.0</FileVersion>
+    <AssemblyVersion>4.9.0.0</AssemblyVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>ComponentDiscovery.DspAnalysis.xml</DocumentationFile>
+    <DefineConstants>NET5</DefineConstants>
+    <OutputPath>..\..\(Stage)\Bin\net8.0\</OutputPath>    
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>ComponentDiscovery.DspAnalysis.xml</DocumentationFile>
+    <OutputPath>..\..\(Stage)\Bin\net8.0\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>false</Deterministic>
+    <DefineConstants>NET5</DefineConstants>
+  </PropertyGroup>
+
+  <Import Project="..\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems" Label="Shared" />
+
+  <ItemGroup>
+    <PackageReference Include="dnSpyLibs" Version="0.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ComponentDiscovery.net8.0\ComponentDiscovery.net8.0.vbproj" />
+  </ItemGroup>
+
+</Project>

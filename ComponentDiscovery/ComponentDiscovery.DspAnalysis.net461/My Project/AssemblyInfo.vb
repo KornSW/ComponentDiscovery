@@ -3,9 +3,9 @@ Imports System.Reflection
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 
-<Assembly: AssemblyTitle("ComponentDiscovery")>
-<Assembly: AssemblyDescription("ComponentDiscovery")>
-<Assembly: AssemblyProduct("ComponentDiscovery")>
+<Assembly: AssemblyTitle("ComponentDiscovery.DspAnalysis")>
+<Assembly: AssemblyDescription("ComponentDiscovery.DspAnalysis")>
+<Assembly: AssemblyProduct("ComponentDiscovery.DspAnalysis")>
 <Assembly: AssemblyCompany("KornSW")>
 <Assembly: AssemblyCopyright("KornSW")>
 <Assembly: AssemblyTrademark("KornSW")>

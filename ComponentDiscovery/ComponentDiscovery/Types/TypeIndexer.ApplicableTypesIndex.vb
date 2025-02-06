@@ -174,7 +174,7 @@ Namespace ComponentDiscovery
           foundTypes = New List(Of Type)
 
           Diag.Verbose(
-          Function() $"TypeIndexer (for '{1}'): Loading applicable types for '{_Selector.Name}' from persistent cache (for assembly '{assName}')..."
+          Function() $"TypeIndexer (for '{_Selector.Name}'): Loading applicable types for '{_Selector.Name}' from persistent cache (for assembly '{assName}')..."
         )
 
           For Each typeNameFromCache In persistentCacheTypeNames
@@ -188,7 +188,7 @@ Namespace ComponentDiscovery
           Next
 
         Else
-          Diag.Verbose(Function() $"TypeIndexer (for '{_Selector.Name}'): Scanning assembly '{assName}' to find applicable type for '{1}'...")
+          Diag.Verbose(Function() $"TypeIndexer (for '{_Selector.Name}'): Scanning assembly '{assName}' to find applicable type for '{_Selector.Name}'...")
           foundTypes = assemblyToCrawl.GetTypesAccessible().ToList()
           cacheUpdateRequired = _EnablePersistentCache
         End If
