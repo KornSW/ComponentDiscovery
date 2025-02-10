@@ -8,6 +8,7 @@ This files contains a version history including all changes relevant for semanti
 
 ## Upcoming Changes
 
+ - **new Feature**: added 'DnLib' based Assembly-Classification-detection-Strategy
  - **new Feature**: added Target for .NET4.8
  - **new Feature**: added Target for .NET8
  - removed Target for .NET5

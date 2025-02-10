@@ -158,9 +158,16 @@ Namespace ComponentDiscovery
         Return True
       End If
 
-      If (_CurrentlyApprovingAssemblies.Contains(assemblyFileFullName)) Then
-        Return False
-      End If
+      Dim needToWaitForResult As Boolean = False
+      Do
+        SyncLock (_CurrentlyApprovingAssemblies)
+          needToWaitForResult = _CurrentlyApprovingAssemblies.Contains(assemblyFileFullName)
+          If (needToWaitForResult) Then
+            Threading.Thread.Sleep(100)
+          End If
+        End SyncLock
+      Loop While (needToWaitForResult)
+      'NOTE: zuvo wurde hier einfach return false aufgerufen
 
       SyncLock _DismissedAssemblies
         If (_DismissedAssemblies.Contains(assemblyFileFullName)) Then
@@ -172,8 +179,10 @@ Namespace ComponentDiscovery
         End If
       End SyncLock
 
-      ' We need to do this because this method needs to be absolutely thread-safe
-      _CurrentlyApprovingAssemblies.Add(assemblyFileFullName)
+      SyncLock (_CurrentlyApprovingAssemblies)
+        ' We need to do this because this method needs to be absolutely thread-safe
+        _CurrentlyApprovingAssemblies.Add(assemblyFileFullName)
+      End SyncLock
       Try
 
         Diag.Verbose(Function() $"AssemblyIndexer: approving incomming assembly '{fileName}'...")
@@ -192,7 +201,9 @@ Namespace ComponentDiscovery
         End If
 
       Finally
-        _CurrentlyApprovingAssemblies.Remove(assemblyFileFullName)
+        SyncLock (_CurrentlyApprovingAssemblies)
+          _CurrentlyApprovingAssemblies.Remove(assemblyFileFullName)
+        End SyncLock
       End Try
 
       Return False

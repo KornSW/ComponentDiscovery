@@ -7,7 +7,7 @@
     <ProjectGuid>{4637733C-95E6-43FD-A6E9-91F46E9F7C61}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>ComponentDiscoveryTests</RootNamespace>
-    <AssemblyName>ComponentDiscoveryTests</AssemblyName>
+    <AssemblyName>ComponentDiscovery.Tests</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -85,6 +85,7 @@
     <Compile Include="%28internal%29\AsyncDisposalDelayTests.vb" />
     <Compile Include="%28internal%29\ContextAmbienceManagerTests.vb" />
     <Compile Include="%28internal%29\CallTreeTrackerTests.vb" />
+    <Compile Include="DnLibBasedAssemblyClassificationDetectionStrategyTests.vb" />
     <Compile Include="ManifestBasedAssemblyClassificationDetectionStrategyTests.vb" />
     <Compile Include="AttributeBasedAssemblyClassificationDetectionStrategyTests.vb" />
     <Compile Include="%28internal%29\PersistentIndexCacheTests.vb" />
@@ -121,7 +122,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ComponentDiscovery.Tests.cl" />
+    <None Include="ComponentDiscovery.Tests.cl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
@@ -134,6 +137,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\ComponentDiscovery.DspAnalysis.net461\ComponentDiscovery.DspAnalysis.net461.vbproj">
+      <Project>{cf233110-1fde-4b47-95eb-e739aca07a71}</Project>
+      <Name>ComponentDiscovery.DspAnalysis.net461</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\ComponentDiscovery.net461\ComponentDiscovery.net461.vbproj">
       <Project>{d5d23bbd-aab6-4e9d-960c-71499668f4c6}</Project>
       <Name>ComponentDiscovery.net461</Name>

@@ -22,6 +22,9 @@ Namespace ComponentDiscovery.ClassificationDetection
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _DefaultsIfNoAttributeFound As String()
 
+    <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+    Private Shared _InMemoryCachedAssemblies As Integer = 10
+
     Public Sub New(ParamArray defaultsIfNoAttributeFound As String())
 
       _DefaultsIfNoAttributeFound = defaultsIfNoAttributeFound
@@ -44,110 +47,90 @@ Namespace ComponentDiscovery.ClassificationDetection
       ByRef classifications As String()
     ) As Boolean Implements IAssemblyClassificationDetectionStrategy.TryDetectClassificationsForAssembly
 
-      Return Me.TryDetectClassificationsForAssemblyCore(
-        assemblyFullFilename,
-        taxonomicDimensionName,
-        classifications
-      )
-
-    End Function
-
-    'TODO AsselblyDefCache für 10 stück
-
-    Private Function TryDetectClassificationsForAssemblyCore(
-      assemblyFullFilename As String,
-      taxonomicDimensionName As String,
-      ByRef classifications As String()
-    ) As Boolean
-
-      Dim result As String() = Nothing
       Try
 
-        AssemblyDef.Load(assemblyFullFilename)
+        Dim attribs = GetDnLibAssemblyAttributes(assemblyFullFilename)
 
-
-
-        '  var assemblyDef = dnlib.DotNet.AssemblyDef.Load(fileFullName);
-        'var attribs = AssemblyDef.CustomAttributes.
-        'Where((a) >= a.TypeFullName == TypeOf (AssemblyMetadataAttribute).FullName).
-        'Select(a >= a.ConstructorArguments[0].Value.ToString() + ": " + a.ConstructorArguments[1].Value.ToString()).
-        'ToArray();
-
-        'If (attribs.Length > 0) Then {
-        '  Console.WriteLine();
-        '  Console.WriteLine(Thread.CurrentThread.Name);
-        '  Console.WriteLine(fileFullName);
-        '}
-
-        'foreach(var a In attribs) {
-        '  Console.WriteLine("   " + a);
-        '}
-
-
-
-
-
-
-
-
-
-
-        result = Me.FetchMethod.Invoke(assemblyFullFilename, taxonomicDimensionName)
-
-      Catch ex As Exception
-        If (TypeOf (ex) Is TargetInvocationException) Then
-          ex = DirectCast(ex, TargetInvocationException).InnerException
+        If (attribs Is Nothing) Then
+          'ERROR (BadImageFormatException)
+          Return False
         End If
-        Diag.Error($"AssemblyIndexer: Exception in '{NameOf(AttributeBasedAssemblyClassificationDetectionStrategy)}.{NameOf(TryDetectClassificationsForAssemblyCore)}()' (EnableAnalysisSandbox={_EnableAnalysisSandbox}) while invoking the '{NameOf(FetchMethod)}': {ex.Message}")
-        Diag.Verbose(Function() ex.StackTrace)
-        result = Nothing
-      End Try
 
-      If (result Is Nothing) Then
-        'Nothing = ERROR
+        classifications = attribs.Where(
+          Function(a) a.ConstructorArguments(0).Value.ToString().Equals(taxonomicDimensionName, StringComparison.CurrentCultureIgnoreCase)
+        ).Select(Function(a) a.ConstructorArguments(1).Value.ToString()).ToArray()
+
+        If (classifications.Length = 0) Then
+          classifications = _DefaultsIfNoAttributeFound
+        End If
+
+        Return True
+      Catch ex As Exception
         Return False
-      End If
-
-      classifications = result
-      If (classifications.Length = 0) Then
-        classifications = _DefaultsIfNoAttributeFound
-      End If
-
-      Return True
-    End Function
-
-    Private Shared Function FetchClassificationExpressionsFromAssembly(assemblyFullFilename As String, dimensionName As String) As String()
-      Try
-        Dim assemblyToAnalyze = Assembly.LoadFile(assemblyFullFilename)
-        dimensionName = dimensionName.ToLower()
-        If (assemblyToAnalyze IsNot Nothing) Then
-
-          Dim attribs = assemblyToAnalyze.GetCustomAttributes.Where(Function(a) a.GetType().Name = NameOf(AssemblyMetadataAttribute) OrElse a.GetType().Name = NameOf(AssemblyClassificationAttribute)).ToArray()
-
-          Dim expressions = (
-            attribs.OfType(Of AssemblyMetadataAttribute).
-            Where(Function(a) a.Key.ToLower() = dimensionName).
-            Select(Function(a) a.Value)
-          )
-
-          expressions = expressions.Union(
-            attribs.OfType(Of AssemblyClassificationAttribute).
-            Where(Function(a) a.TaxonomicDimensionName.ToLower() = dimensionName).
-            Select(Function(a) a.ClassificationExpression)
-          )
-
-          Return expressions.Distinct().ToArray()
-
-        End If
-      Catch ex As BadImageFormatException 'non-.NET-dll
-        'EXPECTED: happens on non-.NET-dll
-        Diag.Verbose(Function() $"BadImageFormatException: '{assemblyFullFilename}' seems to be not a valid .NET Assembly!")
-      Catch ex As Exception
-        Diag.Error($"AssemblyIndexer: Exception in '{NameOf(AttributeBasedAssemblyClassificationDetectionStrategy)}.{NameOf(FetchClassificationExpressionsFromAssembly)}()': {ex.Message}")
-        Diag.Verbose(Function() ex.StackTrace)
       End Try
 
-      Return Nothing '=ERROR
+    End Function
+
+    Private Shared _RollingCache As New List(Of Tuple(Of String, CustomAttribute()))
+
+    Private Shared Function GetDnLibAssemblyAttributes(assemblyFullFilename As String) As CustomAttribute()
+
+      If (_InMemoryCachedAssemblies > 0) Then
+
+        Dim cacheEntry As Tuple(Of String, CustomAttribute()) = Nothing
+
+        SyncLock (_RollingCache)
+
+          For Each entry In _RollingCache
+            If (entry.Item1.Equals(assemblyFullFilename, StringComparison.CurrentCultureIgnoreCase)) Then
+              cacheEntry = entry
+              Exit For
+            End If
+          Next
+
+          If (cacheEntry IsNot Nothing) Then
+            _RollingCache.Remove(cacheEntry)
+            _RollingCache.Insert(0, cacheEntry)
+            Return cacheEntry.Item2
+          End If
+
+        End SyncLock
+
+      End If
+
+      Dim newCacheEntry As Tuple(Of String, CustomAttribute())
+
+      Try
+        Dim aDef = AssemblyDef.Load(assemblyFullFilename)
+
+        Dim attribs = aDef.CustomAttributes.Where(
+         Function(a) a.TypeFullName = GetType(AssemblyMetadataAttribute).FullName
+        ).ToArray()
+
+        newCacheEntry = New Tuple(Of String, CustomAttribute())(
+          assemblyFullFilename, attribs
+        )
+
+      Catch ex As BadImageFormatException
+        'die assembly wird niemals ladbar sein -> ergebnis cachen
+        newCacheEntry = New Tuple(Of String, CustomAttribute())(
+          assemblyFullFilename, Nothing
+        )
+      Catch ex As Exception
+        'bei zugriffsproblemen das ergebnis nicht cachen
+        Return Nothing
+      End Try
+
+      If (_InMemoryCachedAssemblies > 0) Then
+        SyncLock (_RollingCache)
+          For i As Integer = _RollingCache.Count - 1 To _InMemoryCachedAssemblies Step -1
+            _RollingCache.RemoveAt(i)
+          Next
+          _RollingCache.Insert(0, newCacheEntry)
+        End SyncLock
+      End If
+
+      Return newCacheEntry.Item2
     End Function
 
   End Class

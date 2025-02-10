@@ -5,10 +5,12 @@
 '  +------------------------------------------------------------------------+
 
 Imports System
+Imports System.Collections
 Imports System.Collections.Generic
 Imports System.IO
 Imports System.Linq
 Imports System.Reflection
+Imports System.Threading
 Imports System.Threading.Tasks
 Imports ComponentDiscovery
 Imports ComponentDiscovery.ClassificationApproval
@@ -16,13 +18,11 @@ Imports ComponentDiscovery.ClassificationDetection
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 
 <TestClass()>
-Public Class AttributeBasedAssemblyClassificationDetectionStrategyTests
+Public Class DnLibBasedAssemblyClassificationDetectionStrategyTests
 
   <TestMethod()>
   Public Sub ExpressionCentricClassificationApprovalStrategyTest()
-    Dim useCache As Boolean = True
-    Dim useSandbox As Boolean = False
-    Dim strat As New AttributeBasedAssemblyClassificationDetectionStrategy(useSandbox, useCache, "Fallback")
+    Dim strat As New DnLibBasedAssemblyClassificationDetectionStrategy("Fallback")
 
     Dim assemblyFileFullName As String = Assembly.GetExecutingAssembly().Location
 
@@ -36,13 +36,24 @@ Public Class AttributeBasedAssemblyClassificationDetectionStrategyTests
 
   End Sub
 
-  <TestMethod()> <Ignore()>
-  Public Sub MassTest_AttributeBasedStrategy()
-    Dim useCache As Boolean = False
-    Dim useSandbox As Boolean = True
-    Dim strat As New AttributeBasedAssemblyClassificationDetectionStrategy(useSandbox, useCache, "Fallback")
+  <TestMethod()>
+  Public Sub ExpressionCentricClassificationApprovalStrategyTest2()
+    Dim strat As New DnLibBasedAssemblyClassificationDetectionStrategy("Fallback")
 
-    Dim di = New DirectoryInfo("c:\temp")
+    Dim assemblyFileFullName As String = "C:\Temp\NotExisiting.dll"
+
+    Dim classifications As String() = Nothing
+    Dim success = strat.TryDetectClassificationsForAssembly(assemblyFileFullName, "BusinessConcern", classifications)
+
+    Assert.AreEqual(False, success)
+
+  End Sub
+
+  <TestMethod()> <Ignore()>
+  Public Sub MassTest_DnLibBasedStrategy()
+    Dim strat As New DnLibBasedAssemblyClassificationDetectionStrategy("Fallback")
+
+    Dim di = New DirectoryInfo("C:\Temp")
 
     Dim allFileFullNames = di.GetFiles("*.dll").Select(Function(f) f.FullName).ToArray()
 

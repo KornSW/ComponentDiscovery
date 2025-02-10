@@ -10,7 +10,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyCopyright("KornSW")>
 <Assembly: AssemblyTrademark("KornSW")>
 
-<Assembly: InternalsVisibleTo("ComponentDiscoveryTests")>
+<Assembly: InternalsVisibleTo("ComponentDiscovery.Tests")>
 
 <Assembly: CLSCompliant(True)>
 <Assembly: ComVisible(False)>
