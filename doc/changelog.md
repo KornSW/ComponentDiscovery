@@ -11,6 +11,7 @@ This files contains a version history including all changes relevant for semanti
  - **new Feature**: added Target for .NET4.8
  - **new Feature**: added Target for .NET8
  - removed Target for .NET5
+ - updated Newtonsoft to 13.0.3
 
 
 

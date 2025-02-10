@@ -49,32 +49,8 @@
     <OptionInfer>On</OptionInfer>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="dnlib, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\(Vendor)\NuGet\dnSpyLibs.0.0.1\lib\net45\dnlib.dll</HintPath>
-    </Reference>
-    <Reference Include="dnSpy.Contracts.Logic, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\(Vendor)\NuGet\dnSpyLibs.0.0.1\lib\net45\dnSpy.Contracts.Logic.dll</HintPath>
-    </Reference>
-    <Reference Include="dnSpy.Decompiler, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\(Vendor)\NuGet\dnSpyLibs.0.0.1\lib\net45\dnSpy.Decompiler.dll</HintPath>
-    </Reference>
-    <Reference Include="dnSpy.Decompiler.ILSpy.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\(Vendor)\NuGet\dnSpyLibs.0.0.1\lib\net45\dnSpy.Decompiler.ILSpy.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="ICSharpCode.Decompiler, Version=2.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\(Vendor)\NuGet\dnSpyLibs.0.0.1\lib\net45\ICSharpCode.Decompiler.dll</HintPath>
-    </Reference>
-    <Reference Include="ICSharpCode.NRefactory, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\(Vendor)\NuGet\dnSpyLibs.0.0.1\lib\net45\ICSharpCode.NRefactory.dll</HintPath>
-    </Reference>
-    <Reference Include="ICSharpCode.NRefactory.CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\(Vendor)\NuGet\dnSpyLibs.0.0.1\lib\net45\ICSharpCode.NRefactory.CSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\(Vendor)\NuGet\dnSpyLibs.0.0.1\lib\net45\System.ValueTuple.dll</HintPath>
-    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />

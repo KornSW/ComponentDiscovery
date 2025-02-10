@@ -9,5 +9,12 @@
     <Import_RootNamespace>ComponentDiscovery_code</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DnLibBasedAssemblyClassificationDetectionStrategy.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)[fromDnLib]\ModuleDefMD.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)[fromDnLib]\AssemblyDef.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)[internal]\MultiTask.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)[internal]\" />
   </ItemGroup>
 </Project>

@@ -17,19 +17,19 @@
     <dependencies>
       <group targetFramework=".NETFramework4.6">
         <dependency id="ComponentDiscovery" version="999.0.0" />
-        <dependency id="dnSpyLibs" version="0.0.1" /> 
+        <dependency id="dnlib" version="[4.4.0,5.0)" /> 
       </group>
       <group targetFramework=".NETFramework4.8">
         <dependency id="ComponentDiscovery" version="999.0.0" />
-        <dependency id="dnSpyLibs" version="0.0.1" />
+        <dependency id="dnlib" version="[4.4.0,5.0)" />
       </group>  
       <group targetFramework="net6.0">
         <dependency id="ComponentDiscovery" version="999.0.0" />
-        <dependency id="dnSpyLibs" version="0.0.1" />
+        <dependency id="dnlib" version="[4.4.0,5.0)" />
       </group>
       <!--<group targetFramework="net8.0">
         <dependency id="ComponentDiscovery" version="999.0.0" />
-        <dependency id="dnSpyLibs" version="0.0.1" />
+        <dependency id="dnlib" version="[4.4.0,5.0)" /> 
       </group>-->
     </dependencies>
   </metadata>

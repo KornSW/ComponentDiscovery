@@ -30,7 +30,7 @@
   <Import Project="..\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="dnSpyLibs" Version="0.0.1" />
+    <PackageReference Include="dnlib" Version="4.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
