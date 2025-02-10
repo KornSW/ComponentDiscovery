@@ -98,15 +98,15 @@ Global
 		SolutionGuid = {50410137-7AFA-42CD-8C88-07DE4278718A}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\ComponentDiscovery\ComponentDiscovery_code.projitems*{26001489-ce80-4c6f-9058-4fdd1d4e3b4c}*SharedItemsImports = 5
+		src\ComponentDiscovery\ComponentDiscovery.projitems*{26001489-ce80-4c6f-9058-4fdd1d4e3b4c}*SharedItemsImports = 5
 		src\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems*{293e1bf8-74e9-4f71-a66b-e551d75d6654}*SharedItemsImports = 13
 		src\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems*{40c20b74-6689-47fb-94b0-b0a73adbb43a}*SharedItemsImports = 5
-		src\ComponentDiscovery\ComponentDiscovery_code.projitems*{4a202ea2-ebc9-4b36-9614-fa7862d624b3}*SharedItemsImports = 5
+		src\ComponentDiscovery\ComponentDiscovery.projitems*{4a202ea2-ebc9-4b36-9614-fa7862d624b3}*SharedItemsImports = 5
 		src\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems*{5ab0d24d-f18a-42ea-91f9-f1a59be0fc1c}*SharedItemsImports = 5
 		src\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems*{764f38fd-8938-404c-ba8b-4abcd658f954}*SharedItemsImports = 4
-		src\ComponentDiscovery\ComponentDiscovery_code.projitems*{9790d8d3-46f2-4d0c-8554-5bec12e2c272}*SharedItemsImports = 4
-		src\ComponentDiscovery\ComponentDiscovery_code.projitems*{9c04bcf1-18f1-4d96-bb13-bc6ff83407a4}*SharedItemsImports = 13
+		src\ComponentDiscovery\ComponentDiscovery.projitems*{9790d8d3-46f2-4d0c-8554-5bec12e2c272}*SharedItemsImports = 4
+		src\ComponentDiscovery\ComponentDiscovery.projitems*{9c04bcf1-18f1-4d96-bb13-bc6ff83407a4}*SharedItemsImports = 13
 		src\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems*{cf233110-1fde-4b47-95eb-e739aca07a71}*SharedItemsImports = 4
-		src\ComponentDiscovery\ComponentDiscovery_code.projitems*{d5d23bbd-aab6-4e9d-960c-71499668f4c6}*SharedItemsImports = 4
+		src\ComponentDiscovery\ComponentDiscovery.projitems*{d5d23bbd-aab6-4e9d-960c-71499668f4c6}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal

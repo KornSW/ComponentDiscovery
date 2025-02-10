@@ -14,23 +14,23 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>ComponentDiscovery.xml</DocumentationFile>
     <DefineConstants>NET5</DefineConstants>
-    <OutputPath>..\..\(Stage)\Bin\net6.0\</OutputPath>    
+    <OutputPath>..\..\dist\net6.0\</OutputPath>    
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Deterministic>false</Deterministic>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>ComponentDiscovery.xml</DocumentationFile>
-    <OutputPath>..\..\(Stage)\Bin\net6.0\</OutputPath>
+    <OutputPath>..\..\dist\net6.0\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <Deterministic>false</Deterministic>
     <DefineConstants>NET5</DefineConstants>
   </PropertyGroup>
 
-  <Import Project="..\ComponentDiscovery\ComponentDiscovery_code.projitems" Label="Shared" />
+  <Import Project="..\ComponentDiscovery\ComponentDiscovery.projitems" Label="Shared" />
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="8.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>

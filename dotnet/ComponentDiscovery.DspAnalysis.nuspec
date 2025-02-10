@@ -19,10 +19,18 @@
         <dependency id="ComponentDiscovery" version="999.0.0" />
         <dependency id="dnSpyLibs" version="0.0.1" /> 
       </group>
+      <group targetFramework=".NETFramework4.8">
+        <dependency id="ComponentDiscovery" version="999.0.0" />
+        <dependency id="dnSpyLibs" version="0.0.1" />
+      </group>  
       <group targetFramework="net6.0">
         <dependency id="ComponentDiscovery" version="999.0.0" />
         <dependency id="dnSpyLibs" version="0.0.1" />
       </group>
+      <!--<group targetFramework="net8.0">
+        <dependency id="ComponentDiscovery" version="999.0.0" />
+        <dependency id="dnSpyLibs" version="0.0.1" />
+      </group>-->
     </dependencies>
   </metadata>
   <files>
@@ -32,9 +40,17 @@
     <file src="(Stage)\Bin\net461\ComponentDiscovery.DspAnalysis.dll" target="lib/net46" />
     <file src="(Stage)\Bin\net461\ComponentDiscovery.DspAnalysis.xml" target="lib/net46" />
     <file src="(Stage)\Bin\net461\ComponentDiscovery.DspAnalysis.pdb" target="lib/net46" />
+    <!-- .NET 4.8.0 -->
+    <file src="(Stage)\Bin\net48\ComponentDiscovery.DspAnalysis.dll" target="lib/net48" />
+    <file src="(Stage)\Bin\net48\ComponentDiscovery.DspAnalysis.xml" target="lib/net48" />
+    <file src="(Stage)\Bin\net48\ComponentDiscovery.DspAnalysis.pdb" target="lib/net48" />
     <!-- .NET 6.0 -->
     <file src="(Stage)\Bin\net6.0\ComponentDiscovery.DspAnalysis.dll" target="lib/net6.0" />
     <file src="(Stage)\Bin\net6.0\ComponentDiscovery.DspAnalysis.xml" target="lib/net6.0" />
     <file src="(Stage)\Bin\net6.0\ComponentDiscovery.DspAnalysis.pdb" target="lib/net6.0" />
+    <!-- .NET 8.0 --><!--
+    <file src="(Stage)\Bin\net8.0\ComponentDiscovery.DspAnalysis.dll" target="lib/net8.0" />
+    <file src="(Stage)\Bin\net8.0\ComponentDiscovery.DspAnalysis.xml" target="lib/net8.0" />
+    <file src="(Stage)\Bin\net8.0\ComponentDiscovery.DspAnalysis.pdb" target="lib/net8.0" />-->
   </files>
 </package>
