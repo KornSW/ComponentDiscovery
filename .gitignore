@@ -246,3 +246,4 @@ ModelManifest.xml
 
 /(Vendor)/NuGet/
 /dotnet/(Vendor)/NuGet
+/dotnet/dist/net461
