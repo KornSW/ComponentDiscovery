@@ -121,6 +121,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="ComponentDiscovery.Tests.cl" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
@@ -131,12 +132,9 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
     <None Include="packages.config" />
-    <None Include="ComponentDiscoveryTests.cl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ComponentDiscovery.net461\ComponentDiscovery.net461.vbproj">
+    <ProjectReference Include="..\..\src\ComponentDiscovery.net461\ComponentDiscovery.net461.vbproj">
       <Project>{d5d23bbd-aab6-4e9d-960c-71499668f4c6}</Project>
       <Name>ComponentDiscovery.net461</Name>
       <Private>False</Private>
