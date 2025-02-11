@@ -12,6 +12,12 @@ This files contains a version history including all changes relevant for semanti
 
 
 
+## v 4.10.1
+released **2025-02-11**, including:
+ - new revision without significant changes
+
+
+
 ## v 4.10.0
 released **2025-02-11**, including:
  - **new Feature**: added 'DnLib' based Assembly-Classification-detection-Strategy

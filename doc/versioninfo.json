@@ -1,13 +1,13 @@
 {
-  "currentVersion": "4.10.0",
-  "currentVersionWithSuffix": "4.10.0",
+  "currentVersion": "4.10.1",
+  "currentVersionWithSuffix": "4.10.1",
   "releaseType": "",
-  "previousVersion": "4.9.1",
-  "changeGrade": "minor",
+  "previousVersion": "4.10.0",
+  "changeGrade": "fix",
   "currentMajor": 4,
   "currentMinor": 10,
-  "currentPatch": 0,
+  "currentPatch": 1,
   "versionDateInfo": "2025-02-11",
-  "versionTimeInfo": "07:41:20",
-  "versionNotes": "- new Feature: added 'DnLib' based Assembly-Classification-detection-Strategy\n- new Feature: added Target for .NET4.8\n- new Feature: added Target for .NET8\n- removed Target for .NET5\n- updated Newtonsoft to 13.0.3\n"
+  "versionTimeInfo": "10:12:59",
+  "versionNotes": "- new revision without significant changes\n"
 }
