@@ -50,7 +50,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="dnlib">
-      <HintPath>..\..\..\(Vendor)\NuGet\dnlib.4.4.0\lib\net45\dnlib.dll</HintPath>
+      <HintPath>..\..\vendor\nuget\dnlib.4.4.0\lib\net45\dnlib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
