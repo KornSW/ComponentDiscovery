@@ -8,6 +8,12 @@ This files contains a version history including all changes relevant for semanti
 
 ## Upcoming Changes
 
+*(none)*
+
+
+
+## v 4.10.0
+released **2025-02-11**, including:
  - **new Feature**: added 'DnLib' based Assembly-Classification-detection-Strategy
  - **new Feature**: added Target for .NET4.8
  - **new Feature**: added Target for .NET8
