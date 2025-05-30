@@ -15,10 +15,6 @@
     <icon>PackageIcon.png</icon>
     <projectUrl>https://github.com/KornSW/ComponentDiscovery</projectUrl>
     <dependencies>
-      <group targetFramework=".NETFramework4.6">
-        <dependency id="ComponentDiscovery" version="999.0.0" />
-        <dependency id="dnlib" version="[4.4.0,5.0)" /> 
-      </group>
       <group targetFramework=".NETFramework4.8">
         <dependency id="ComponentDiscovery" version="999.0.0" />
         <dependency id="dnlib" version="[4.4.0,5.0)" />
@@ -27,19 +23,15 @@
         <dependency id="ComponentDiscovery" version="999.0.0" />
         <dependency id="dnlib" version="[4.4.0,5.0)" />
       </group>
-      <!--<group targetFramework="net8.0">
+      <group targetFramework="net8.0">
         <dependency id="ComponentDiscovery" version="999.0.0" />
         <dependency id="dnlib" version="[4.4.0,5.0)" /> 
-      </group>-->
+      </group>
     </dependencies>
   </metadata>
   <files>
     <!-- https://docs.microsoft.com/en-us/nuget/create-packages/creating-a-package#from-a-convention-based-working-directory -->    
     <file src="PackageIcon.png" target="" />
-    <!-- .NET 4.6.1 -->
-    <file src="dist\net461\ComponentDiscovery.DspAnalysis.dll" target="lib/net46" />
-    <file src="dist\net461\ComponentDiscovery.DspAnalysis.xml" target="lib/net46" />
-    <file src="dist\net461\ComponentDiscovery.DspAnalysis.pdb" target="lib/net46" />
     <!-- .NET 4.8.0 -->
     <file src="dist\net48\ComponentDiscovery.DspAnalysis.dll" target="lib/net48" />
     <file src="dist\net48\ComponentDiscovery.DspAnalysis.xml" target="lib/net48" />
@@ -48,9 +40,9 @@
     <file src="dist\net6.0\ComponentDiscovery.DspAnalysis.dll" target="lib/net6.0" />
     <file src="dist\net6.0\ComponentDiscovery.DspAnalysis.xml" target="lib/net6.0" />
     <file src="dist\net6.0\ComponentDiscovery.DspAnalysis.pdb" target="lib/net6.0" />
-    <!-- .NET 8.0 --><!--
+    <!-- .NET 8.0 -->
     <file src="dist\net8.0\ComponentDiscovery.DspAnalysis.dll" target="lib/net8.0" />
     <file src="dist\net8.0\ComponentDiscovery.DspAnalysis.xml" target="lib/net8.0" />
-    <file src="dist\net8.0\ComponentDiscovery.DspAnalysis.pdb" target="lib/net8.0" />-->
+    <file src="dist\net8.0\ComponentDiscovery.DspAnalysis.pdb" target="lib/net8.0" />
   </files>
 </package>

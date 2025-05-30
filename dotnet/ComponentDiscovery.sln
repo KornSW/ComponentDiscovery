@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ComponentDiscovery.net461", "src\ComponentDiscovery.net461\ComponentDiscovery.net461.vbproj", "{D5D23BBD-AAB6-4E9D-960C-71499668F4C6}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9F20F2FF-0A39-4B31-BBA5-425F2FEFE817}"
 	ProjectSection(SolutionItems) = preProject
 		..\doc\changelog.md = ..\doc\changelog.md
@@ -21,8 +19,6 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ComponentDiscovery.DspAnalysis", "src\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.shproj", "{293E1BF8-74E9-4F71-A66B-E551D75D6654}"
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "ComponentDiscovery.DspAnalysis.net6.0", "src\ComponentDiscovery.DspAnalysis.net6.0\ComponentDiscovery.DspAnalysis.net6.0.vbproj", "{40C20B74-6689-47FB-94B0-B0A73ADBB43A}"
-EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ComponentDiscovery.DspAnalysis.net461", "src\ComponentDiscovery.DspAnalysis.net461\ComponentDiscovery.DspAnalysis.net461.vbproj", "{CF233110-1FDE-4B47-95EB-E739ACA07A71}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "ComponentDiscovery.net8.0", "src\ComponentDiscovery.net8.0\ComponentDiscovery.net8.0.vbproj", "{26001489-CE80-4C6F-9058-4FDD1D4E3B4C}"
 EndProject
@@ -44,10 +40,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D5D23BBD-AAB6-4E9D-960C-71499668F4C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D5D23BBD-AAB6-4E9D-960C-71499668F4C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D5D23BBD-AAB6-4E9D-960C-71499668F4C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D5D23BBD-AAB6-4E9D-960C-71499668F4C6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4A202EA2-EBC9-4B36-9614-FA7862D624B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4A202EA2-EBC9-4B36-9614-FA7862D624B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A202EA2-EBC9-4B36-9614-FA7862D624B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -56,16 +48,14 @@ Global
 		{40C20B74-6689-47FB-94B0-B0A73ADBB43A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40C20B74-6689-47FB-94B0-B0A73ADBB43A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40C20B74-6689-47FB-94B0-B0A73ADBB43A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CF233110-1FDE-4B47-95EB-E739ACA07A71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF233110-1FDE-4B47-95EB-E739ACA07A71}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CF233110-1FDE-4B47-95EB-E739ACA07A71}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CF233110-1FDE-4B47-95EB-E739ACA07A71}.Release|Any CPU.Build.0 = Release|Any CPU
 		{26001489-CE80-4C6F-9058-4FDD1D4E3B4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{26001489-CE80-4C6F-9058-4FDD1D4E3B4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26001489-CE80-4C6F-9058-4FDD1D4E3B4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26001489-CE80-4C6F-9058-4FDD1D4E3B4C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5AB0D24D-F18A-42EA-91F9-F1A59BE0FC1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5AB0D24D-F18A-42EA-91F9-F1A59BE0FC1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AB0D24D-F18A-42EA-91F9-F1A59BE0FC1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AB0D24D-F18A-42EA-91F9-F1A59BE0FC1C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9790D8D3-46F2-4D0C-8554-5BEC12E2C272}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9790D8D3-46F2-4D0C-8554-5BEC12E2C272}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9790D8D3-46F2-4D0C-8554-5BEC12E2C272}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -83,13 +73,11 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{D5D23BBD-AAB6-4E9D-960C-71499668F4C6} = {AE715A42-336A-484F-9478-B3870AE48D6B}
 		{9C04BCF1-18F1-4D96-BB13-BC6FF83407A4} = {D0AC1309-04D2-41FA-B8E9-3B3F1B536E12}
 		{AE715A42-336A-484F-9478-B3870AE48D6B} = {D0AC1309-04D2-41FA-B8E9-3B3F1B536E12}
 		{4A202EA2-EBC9-4B36-9614-FA7862D624B3} = {AE715A42-336A-484F-9478-B3870AE48D6B}
 		{293E1BF8-74E9-4F71-A66B-E551D75D6654} = {D0AC1309-04D2-41FA-B8E9-3B3F1B536E12}
 		{40C20B74-6689-47FB-94B0-B0A73ADBB43A} = {AE715A42-336A-484F-9478-B3870AE48D6B}
-		{CF233110-1FDE-4B47-95EB-E739ACA07A71} = {AE715A42-336A-484F-9478-B3870AE48D6B}
 		{26001489-CE80-4C6F-9058-4FDD1D4E3B4C} = {AE715A42-336A-484F-9478-B3870AE48D6B}
 		{5AB0D24D-F18A-42EA-91F9-F1A59BE0FC1C} = {AE715A42-336A-484F-9478-B3870AE48D6B}
 		{9790D8D3-46F2-4D0C-8554-5BEC12E2C272} = {AE715A42-336A-484F-9478-B3870AE48D6B}
@@ -108,7 +96,5 @@ Global
 		src\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems*{764f38fd-8938-404c-ba8b-4abcd658f954}*SharedItemsImports = 4
 		src\ComponentDiscovery\ComponentDiscovery.projitems*{9790d8d3-46f2-4d0c-8554-5bec12e2c272}*SharedItemsImports = 4
 		src\ComponentDiscovery\ComponentDiscovery.projitems*{9c04bcf1-18f1-4d96-bb13-bc6ff83407a4}*SharedItemsImports = 13
-		src\ComponentDiscovery.DspAnalysis\ComponentDiscovery.DspAnalysis.projitems*{cf233110-1fde-4b47-95eb-e739aca07a71}*SharedItemsImports = 4
-		src\ComponentDiscovery\ComponentDiscovery.projitems*{d5d23bbd-aab6-4e9d-960c-71499668f4c6}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal
