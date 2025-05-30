@@ -1,13 +1,13 @@
 {
-  "currentVersion": "4.10.1",
-  "currentVersionWithSuffix": "4.10.1",
+  "currentVersion": "4.10.2",
+  "currentVersionWithSuffix": "4.10.2",
   "releaseType": "",
-  "previousVersion": "4.10.0",
+  "previousVersion": "4.10.1",
   "changeGrade": "fix",
   "currentMajor": 4,
   "currentMinor": 10,
-  "currentPatch": 1,
-  "versionDateInfo": "2025-02-11",
-  "versionTimeInfo": "10:12:59",
-  "versionNotes": "- new revision without significant changes\n"
+  "currentPatch": 2,
+  "versionDateInfo": "2025-05-30",
+  "versionTimeInfo": "07:16:29",
+  "versionNotes": "- Removed .NET 4.6-Targets and enabled .NET 8.0-Targets (while switching build-runner from Win-2019 to WIN-2022)\n"
 }
