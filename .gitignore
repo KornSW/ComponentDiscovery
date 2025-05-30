@@ -244,8 +244,5 @@ ModelManifest.xml
 # FAKE - F# Make
 .fake/
 
-/dotnet/(Vendor)/NuGet
 /dotnet/dist/
-/(Vendor)/NuGet
-/dotnet/dist/net6.0/ComponentDiscovery.dll
-/dotnet/dist/net48/ComponentDiscovery.dll
+/dotnet/vendor/nuget
