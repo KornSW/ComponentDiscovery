@@ -150,6 +150,19 @@ Namespace ComponentDiscovery
       Return Me.TryApproveAssembly(assembly.Location, False)
     End Function
 
+    ''' <summary>
+    ''' In addition to protection against concurrency issues, we also need explicit protection against recursion.
+    ''' In the special case that AppDomainBinding is enabled and TryApproveAssembly is called from the AppDomain_AssemblyLoad event,
+    ''' it can happen that the assembly currently being loaded cannot be activated via Fusion
+    ''' (e.g., due to an exception when loading a related satellite assembly), which then causes LoadAndAdd to attempt to load
+    ''' the assembly via FileName! In this case, however, the framework does not recognize that it is already loading this assembly
+    ''' itself and triggers the assemblyload event again. Fortunately, this latter event occurs synchronously, so we can detect it
+    ''' and simply have to "endure" this inner event! BUT waiting (which is important for a multithreading scenario) would freeze
+    ''' the thread permanently in this case...
+    ''' </summary>
+    <ThreadStatic>
+    Private Shared _CurrentlyLoadingAssemblyFileFullName As String = String.Empty
+
     Protected Function TryApproveAssembly(assemblyFileFullName As String, forceReapprove As Boolean) As Boolean
       assemblyFileFullName = assemblyFileFullName.ToLower()
       Dim fileName As String = Path.GetFileNameWithoutExtension(assemblyFileFullName)
@@ -159,15 +172,28 @@ Namespace ComponentDiscovery
       End If
 
       Dim needToWaitForResult As Boolean = False
+      Dim waitIterations As Integer = 0
       Do
         SyncLock (_CurrentlyApprovingAssemblies)
           needToWaitForResult = _CurrentlyApprovingAssemblies.Contains(assemblyFileFullName)
-          If (needToWaitForResult) Then
-            Threading.Thread.Sleep(100)
-          End If
         End SyncLock
+
+        If (needToWaitForResult) Then
+
+          If (_CurrentlyLoadingAssemblyFileFullName = assemblyFileFullName) Then
+            'in the recursion scenario described above, the return value is irrelevant, as it is not evaluated...
+            'but we must not wait here under any circumstances!
+            Return False
+          End If
+
+          waitIterations = waitIterations + 1
+          Threading.Thread.Sleep(100)
+          If (waitIterations > 200) Then
+            Return False 'lock detected... (after 20s)
+          End If
+
+        End If
       Loop While (needToWaitForResult)
-      'NOTE: zuvo wurde hier einfach return false aufgerufen
 
       SyncLock _DismissedAssemblies
         If (_DismissedAssemblies.Contains(assemblyFileFullName)) Then
@@ -183,7 +209,11 @@ Namespace ComponentDiscovery
         ' We need to do this because this method needs to be absolutely thread-safe
         _CurrentlyApprovingAssemblies.Add(assemblyFileFullName)
       End SyncLock
+
       Try
+
+        'set recursion-protection
+        _CurrentlyLoadingAssemblyFileFullName = assemblyFileFullName
 
         Diag.Verbose(Function() $"AssemblyIndexer: approving incomming assembly '{fileName}'...")
 
@@ -201,9 +231,14 @@ Namespace ComponentDiscovery
         End If
 
       Finally
+
         SyncLock (_CurrentlyApprovingAssemblies)
           _CurrentlyApprovingAssemblies.Remove(assemblyFileFullName)
         End SyncLock
+
+        'release recursion-protection
+        _CurrentlyLoadingAssemblyFileFullName = String.Empty
+
       End Try
 
       Return False
@@ -265,6 +300,19 @@ Namespace ComponentDiscovery
 
         Return False
       End Try
+
+      If (ass Is Nothing) Then
+        Dim fileName As String = Path.GetFileNameWithoutExtension(assemblyFullFilename)
+
+        Diag.Warning(
+          String.Format(
+            "AssemblyIndexer: assembly '{0}' could not be added to index because because 'Assembly.LoadFile(""{1}"")' returned null.",
+            fileName, assemblyFullFilename
+          )
+        )
+
+        Return False
+      End If
 
       SyncLock _ApprovedAssemblies
         If (Not _ApprovedAssemblies.Contains(ass)) Then

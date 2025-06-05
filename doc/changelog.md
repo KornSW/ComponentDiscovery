@@ -8,7 +8,7 @@ This files contains a version history including all changes relevant for semanti
 
 ## Upcoming Changes
 
-*(none)*
+* Fix: added Recursion-detection for Appdomain-LoadAssembly event when doing Fallback-load via fileName (after Fusion-Load has thrown an Exception).
 
 
 
