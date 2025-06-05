@@ -8,7 +8,13 @@ This files contains a version history including all changes relevant for semanti
 
 ## Upcoming Changes
 
-* Fix: added Recursion-detection for Appdomain-LoadAssembly event when doing Fallback-load via fileName (after Fusion-Load has thrown an Exception).
+*(none)*
+
+
+
+## v 4.10.3
+released **2025-06-05**, including:
+ - Fix: added Recursion-detection for Appdomain-LoadAssembly event when doing Fallback-load via fileName (after Fusion-Load has thrown an Exception).
 
 
 

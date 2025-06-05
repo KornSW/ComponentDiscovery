@@ -1,13 +1,13 @@
 {
-  "currentVersion": "4.10.2",
-  "currentVersionWithSuffix": "4.10.2",
+  "currentVersion": "4.10.3",
+  "currentVersionWithSuffix": "4.10.3",
   "releaseType": "",
-  "previousVersion": "4.10.1",
+  "previousVersion": "4.10.2",
   "changeGrade": "fix",
   "currentMajor": 4,
   "currentMinor": 10,
-  "currentPatch": 2,
-  "versionDateInfo": "2025-05-30",
-  "versionTimeInfo": "07:16:29",
-  "versionNotes": "- Removed .NET 4.6-Targets and enabled .NET 8.0-Targets (while switching build-runner from Win-2019 to WIN-2022)\n"
+  "currentPatch": 3,
+  "versionDateInfo": "2025-06-05",
+  "versionTimeInfo": "12:57:46",
+  "versionNotes": "- Fix: added Recursion-detection for Appdomain-LoadAssembly event when doing Fallback-load via fileName (after Fusion-Load has thrown an Exception).\n"
 }

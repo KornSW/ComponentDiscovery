@@ -6,9 +6,9 @@
     <AssemblyName>ComponentDiscovery.DspAnalysis</AssemblyName>
     <Authors>KornSW</Authors>
     <Copyright>KornSW</Copyright>
-    <Version>4.9.0</Version>
-    <FileVersion>4.9.0.0</FileVersion>
-    <AssemblyVersion>4.9.0.0</AssemblyVersion>
+    <Version>4.10.3</Version>
+    <FileVersion>4.10.3</FileVersion>
+    <AssemblyVersion>4.10.3</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
