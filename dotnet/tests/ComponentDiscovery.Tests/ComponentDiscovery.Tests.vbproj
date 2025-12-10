@@ -1,11 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-
   <Import Project="..\..\vendor\nuget\MSTest.TestAdapter.3.9.1\build\net462\MSTest.TestAdapter.props" Condition="Exists('..\..\vendor\nuget\MSTest.TestAdapter.3.9.1\build\net462\MSTest.TestAdapter.props')" />
   <Import Project="..\..\vendor\nuget\Microsoft.Testing.Extensions.Telemetry.1.7.1\build\netstandard2.0\Microsoft.Testing.Extensions.Telemetry.props" Condition="Exists('..\..\vendor\nuget\Microsoft.Testing.Extensions.Telemetry.1.7.1\build\netstandard2.0\Microsoft.Testing.Extensions.Telemetry.props')" />
   <Import Project="..\..\vendor\nuget\Microsoft.Testing.Platform.MSBuild.1.7.1\build\Microsoft.Testing.Platform.MSBuild.props" Condition="Exists('..\..\vendor\nuget\Microsoft.Testing.Platform.MSBuild.1.7.1\build\Microsoft.Testing.Platform.MSBuild.props')" />
   <Import Project="..\..\vendor\nuget\Microsoft.Testing.Platform.1.7.1\build\netstandard2.0\Microsoft.Testing.Platform.props" Condition="Exists('..\..\vendor\nuget\Microsoft.Testing.Platform.1.7.1\build\netstandard2.0\Microsoft.Testing.Platform.props')" />
-  
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -161,6 +159,7 @@
     <Compile Include="TestContent\MyBusinessClass2.vb" />
     <Compile Include="TestContent\MyBusinessClass1.vb" />
     <Compile Include="DemandCentricClassificationApprovalStrategyTests.vb" />
+    <Compile Include="InstanceDiscoveryTests.vb" />
     <Compile Include="TypeIndexerTests.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -234,10 +233,8 @@
       </ItemGroup>
     </When>
   </Choose>
-  
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
-  
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
@@ -250,9 +247,7 @@
     <Error Condition="!Exists('..\..\vendor\nuget\MSTest.TestAdapter.3.9.1\build\net462\MSTest.TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\vendor\nuget\MSTest.TestAdapter.3.9.1\build\net462\MSTest.TestAdapter.props'))" />
     <Error Condition="!Exists('..\..\vendor\nuget\MSTest.TestAdapter.3.9.1\build\net462\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\vendor\nuget\MSTest.TestAdapter.3.9.1\build\net462\MSTest.TestAdapter.targets'))" />
   </Target>
-  
   <Import Project="..\..\vendor\nuget\Microsoft.Testing.Platform.1.7.1\build\netstandard2.0\Microsoft.Testing.Platform.targets" Condition="Exists('..\..\vendor\nuget\Microsoft.Testing.Platform.1.7.1\build\netstandard2.0\Microsoft.Testing.Platform.targets')" />
   <Import Project="..\..\vendor\nuget\Microsoft.Testing.Platform.MSBuild.1.7.1\build\Microsoft.Testing.Platform.MSBuild.targets" Condition="Exists('..\..\vendor\nuget\Microsoft.Testing.Platform.MSBuild.1.7.1\build\Microsoft.Testing.Platform.MSBuild.targets')" />
   <Import Project="..\..\vendor\nuget\MSTest.TestAdapter.3.9.1\build\net462\MSTest.TestAdapter.targets" Condition="Exists('..\..\vendor\nuget\MSTest.TestAdapter.3.9.1\build\net462\MSTest.TestAdapter.targets')" />
-
 </Project>

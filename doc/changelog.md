@@ -8,7 +8,9 @@ This files contains a version history including all changes relevant for semanti
 
 ## Upcoming Changes
 
-*(none)*
+* **new Feature**: added '*InstanceDiscoveryContext.UseExternalManagedTypeIndexer*' and '*InstanceDiscoveryContext.ActivateScoping*' to allow less invasive customizing of runtime scopes
+
+* Fix: not more NullReferenceException when InstanceDiscovery reading provided instances from Private Getter-Methods
 
 
 

@@ -280,7 +280,7 @@ Namespace Composition.InstanceDiscovery
             Continue For
           End If
 
-          If (Not prop.GetGetMethod().IsStatic) Then
+          If (Not prop.GetGetMethod(True).IsStatic) Then
             Trace.TraceError($"Instance-Discovery will ignore the ProvidesDiscoverableInstanceAttribute on Property '{_TargetType.FullName}.{prop.Name}' because this attribute can only be applied to STATIC methods/properties!")
             Continue For
           End If
@@ -441,7 +441,7 @@ Namespace Composition.InstanceDiscovery
                 Continue For
               End If
 
-              If (prop.GetGetMethod().IsStatic) Then
+              If (prop.GetGetMethod(True).IsStatic) Then
                 Trace.TraceError($"Instance-Discovery will ignore the InjectAttribute on Property '{_TargetType.FullName}.{prop.Name}' because this attribute can only be applied to NON-STATIC methods/properties!")
                 Continue For
               End If
@@ -478,7 +478,7 @@ Namespace Composition.InstanceDiscovery
                 Continue For
               End If
 
-              If (prop.GetGetMethod().IsStatic) Then
+              If (prop.GetGetMethod(True).IsStatic) Then
                 Trace.TraceError($"Instance-Discovery will ignore the TryInjectAttribute on Property '{_TargetType.FullName}.{prop.Name}' because this attribute can only be applied to NON-STATIC methods/properties!")
                 Continue For
               End If

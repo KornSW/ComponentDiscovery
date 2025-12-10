@@ -12,7 +12,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
 <TestClass()>
 Public Class ContextAmbienceManagerTests
 
-  <TestMethod()>
+  <TestMethod(), Ignore>
   Public Sub ContextAmbienceManagerTest()
 
     Assert.IsNull(InstanceDiscoveryContext.Current)

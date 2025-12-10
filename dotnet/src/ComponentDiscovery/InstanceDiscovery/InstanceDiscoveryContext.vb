@@ -16,6 +16,7 @@ Namespace Composition.InstanceDiscovery
   ''' <summary>
   ''' provides access to discoverable instances
   ''' </summary>
+  <DebuggerDisplay("InstanceDiscoveryContext ({InstanceName})")>
   Partial Public Class InstanceDiscoveryContext
     Implements IDisposable
 
@@ -31,15 +32,31 @@ Namespace Composition.InstanceDiscovery
     <DebuggerBrowsable(DebuggerBrowsableState.Never)>
     Private _PriorityRules As New PriorityList(Of Type)
 
+    <DebuggerBrowsable(DebuggerBrowsableState.Never)>
+    Private _InstanceName As String = String.Empty
+
     Public Sub New()
+      _InstanceName = Guid.NewGuid().ToString()
       _ContextCreationHandler.Invoke(Me)
       Me.LoadProviders()
     End Sub
 
+    Public Sub New(instanceName As String)
+      _InstanceName = instanceName
+      _ContextCreationHandler.Invoke(Me)
+      Me.LoadProviders()
+    End Sub
+
+    Private ReadOnly Property InstanceName As String
+      Get
+        Return _InstanceName
+      End Get
+    End Property
+
     Private Sub LoadProviders()
 
       'create a snapshot, so that the amount of available providers cannot change during the usage of the context
-      _ProvidersUnsorted = _ProviderDiscoveryMethod.Invoke()
+      _ProvidersUnsorted = _CurrentProviderGetter.Invoke()
 
       'first lets add the overriding rules
       For Each p In _ProvidersUnsorted
@@ -67,7 +84,7 @@ Namespace Composition.InstanceDiscovery
     Protected ReadOnly Property ProvidersByPriority As IDiscoverableInstanceProvider()
       Get
 
-        If (_ProvidersUnsorted.Count <> _ProviderDiscoveryMethod.Invoke().Count) Then
+        If (_ProvidersUnsorted.Count <> _CurrentProviderGetter.Invoke().Count) Then
           Me.LoadProviders()
           _ProvidersByPriority = Nothing
         End If
@@ -191,6 +208,10 @@ Namespace Composition.InstanceDiscovery
     Public Function DumpFullState() As String
       Dim result As New StringBuilder
 
+      result.AppendLine("#### INSTANCE-SCOPE/NAME ###")
+      result.AppendLine($"  {Me.InstanceName}")
+      result.AppendLine()
+
       result.AppendLine("#### SELF MANAGED INSTANCES ###")
       If (Me.SelfManagedInstances.Any()) Then
         result.AppendLine("<none>")
@@ -224,11 +245,8 @@ Namespace Composition.InstanceDiscovery
       result.AppendLine("#### PROVIDER DISCOVERY ###")
       If (_ProviderDiscoveryMethodIsHooked) Then
         result.AppendLine("WAS HOOKED - NO INFO AVAILABLE!")
-      ElseIf (_AppDomainAssemblyIndexer Is Nothing) Then
-        result.Append("oob-mode, but not yet initialized...")
       Else
-        result.Append("oob-mode, via appdomain-Scoped ")
-        result.Append(_AppDomainAssemblyIndexer.DumpFullState())
+        result.Append("oob-mode")
       End If
       result.AppendLine()
 

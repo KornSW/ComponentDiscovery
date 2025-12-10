@@ -352,6 +352,10 @@ Namespace ComponentDiscovery
       End Set
     End Property
 
+    Private Shared DotNetAssemblyNamesToSkip As String() = {
+      "System", "system.core", "mscorlib", "System.Data", "microsoft.visualbasic", "system.runtime.interopservices.runtimeinformation"
+    }
+
     Private Sub SubscribeAssembliesFromAppdomain()
 
       AddHandler AppDomain.CurrentDomain.AssemblyLoad, AddressOf Me.AppDomain_AssemblyLoad
@@ -359,8 +363,9 @@ Namespace ComponentDiscovery
 
       'import the assemblies for which were missed the AssemblyLoad-Events
       For Each assembly In AppDomain.CurrentDomain.GetAssemblies()
-        If (Not assembly.IsDynamic) Then
-          Diag.Verbose(Function() $"AssemblyIndexer: assembly '{assembly.GetName().Name}' received over appdomain subscription")
+        Dim assName = assembly.GetName().Name
+        If (Not assembly.IsDynamic AndAlso Not DotNetAssemblyNamesToSkip.Contains(assName, True)) Then
+          Diag.Verbose(Function() $"AssemblyIndexer: assembly '{assName}' received over appdomain subscription")
           Me.TryApproveAssembly(assembly)
         End If
       Next
@@ -369,11 +374,10 @@ Namespace ComponentDiscovery
 
     Private Sub AppDomain_AssemblyLoad(sender As Object, args As AssemblyLoadEventArgs)
       If (Me.AppDomainBindingEnabled) Then
-        If (Not args.LoadedAssembly.IsDynamic) Then
-
-          Diag.Verbose(Function() $"AssemblyIndexer: assembly '{args.LoadedAssembly.GetName().Name}' received over appdomain subscription")
+        Dim assName = args.LoadedAssembly.GetName().Name
+        If (Not args.LoadedAssembly.IsDynamic AndAlso Not DotNetAssemblyNamesToSkip.Contains(assName, True)) Then
+          Diag.Verbose(Function() $"AssemblyIndexer: assembly '{assName}' received over appdomain subscription")
           Me.TryApproveAssembly(args.LoadedAssembly)
-
         End If
       End If
     End Sub
