@@ -1,13 +1,13 @@
 {
-  "currentVersion": "4.10.3",
-  "currentVersionWithSuffix": "4.10.3",
+  "currentVersion": "4.11.0",
+  "currentVersionWithSuffix": "4.11.0",
   "releaseType": "",
-  "previousVersion": "4.10.2",
-  "changeGrade": "fix",
+  "previousVersion": "4.10.3",
+  "changeGrade": "minor",
   "currentMajor": 4,
-  "currentMinor": 10,
-  "currentPatch": 3,
-  "versionDateInfo": "2025-06-05",
-  "versionTimeInfo": "12:57:46",
-  "versionNotes": "- Fix: added Recursion-detection for Appdomain-LoadAssembly event when doing Fallback-load via fileName (after Fusion-Load has thrown an Exception).\n"
+  "currentMinor": 11,
+  "currentPatch": 0,
+  "versionDateInfo": "2025-12-10",
+  "versionTimeInfo": "09:44:48",
+  "versionNotes": "- new Feature: added '*InstanceDiscoveryContext.UseExternalManagedTypeIndexer*' and '*InstanceDiscoveryContext.ActivateScoping*' to allow less invasive customizing of runtime scopes\n- Fix: not more NullReferenceException when InstanceDiscovery reading provided instances from Private Getter-Methods\n"
 }

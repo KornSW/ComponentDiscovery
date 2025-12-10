@@ -6,9 +6,9 @@
     <AssemblyName>ComponentDiscovery</AssemblyName>
     <Authors>KornSW</Authors>
     <Copyright>KornSW</Copyright>
-    <Version>4.10.3</Version>
-    <FileVersion>4.10.3</FileVersion>
-    <AssemblyVersion>4.10.3</AssemblyVersion>
+    <Version>4.11.0</Version>
+    <FileVersion>4.11.0</FileVersion>
+    <AssemblyVersion>4.11.0</AssemblyVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
