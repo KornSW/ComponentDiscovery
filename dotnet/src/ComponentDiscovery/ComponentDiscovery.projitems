@@ -60,6 +60,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)InstanceDiscovery\LifetimeResponsibility.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)Providers\ProviderRepository.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)Ressolving\AssemblyResolving.vb" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ressolving\AssemblyConflictGuard.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)Types\ClassificationBasedTypeIndexer.SemanticDimension.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)Types\ClassificationBasedTypeIndexer.vb" />
     <Compile Include="$(MSBuildThisFileDirectory)Types\ExtensionsForITypeIndexer.vb" />
