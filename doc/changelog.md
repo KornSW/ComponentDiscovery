@@ -8,7 +8,7 @@ This files contains a version history including all changes relevant for semanti
 
 ## Upcoming Changes
 
-*(none)*
+* set preferAssemblyLoadingViaFusion to true for default Indexer in InstanceDiscovery
 
 
 

@@ -37,7 +37,7 @@ Namespace Composition.InstanceDiscovery
           Dim currentInstance As IAssemblyIndexer = Nothing
           If (Not _SelfManagedAssemblyIndexerInstances.TryGetValue(bindingDiscriminator, currentInstance)) Then
             currentInstance = New AssemblyIndexer(
-              enableResolvePathsBinding:=True, enableAppDomainBinding:=True, preferAssemblyLoadingViaFusion:=False
+              enableResolvePathsBinding:=True, enableAppDomainBinding:=True, preferAssemblyLoadingViaFusion:=True
             )
             _SelfManagedAssemblyIndexerInstances.Add(bindingDiscriminator, currentInstance)
           End If
