@@ -1,13 +1,13 @@
 {
-  "currentVersion": "4.11.0",
-  "currentVersionWithSuffix": "4.11.0",
+  "currentVersion": "4.11.1",
+  "currentVersionWithSuffix": "4.11.1",
   "releaseType": "",
-  "previousVersion": "4.10.3",
-  "changeGrade": "minor",
+  "previousVersion": "4.11.0",
+  "changeGrade": "fix",
   "currentMajor": 4,
   "currentMinor": 11,
-  "currentPatch": 0,
-  "versionDateInfo": "2025-12-10",
-  "versionTimeInfo": "09:44:48",
-  "versionNotes": "- new Feature: added '*InstanceDiscoveryContext.UseExternalManagedTypeIndexer*' and '*InstanceDiscoveryContext.ActivateScoping*' to allow less invasive customizing of runtime scopes\n- Fix: not more NullReferenceException when InstanceDiscovery reading provided instances from Private Getter-Methods\n"
+  "currentPatch": 1,
+  "versionDateInfo": "2026-02-11",
+  "versionTimeInfo": "14:52:15",
+  "versionNotes": "- set preferAssemblyLoadingViaFusion to true for default Indexer in InstanceDiscovery\n"
 }

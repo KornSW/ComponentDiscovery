@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>ComponentDiscovery.DspAnalysis</id>
-    <version>4.11.0</version>
+    <version>4.11.1</version>
     <title>ComponentDiscovery.DspAnalysis</title>
     <authors>KornSW</authors>
     <owners>KornSW</owners>
@@ -16,15 +16,15 @@
     <projectUrl>https://github.com/KornSW/ComponentDiscovery</projectUrl>
     <dependencies>
       <group targetFramework=".NETFramework4.8">
-        <dependency id="ComponentDiscovery" version="[4.11.0]" />
+        <dependency id="ComponentDiscovery" version="[4.11.1]" />
         <dependency id="dnlib" version="[4.4.0,5.0)" />
       </group>  
       <group targetFramework="net6.0">
-        <dependency id="ComponentDiscovery" version="[4.11.0]" />
+        <dependency id="ComponentDiscovery" version="[4.11.1]" />
         <dependency id="dnlib" version="[4.4.0,5.0)" />
       </group>
       <group targetFramework="net8.0">
-        <dependency id="ComponentDiscovery" version="[4.11.0]" />
+        <dependency id="ComponentDiscovery" version="[4.11.1]" />
         <dependency id="dnlib" version="[4.4.0,5.0)" /> 
       </group>
     </dependencies>

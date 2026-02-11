@@ -8,7 +8,13 @@ This files contains a version history including all changes relevant for semanti
 
 ## Upcoming Changes
 
-* set preferAssemblyLoadingViaFusion to true for default Indexer in InstanceDiscovery
+*(none)*
+
+
+
+## v 4.11.1
+released **2026-02-11**, including:
+ - set preferAssemblyLoadingViaFusion to true for default Indexer in InstanceDiscovery
 
 
 
